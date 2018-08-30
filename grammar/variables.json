@@ -1,0 +1,11 @@
+{
+  "terminals": ["variablesLet", "equalsSign"],
+  "rules": {
+  	"variableStatement": {
+    	"variableAssignment": ["variablesLet", "identifier", "equalsSign", "expression"]
+    },
+    "variablesLet": "let",
+    "equalsSign": "=",
+    "identifier": "token_"
+  }
+}

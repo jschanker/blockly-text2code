@@ -1,0 +1,99 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <title>Text 2 Code</title>
+    <link rel = "stylesheet" href = "styles.css">
+    <script src="blockly/blockly_compressed.js"></script>
+    <script src="blockly/blocks_compressed.js"></script>
+    <script src="blockly/javascript_compressed.js"></script>
+    <!--<script src="blockly/python_compressed.js"></script>-->
+    <script src="blockly/msg/js/en.js"></script>
+    <script src="blockly/blocks/math.js"></script>
+    <script src="blockly/blocks/text.js"></script>
+    <script src="blockly/blocks/type-in-code.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1><span id = "textHeader">Text</span> <span id = "twoHeader">2</span> <span id = "codeTextHeader">Code</span></h1>
+    </header>
+    <div id = "all-content">
+        <div id = "blockly-div">
+          <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
+              <category name="Text2Code Input/Output" colour="160">
+                <block type="text_print"></block>
+                <block type="text_input"></block>
+              </category>
+              <category name="JavaScript Input/Output" colour="160">
+                <block type="js_text_print"></block>
+                <block type="js_text_input"></block>
+              </category>
+              <category name="Variables" custom="VARIABLE" colour="330">
+              </category>
+              <category name="Math" colour="#5C68A6">
+                <block type="math_number">
+                  <field name="NUM">0</field>
+                </block>
+                <block type="math_arithmetic_basic">
+                  <field name="OP">ADD</field>
+                  <value name="A">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                  <value name="B">
+                    <shadow type="math_number">
+                      <field name="NUM">1</field>
+                    </shadow>
+                  </value>
+                </block>
+              </category>
+              <category name="Text2Code Text" colour="160">
+                <block type="text"></block>
+                <block type="t2c_text_join"></block>
+                <!--<block type="before_substring"></block>
+                <block type="after_substring"></block>-->
+                <block type="text_length"></block>
+                <block type="t2c_text_indexof"></block>
+                <block type="t2c_text_charat"></block>
+                <block type="t2c_text_getsubstring"></block>
+              </category>
+              <category name="JavaScript Text" colour="160">
+                <block type="text"></block>
+                <block type="t2c_text_join"></block>
+                <block type="text_length"></block>
+                <block type="js_text_indexof"></block>
+                <block type="js_text_charat"></block>
+                <block type="js_text_getsubstring"></block>
+              </category>
+              <category name = "Type in Code Blocks" colour="60">
+                <block type = "code_expression"></block>
+                <block type = "code_statement"></block>
+              </category>
+            </xml>
+        </div>
+        <div><button id = "convertToJSButton">Convert to pure JavaScript blocks</button></div>
+        <div><button id = "convertToXMLButton">Convert XML to Blocks</button></div>
+        <div><button id = "convert-to-ruby-text-btn">Convert to JS Text2Code instructions</button></div>
+        <div id = "text-code">
+            <form>
+              <textarea disabled = "true" id = "text-code-box">Code to appear here.</textarea>
+              <textarea id = "xml_data" placeholder = "Copy text here to save/load blocks."></textarea>
+            </form>
+        </div>
+    </div>
+    <div>
+      <iframe height="400px" width="100%" src="https://repl.it/@jschanker/Text2Code-Strings?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals"></iframe>
+    </div>
+    <footer>
+        <h3><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
+    </footer>
+    <script src = "grammar.js"></script>
+    <script src = "parser.js"></script>
+    <script src = "block-interpretations.js"></script>
+    <script src = "block-evaluator.js"></script>
+    <script src = "workspace1.js"></script>
+    <script src = "block-generator.js"></script>
+  </body>
+</html>

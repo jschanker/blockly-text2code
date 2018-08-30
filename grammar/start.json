@@ -1,0 +1,16 @@
+{
+	"terminals": ["semicolon"],
+	"rules": {
+		"expression": {
+			"expressionText": ["stringExp"],
+			"expressionNumber": ["wholeNumberExp"]
+		},
+		"statement": {
+			"statementSingle": ["expression"],
+			"statementVariable": ["variableStatement"],
+			"statementPrint": ["stringDisplay"],
+			"statementSemicolon": ["statement", "semicolon"]
+		},
+		"semicolon": ";"
+	}
+}

@@ -1,0 +1,11 @@
+{
+  "identifierGet": {
+    "type": "variables_get",
+    "fields": {"VAR": "%1"}
+  },
+  "variableAssignment": {
+    "type": "variables_set",
+    "fields": {"VAR": "%2"},
+    "inputs": {"VALUE": "%4"}
+  }
+}

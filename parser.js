@@ -182,7 +182,7 @@ const parseTopDown = s => {
   };
 
   console.log("Token Array:", tokenArr);
-  let result = memoizedFunc(parseHelper, ["stringExp", 0, tokenArr.length-1, 0*totalNumOfRules*tokenArr.length+20]);
+  let result = memoizedFunc(parseHelper, ["statement", 0, tokenArr.length-1, 0*totalNumOfRules*tokenArr.length+20]);
   memoizedFunc.clear();
   return result;
 }

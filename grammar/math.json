@@ -1,0 +1,31 @@
+{
+  "terminals": ["wholeNumberPlus", "wholeNumberMinus", "wholeNumberTimes", "wholeNumberDividedBy"],
+  "rules": {
+    "wholeNumberExp": {
+      "wholeNumberSum": ["wholeNumberTerm", "wholeNumberAddMinusOp", "wholeNumberExp"],
+      "wholeNumberTermSingle": ["wholeNumberTerm"]
+    },
+    "wholeNumberTerm": {
+      "wholeNumberTermSingleGroupedExp": ["openParenthesis", "wholeNumberTerm", "closeParenthesis"],
+      "wholeNumberTermTwoGroupedExp": ["openParenthesis", "wholeNumberTerm", "wholeNumberGroupedOp", "wholeNumberTerm", "closeParenthesis"],
+      "wholeNumberTermProduct": ["wholeNumberTerm", "wholeNumberTimesDividedByOp", "wholeNumberTerm"],
+      "wholeNumberTermAtomic": ["wholeNumberAtomic"]
+    },
+    "wholeNumberAtomic": {
+      "wholeNumberLiteral": "token_",
+      "identifierGet": ["identifier"]    	
+    },
+    "wholeNumberGroupedOp": {
+    	"wholeNumberSumTwo": ["wholeNumberAddMinusOp"],
+    	"wholeNumberProductTwo": ["wholeNumberTimesDividedByOp"]
+    },
+    "wholeNumberAddMinusOp": {
+    	"wholeNumberPlus": "+",
+    	"wholeNumberMinus": "-"
+    },
+    "wholeNumberTimesDividedByOp": {
+    	"wholeNumberTimes": "*",
+    	"wholeNumberDividedBy" : "/"
+    }
+  }
+}

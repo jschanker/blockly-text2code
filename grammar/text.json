@@ -1,0 +1,68 @@
+{
+  "type": "CNF",
+  "terminals": ["findFirstOccurrenceOfText", "jsIndexOf", "findLastOccurrenceOfText", "getAfterText", "getBeforeText", "plusStr", 
+                "getCharacterNumber", "getCharacterNumberJS", "toNumber", "getTextFrom", "getSubstringJS", "getTextTo",
+                "stringGetInput", "stringPrompt", "console", "log", "display"],
+  "rules": {
+    "stringExp": {
+      "identifierGet": ["identifier"],
+      "stringGetInputExp": ["stringGetInput", "openParenthesis", "stringExp", "closeParenthesis"],
+      "js_stringGetInputExp": ["stringPrompt", "openParenthesis", "stringExp", "closeParenthesis"],
+      "stringGroupedExp": ["openParenthesis", "stringExp", "closeParenthesis"],
+      "stringFindFirstFullExpression": ["stringExp", "dot", "findFirstOccurrenceOfText", "openParenthesis", "stringExp", "closeParenthesis"],
+      "js_stringFindFirstFullExpression": ["stringExp", "dot", "jsIndexOf", "openParenthesis", "stringExp", "closeParenthesis"],
+      "stringConcatenationFullExpression": ["stringExp", "plusStr", "stringExp"],
+      "stringCharAtFullExpression": ["stringExp", "dot", "getCharacterNumber", "openParenthesis", "wholeNumberExp", "closeParenthesis"],
+      "js_stringCharAtFullExpression": ["stringExp", "dot", "getCharacterNumberJS", "openParenthesis", "wholeNumberExp", "closeParenthesis"],
+      "stringAfterTextFullExpression": ["stringExp", "dot", "getAfterText", "openParenthesis", "stringExp", "closeParenthesis"],
+      "stringBeforeTextFullExpression": ["stringExp", "dot", "getBeforeText", "openParenthesis", "stringExp", "closeParenthesis"],
+      "stringSubstringFullExpression": ["stringExp", "dot", "getTextFrom", "openParenthesis", "wholeNumberExp", "closeParenthesis", "dot", 
+                                                            "getTextTo", "openParenthesis", "wholeNumberExp", "closeParenthesis"],
+      "js_stringSubstringFullExpression": ["stringExp", "dot", "getSubstringJS", "openParenthesis", "wholeNumberExp", "comma", "wholeNumberExp", "closeParenthesis"],
+      "stringLiteral": "token_"
+    },
+    "stringDisplay": {
+      "js_ConsoleLogStatement": ["console", "dot", "log", "openParenthesis", "expression", "closeParenthesis"],
+      "displayStatement": ["display", "openParenthesis", "expression", "closeParenthesis"]
+    },
+    "dot": "token_",
+    "dotStringMethodOne": ["dot", "stringMethodOne"],
+    "dotStringMethodTwo": ["dot", "stringMethodTwo"],
+    "stringMethodOne": {
+      "stringMethodOneArgString": ["stringMethodFirstStringArg", "stringArgParens"],
+      "stringMethodOneArgNumber": ["stringMethodFirstNumberArg", "numberArgParens"]
+    },
+    "console": "console",
+    "log": "log",
+    "display": "display",
+    "stringArgParens": ["openParenthesis", "stringArgCloseParenthesis"],
+    "numberArgParens": ["openParenthesis", "numberArgCloseParenthesis"],
+    "numberArgCloseParenthesis": ["wholeNumberExp", "closeParenthesis"],
+    "stringArgCloseParenthesis": ["stringExp", "closeParenthesis"],
+    "stringMethodTwo": ["stringMethodOne", "dotStringMethodOne"],
+    "openParenthesis": "token_",
+    "closeParenthesis": "token_",
+    "comma": "token_",
+    "semicolon": "token_",
+    "stringGetInput": "getInputByAsking",
+    "stringPrompt": "prompt",
+    "getTextFrom": "getTextFromPositionNUMBER",
+    "getTextTo": "toPositionNUMBER",
+    "getSubstringJS": "substring",
+    "jsIndexOf": "indexOf",
+    "stringMethodFirstStringArg": {
+      "findFirstOccurrenceOfText": "positionNumberOfText",
+      "findLastOccurrenceOfText": "findLastOccurrenceOfText",
+      "getAfterText": "getAfterTEXT",
+      "getBeforeText": "getBeforeTEXT",
+      "plusStr": "+"
+    },
+    "stringMethodFirstNumberArg": {
+      "getCharacterNumber": "getCharacterNUMBER",
+      "getCharacterNumberJS": "charAt"
+    },
+    "stringMethodSecond": {
+      "toNumber": "toNumber"
+    }
+  }
+}

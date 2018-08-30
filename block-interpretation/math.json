@@ -1,0 +1,26 @@
+{
+  "wholeNumberLiteral": {
+    "type": "math_number",
+    "fields": {"NUM": "%1"}
+  },
+  "wholeNumberSum": {
+    "type": "math_arithmetic_basic",
+    "fields": {"OP": "%2"},
+    "inputs": {"A": "%1", "B": "%3"}
+  },
+  "wholeNumberTermTwoGroupedExp": {
+    "type": "math_arithmetic_basic",
+    "fields": {"OP": "%3"},
+    "inputs": {"A": "%2", "B": "%4"}
+  },
+  "wholeNumberTermProduct": {
+    "type": "math_arithmetic_basic",
+    "fields": {"OP": "%2"},
+    "inputs": {"A": "%1", "B": "%3"}
+  },
+  "wholeNumberPlus": "ADD",
+  "wholeNumberMinus": "MINUS",
+  "wholeNumberTimes": "MULTIPLY",
+  "wholeNumberDividedBy": "DIVIDE",
+  "wholeNumberTermSingleGroupedExp": "%2"
+}

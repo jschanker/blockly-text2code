@@ -1,0 +1,94 @@
+html, body {
+  height: 100%;
+  margin: 0px;
+  background-color:#33beb6;
+}
+
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  font-family: verdana, sans-serif;
+}
+
+header {
+	padding:0px 10px;
+	text-align: center;
+	background-color:#292929;
+    margin-top: 0px;
+}
+
+#textHeader, #codeTextHeader {
+	/*color:#007700;*/
+	color:#ffffff;
+	/*color:#33beb6;*/
+}
+
+@media screen and (max-width: 500px) {
+	header {
+		font-size: 115%;
+	}
+}
+
+@media screen and (min-width: 500px) and (max-width: 599px) {
+	header {
+		font-size: 150%;
+	}
+}
+
+@media screen and (min-width: 600px) and (max-width: 699px) {
+	header {
+		font-size: 200%;
+	}
+}
+
+@media screen and (min-width: 700px) and (max-width: 799px) {
+	header {
+		font-size: 250%;
+	}
+}
+
+@media screen and (min-width: 800px) {
+	header {
+		font-size: 300%;
+	}
+}
+
+#blockly-div {
+  height: 500px;
+}
+
+#all-content {
+    margin: 0.5% 5.5%;
+}
+
+
+#twoHeader {
+	background-color: #aaa;
+	color: #292929; 
+	padding: 0px 30px;
+	border-radius:500px;
+}
+
+
+footer {
+	font-size: 70%;
+	color: #fff;
+	padding: 10px;
+	text-align: center;
+	background-color:#292929;
+}
+
+textarea {
+  font-size:medium;
+  color:green;
+  width:40%;
+  height:200px;
+  scroll:true;
+}
+
+button {
+  padding: 2px;
+}
