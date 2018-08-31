@@ -119,4 +119,17 @@ if(document.getElementById("consoleDisplay")) {
 
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
+
+  var getBeforeAfterCode = function(funcName, block) {
+    // Get text appearing before or after.
+    var sub = Blockly.JavaScript.valueToCode(block, 'SUB',
+        Blockly.JavaScript.ORDER_NONE);
+    var text = Blockly.JavaScript.valueToCode(block, 'TEXT',
+        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+    var code = text + '.' + funcName + '(' + sub + ')';
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+  };
+
+  Blockly.JavaScript['t2c_text_after'] = getBeforeAfterCode.bind(null, 'getAfterTEXT');
+  Blockly.JavaScript['t2c_text_before'] = getBeforeAfterCode.bind(null, 'getBeforeTEXT');  
 })();
