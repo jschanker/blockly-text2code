@@ -13,7 +13,7 @@
     <script src="blockly/blocks/math.js"></script>
     <script src="blockly/blocks/text.js"></script>
     <script src="blockly/blocks/type-in-code.js"></script>
-    <!--<script src="blockly/generators/javascript/math.js"></script>-->
+    <script src="blockly/generators/javascript/math.js"></script>
     <script src="blockly/generators/javascript/text.js"></script>
     <script src="blockly/generators/javascript/type-in-code.js"></script>
   </head>
@@ -77,12 +77,12 @@
             </xml>
         </div>
         <div><button id = "convertToJSButton">Convert to pure JavaScript blocks</button></div>
-        <div><button id = "convertToXMLButton">Convert XML to Blocks</button></div>
-        <div><button id = "convert-to-ruby-text-btn">Convert to JS Text2Code instructions</button></div>
+        <div><button id = "convertXMLToBlocksButton">Convert XML to Blocks</button></div>
+        <div><button id = "convertToJSText2CodeButton">Convert to JS Text2Code instructions</button></div>
         <div id = "text-code">
             <form>
-              <textarea disabled = "true" id = "text-code-box">Code to appear here.</textarea>
-              <textarea id = "xml_data" placeholder = "Copy text here to save/load blocks."></textarea>
+              <textarea disabled = "true" id = "textCodeBox">Code to appear here.</textarea>
+              <textarea id = "xmlData" placeholder = "Copy text here to save/load blocks."></textarea>
             </form>
         </div>
     </div>
@@ -98,5 +98,6 @@
     <script src = "block-evaluator.js"></script>
     <script src = "workspace1.js"></script>
     <script src = "block-generator.js"></script>
+    <script src = "run-code.js"></script>
   </body>
 </html>

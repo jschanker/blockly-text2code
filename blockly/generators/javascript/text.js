@@ -53,16 +53,25 @@ if(document.getElementById("consoleDisplay")) {
 }
 
 (function() {
-  var printAndPromptCode = function(funcName, block) {
+  var printCode = function(funcName, block) {
     // Print statement.
     var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
         Blockly.JavaScript.ORDER_NONE) || '\'\'';
     return funcName + '(' + msg + ');\n';  	
   };
-  Blockly.JavaScript['js_text_print'] = printAndPromptCode.bind(null, 'console.log');
-  Blockly.JavaScript['text_print'] = printAndPromptCode.bind(null, 'display');
-  Blockly.JavaScript['js_text_input'] = printAndPromptCode.bind(null, 'prompt');
-  Blockly.JavaScript['text_input'] = printAndPromptCode.bind(null, 'getInputByAsking');
+  Blockly.JavaScript['js_text_print'] = printCode.bind(null, 'console.log');
+  Blockly.JavaScript['text_print'] = printCode.bind(null, 'display');
+
+  var promptCode = function(funcName, block) {
+    // Prompt user for input.
+    var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
+        Blockly.JavaScript.ORDER_NONE) || '\'\'';
+    var code = funcName + '(' + msg + ');\n';
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+  };
+
+  Blockly.JavaScript['js_text_input'] = promptCode.bind(null, 'prompt');
+  Blockly.JavaScript['text_input'] = promptCode.bind(null, 'getInputByAsking');
 
   Blockly.JavaScript['t2c_text_join'] = function(block) {
     var argument0 = Blockly.JavaScript.valueToCode(block, 'A', Blockly.JavaScript.ORDER_NONE) || '\'\'';
@@ -103,7 +112,7 @@ if(document.getElementById("consoleDisplay")) {
     var at1 = Blockly.JavaScript.valueToCode(block, 'AT1');
     var at2 = Blockly.JavaScript.valueToCode(block, 'AT2');
   
-    code = text + '.substring(' + at1 + ', ' + at2 + ')';
+    var code = text + '.substring(' + at1 + ', ' + at2 + ')';
 
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
@@ -115,7 +124,7 @@ if(document.getElementById("consoleDisplay")) {
     var at1 = Blockly.JavaScript.valueToCode(block, 'AT1');
     var at2 = Blockly.JavaScript.valueToCode(block, 'AT2');
   
-    code = text + '.getTextFromPositionNUMBER(' + at1 + '.toPositionNUMBER(' + at2 + ')';
+    var code = text + '.getTextFromPositionNUMBER(' + at1 + ').toPositionNUMBER(' + at2 + ')';
 
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };

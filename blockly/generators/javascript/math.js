@@ -1,0 +1,1 @@
+Blockly.JavaScript['math_arithmetic_basic'] = Blockly.JavaScript['math_arithmetic'];
