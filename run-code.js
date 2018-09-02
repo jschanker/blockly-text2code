@@ -93,10 +93,26 @@
     return code;
   }
   document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
+    if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
     document.getElementById("textCodeBox").value = runCode();
     document.getElementById("xmlData").value = generateXML();
   });
   document.getElementById("convertXMLToBlocksButton").addEventListener("click", function() {
     generateBlocksFromXML();
+  });
+  document.getElementById("convertToJSButton").addEventListener("click", function() {
+    var workspace = workspace || Blockly.getMainWorkspace();
+        workspace.getAllBlocks().forEach(convertTextBlocksToJSBlocks);
+    // THIS SNIPPET OF CODE FOR REFRESHING THE WORKSPACE
+    // AFTER THE CODE BLOCK IS REPLACED CAME FROM 
+    // (I THINK) @author fraser@google.com (Neil Fraser): 
+    // https://github.com/google/blockly/blob/4e42a1b78ee7bce8f6c4ae8a6600bfc6dbcc3209/demos/code/code.js
+    // IS THERE ANOTHER WAY?
+    // THIS CODE IS DUPLICATED - SHOULD BE FACTORED IN FUNCTION
+    var xmlDom = Blockly.Xml.workspaceToDom(workspace);
+    if (xmlDom) {
+      workspace.clear();
+      Blockly.Xml.domToWorkspace(xmlDom, workspace);
+    }
   });
 })();

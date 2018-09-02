@@ -19,7 +19,7 @@
  * @author Jason Schanker
  */
 
-function convertTextBlocksJS() {
+function convertTextBlocksToJSBlocks(block) {
 	if(block.type === "text_print") replaceWithBlock(block, workspace.newBlock("js_text_print"), true);
 	else if(block.type === "text_input") replaceWithBlock(block, workspace.newBlock("js_text_input"), true);
 	else if(block.type === "t2c_text_indexof") replaceWithBlock(block, workspace.newBlock("js_text_indexof"), true);
@@ -102,7 +102,7 @@ function convertTextBlocksJS() {
 	  block.dispose();
 	}
 
-	else if(block.type === "after_substring") {
+	else if(block.type === "t2c_text_after") {
 	  var parentBlock = block.getParent();
 	  var substringBlock = workspace.newBlock("js_text_getsubstring");
 	  var textBlock = block.getInputTargetBlock("TEXT");
@@ -111,7 +111,7 @@ function convertTextBlocksJS() {
 	  var textLengthBlock = workspace.newBlock("text_length");
 	  var needleLengthBlock = workspace.newBlock("text_length");
 	  var plusBlock = workspace.newBlock("math_arithmetic_basic");
-	  plusBlock.setFieldValue('+', "OP"); 
+	  plusBlock.setFieldValue('ADD', "OP"); 
 	  
 	  if(textBlock) {
 	    if(textBlock.type !== "text" && textBlock.type !== "variables_get") {

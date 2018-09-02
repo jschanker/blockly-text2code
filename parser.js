@@ -41,9 +41,14 @@ const tokenize = str => {
     if(!match) return str.trim().split("")
                          .filter(char => char.search(/\s/) === -1)
                          .map(char => Object({tokenType: "none", value: char}));
-    else return helper(str.substring(0, match.index)).concat( 
+    else {
+      // only use first captured part if capturing parentheses are present
+      let capturedPart = match instanceof Array ? match.slice(1).find(matchPart => matchPart != null) : null;
+      let usedPart = capturedPart != null ? capturedPart : str.substring(match.index, match.index + match[0].length);
+      return helper(str.substring(0, match.index)).concat( 
                 [{tokenType: tokensRegExp[i].key, 
-                 value: str.substring(match.index, match.index + match[0].length)}]).concat(helper(str.substring(match.index + match[0].length)));
+                 value: usedPart}]).concat(helper(str.substring(match.index + match[0].length)));
+    }
   };
   return helper(str);
 };

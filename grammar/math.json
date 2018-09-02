@@ -7,13 +7,14 @@
     },
     "wholeNumberTerm": {
       "wholeNumberTermSingleGroupedExp": ["openParenthesis", "wholeNumberTerm", "closeParenthesis"],
-      "wholeNumberTermTwoGroupedExp": ["openParenthesis", "wholeNumberTerm", "wholeNumberGroupedOp", "wholeNumberTerm", "closeParenthesis"],
+      "wholeNumberTermTwoGroupedExp": ["openParenthesis", "wholeNumberTerm", "wholeNumberGroupedOp", "wholeNumberExp", "closeParenthesis"],
       "wholeNumberTermProduct": ["wholeNumberTerm", "wholeNumberTimesDividedByOp", "wholeNumberTerm"],
       "wholeNumberTermAtomic": ["wholeNumberAtomic"]
     },
     "wholeNumberAtomic": {
       "wholeNumberLiteral": "token_",
-      "identifierGet": ["identifier"]    	
+      "identifierGet": ["identifier"],
+      "wholeNumberStringFunc": ["stringExpWholeNumber"]
     },
     "wholeNumberGroupedOp": {
     	"wholeNumberSumTwo": ["wholeNumberAddMinusOp"],

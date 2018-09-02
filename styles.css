@@ -72,6 +72,12 @@ header {
 	border-radius:500px;
 }
 
+#consoleDisplay {
+	border: 2px solid gray;
+    height: 150px;
+    background-color: #eee;
+	overflow-y: scroll;
+}
 
 footer {
 	font-size: 70%;

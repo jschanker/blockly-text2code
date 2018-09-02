@@ -25,6 +25,20 @@
 
 'use strict';
 
+function beforeSubstring(str, substr) {
+  var endIndex = str.indexOf(substr);
+  return endIndex >= 0 ? str.substring(0, endIndex) : str;
+}
+
+function beforeLastSubstring(str, substr) {
+  var endIndex = str.lastIndexOf(substr);
+  return endIndex >= 0 ? str.substring(0, endIndex) : str;
+}
+
+function afterSubstring(str, substr) {
+  return str.substring(str.indexOf(substr) + substr.length);
+}
+
 var display = function() {
   console.log.apply(console, arguments);
 };
@@ -48,7 +62,8 @@ String.prototype.getTextFromPositionNUMBER = function(startPos) {
 if(document.getElementById("consoleDisplay")) {
   if(!console) console = {};
   console.log = function() {
-    document.getElementById("consoleDisplay").value = Array.prototype.split.apply(arguments, " ");
+    document.getElementById("consoleDisplay").appendChild(
+        document.createTextNode(Array.prototype.join.call(arguments, " ") + "\n"));
   };
 }
 

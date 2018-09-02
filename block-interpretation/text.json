@@ -19,6 +19,10 @@
     "type": "js_text_print",
     "inputs": {"TEXT": "%5"}
   },
+  "stringExpLength": {
+    "type": "text_length",
+    "inputs": {"VALUE": "%1"}
+  },
   "stringFindFirstFullExpression": {
     "type": "%3",
     "inputs": {"VALUE": "%1", "FIND": "%5"}
