@@ -55,8 +55,8 @@
     "getSubstringJS": "substring",
     "jsIndexOf": "indexOf",
     "stringMethodFirstStringArg": {
-      "findFirstOccurrenceOfText": "positionNumberOfText",
-      "findLastOccurrenceOfText": "findLastOccurrenceOfText",
+      "findFirstOccurrenceOfText": "positionNumberOfTEXT",
+      "findLastOccurrenceOfText": "lastPositionNumberOfTEXT",
       "getAfterText": "getAfterTEXT",
       "getBeforeText": "getBeforeTEXT",
       "plusStr": "+"
