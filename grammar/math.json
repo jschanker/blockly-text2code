@@ -2,12 +2,12 @@
   "terminals": ["wholeNumberPlus", "wholeNumberMinus", "wholeNumberTimes", "wholeNumberDividedBy"],
   "rules": {
     "wholeNumberExp": {
-      "wholeNumberSum": ["wholeNumberTerm", "wholeNumberAddMinusOp", "wholeNumberExp"],
+      "wholeNumberSum": ["wholeNumberExp", "wholeNumberAddMinusOp", "wholeNumberTerm"],
       "wholeNumberTermSingle": ["wholeNumberTerm"]
     },
     "wholeNumberTerm": {
       "wholeNumberTermSingleGroupedExp": ["openParenthesis", "wholeNumberTerm", "closeParenthesis"],
-      "wholeNumberTermTwoGroupedExp": ["openParenthesis", "wholeNumberTerm", "wholeNumberGroupedOp", "wholeNumberExp", "closeParenthesis"],
+      "wholeNumberTermTwoGroupedExp": ["openParenthesis", "wholeNumberExp", "wholeNumberGroupedOp", "wholeNumberTerm", "closeParenthesis"],
       "wholeNumberTermProduct": ["wholeNumberTerm", "wholeNumberTimesDividedByOp", "wholeNumberTerm"],
       "wholeNumberTermAtomic": ["wholeNumberAtomic"]
     },

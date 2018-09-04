@@ -30,7 +30,7 @@ Blockly.Blocks['text_print'] = {
    */
   init: function() {
     this.jsonInit({
-      "message0": "display(%1)",
+      "message0": "display(%1);",
       "args0": [
         {
           "type": "input_value",
@@ -53,7 +53,7 @@ Blockly.Blocks['js_text_print'] = {
    */
   init: function() {
     this.jsonInit({
-      "message0": "console.log(%1)",
+      "message0": "console.log(%1);",
       "args0": [
         {
           "type": "input_value",
