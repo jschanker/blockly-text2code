@@ -33,7 +33,7 @@ function convertTextBlocksToJSBlocks(block) {
           var minusBlock = workspace.newBlock("math_arithmetic_basic");
           var numberOneBlock = workspace.newBlock("math_number");
           numberOneBlock.setFieldValue(1, "NUM");
-          minusBlock.setFieldValue('-', "OP");
+          minusBlock.setFieldValue('MINUS', "OP");
           setValueInput(minusBlock, "A", atBlock);
           setValueInput(minusBlock, "B", numberOneBlock);
           setValueInput(block, "AT", minusBlock);
