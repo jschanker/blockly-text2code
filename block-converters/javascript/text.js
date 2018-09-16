@@ -26,7 +26,7 @@ function convertTextBlocksToJSBlocks(block) {
 		var plusBlock = workspace.newBlock("math_arithmetic_basic");
 		var numberOneBlock = workspace.newBlock("math_number");
 		numberOneBlock.setFieldValue(1, "NUM");
-		plusBlock.setFieldValue('PLUS', "OP");
+		plusBlock.setFieldValue('ADD', "OP");
 		if(block.outputConnection.targetConnection) {
 	    block.outputConnection.targetConnection.connect(plusBlock.outputConnection);
 	  } else {
