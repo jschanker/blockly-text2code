@@ -31,7 +31,7 @@
     if(typeof indexStart !== "number") throw new Error("The starting position of one of the substring/getTextFromPositionNUMBER blocks was not a number; it was " + indexStart);
     if(typeof indexEnd !== "number" && typeof indexEnd !== "undefined") throw new Error("The ending position of one of the substring/getTextFromPositionNUMBER blocks was not a number; it was " + indexEnd);
     else if(indexStart < 0) throw new Error("The starting position of one of the substring/getTextFromPositionNUMBER blocks is a negative number; it was " + indexStart);
-    else if(indexStart >= this.length) throw new Error("The starting position of one of the substring/getTextFromPositionNUMBER blocks is at least the length of the string; it was " + indexStart);
+    else if(indexStart > this.length) throw new Error("The starting position of one of the substring/getTextFromPositionNUMBER blocks is at least the length of the string; it was " + indexStart);
     else if(indexEnd > this.length) throw new Error("The ending position of one of the substring/getTextFromPositionNUMBER blocks exceeds the length of the string; it was " + indexEnd);
     else if(indexStart > indexEnd) throw new Error("The starting position of one of the substring/getTextFromPositionNUMBER blocks (" + indexStart + ") exceeds the ending position (" + indexEnd + ")");
     else if(isNaN(indexStart)) throw new Error("The starting position of one of the substring/getTextFromPositionNUMBER blocks evaluates to NaN (not a number).  This could happen if you for example, multiplied a string by a number.");
