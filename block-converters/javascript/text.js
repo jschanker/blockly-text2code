@@ -22,26 +22,39 @@
 function convertTextBlocksToJSBlocks(block) {
 	if(block.type === "text_print") replaceWithBlock(block, workspace.newBlock("js_text_print"), true);
 	else if(block.type === "text_input") replaceWithBlock(block, workspace.newBlock("js_text_input"), true);
-	else if(block.type === "t2c_text_indexof") replaceWithBlock(block, workspace.newBlock("js_text_indexof"), true);
+	else if(block.type === "t2c_text_indexof") {
+		var plusBlock = workspace.newBlock("math_arithmetic_basic");
+		var numberOneBlock = workspace.newBlock("math_number");
+		numberOneBlock.setFieldValue(1, "NUM");
+		plusBlock.setFieldValue('ADD', "OP");
+		if(block.outputConnection.targetConnection) {
+	    block.outputConnection.targetConnection.connect(plusBlock.outputConnection);
+	  } else {
+	    moveToSameLocation(block, plusBlock);
+	  }
+		setValueInput(plusBlock, "A", block);
+		setValueInput(plusBlock, "B", numberOneBlock);
+		replaceWithBlock(block, workspace.newBlock("js_text_indexof"), true);
+	}
 	else if(block.type === "t2c_text_charat") {
 		var atBlock = block.getInputTargetBlock("AT");
 		// adjust for indices starting at 0 instead of 1
-        if(atBlock && (atBlock.type === "math_number")) {
-          atBlock.setFieldValue(atBlock.getFieldValue("NUM")-1, "NUM");
-        }
-        else if(atBlock) {
-          var minusBlock = workspace.newBlock("math_arithmetic_basic");
-          var numberOneBlock = workspace.newBlock("math_number");
-          numberOneBlock.setFieldValue(1, "NUM");
-          minusBlock.setFieldValue('-', "OP");
-          setValueInput(minusBlock, "A", atBlock);
-          setValueInput(minusBlock, "B", numberOneBlock);
-          setValueInput(block, "AT", minusBlock);
-          //minusBlock.getInput("A").connection.connect(atBlock.outputConnection);
-          //minusBlock.getInput("B").connection.connect(numberOneBlock.outputConnection);
-          //block.getInput("AT").connection.connect(minusBlock.outputConnection);
+    if(atBlock && (atBlock.type === "math_number")) {
+      atBlock.setFieldValue(atBlock.getFieldValue("NUM")-1, "NUM");
+    }
+    else if(atBlock) {
+      var minusBlock = workspace.newBlock("math_arithmetic_basic");
+      var numberOneBlock = workspace.newBlock("math_number");
+      numberOneBlock.setFieldValue(1, "NUM");
+      minusBlock.setFieldValue('MINUS', "OP");
+      setValueInput(minusBlock, "A", atBlock);
+      setValueInput(minusBlock, "B", numberOneBlock);
+      setValueInput(block, "AT", minusBlock);
+      //minusBlock.getInput("A").connection.connect(atBlock.outputConnection);
+      //minusBlock.getInput("B").connection.connect(numberOneBlock.outputConnection);
+      //block.getInput("AT").connection.connect(minusBlock.outputConnection);
 		}
-	    replaceWithBlock(block, workspace.newBlock("js_text_charat"), true);
+	  replaceWithBlock(block, workspace.newBlock("js_text_charat"), true);
 	}
 	else if(block.type === "t2c_text_getsubstring") {
 	  var atBlock = block.getInputTargetBlock("AT1");
