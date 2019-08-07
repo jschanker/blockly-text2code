@@ -24,7 +24,7 @@
     <div id = "all-content">
         <div id = "blockly-div">
           <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
-              <category name="Text2Code Input/Output" colour="160">
+              <category name="PseudoJS Input/Output" colour="160">
                 <block type="text_print"></block>
                 <block type="text_input"></block>
               </category>
@@ -52,7 +52,7 @@
                   </value>
                 </block>
               </category>
-              <category name="Text2Code Text" colour="160">
+              <category name="PseudoJS Text" colour="160">
                 <block type="text"></block>
                 <block type="t2c_text_join"></block>
                 <!--<block type="before_substring"></block>
@@ -77,9 +77,9 @@
             </xml>
         </div>
         <div>
+          <button id = "convertToJSText2CodeButton">RUN BLOCK CODE!</button>
           <button id = "convertToJSButton">Convert to pure JavaScript blocks</button>
           <button id = "convertXMLToBlocksButton">Convert XML to Blocks</button>
-          <button id = "convertToJSText2CodeButton">Convert to JS Text2Code instructions</button>
         </div>
         <h3>Output will appear below</h3>
         <pre>

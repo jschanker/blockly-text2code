@@ -96,5 +96,11 @@ textarea {
 }
 
 button {
+  margin-top: 5px;
   padding: 2px;
+}
+
+#convertToJSText2CodeButton {
+	background-color: #00aa00;
+    font-weight: bold;
 }
