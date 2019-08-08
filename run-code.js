@@ -115,4 +115,5 @@
       Blockly.Xml.domToWorkspace(xmlDom, workspace);
     }
   });
+  if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = ""; // clear display console
 })();

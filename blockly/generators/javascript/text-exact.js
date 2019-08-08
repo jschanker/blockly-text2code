@@ -98,6 +98,7 @@ String.prototype.getTextFromPositionNUMBER = function(startPos) {
 
 if(document.getElementById("consoleDisplay")) {
   if(!console) console = {};
+  console.realLog = console.log; // keep reference to actual log for debugging purposes
   console.log = function() {
     document.getElementById("consoleDisplay").appendChild(
         document.createTextNode(Array.prototype.join.call(arguments, " ") + "\n"));
