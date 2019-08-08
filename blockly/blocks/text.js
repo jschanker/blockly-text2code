@@ -253,8 +253,8 @@ Blockly.Blocks['js_text_charat'] = {
     this.setInputsInline(true);
     this.setOutput(true, "String");
     this.setColour(Blockly.Blocks.texts.HUE);
-    this.setTooltip('');
-    this.setHelpUrl('');
+    this.setTooltip(Blockly.Msg.TEXT_CHARAT_FROM_START);
+    this.setHelpUrl(Blockly.Msg.TEXT_CHARAT_HELPURL);
   }
 };
 
@@ -273,7 +273,7 @@ Blockly.Blocks['js_text_getsubstring'] = {
     this.setInputsInline(true);
     this.setOutput(true, "String");
     this.setColour(Blockly.Blocks.texts.HUE);
-    this.setTooltip('');
-    this.setHelpUrl('');
+    this.setTooltip(Blockly.Msg.TEXT_GET_SUBSTRING_TOOLTIP);
+    this.setHelpUrl(Blockly.Msg.TEXT_GET_SUBSTRING_HELPURL);
   }
 };

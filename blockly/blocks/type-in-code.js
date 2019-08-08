@@ -52,8 +52,8 @@
       this.setInputsInline(true);
       this.setOutput(true);
       this.setColour(60);
-      this.setTooltip(Blockly.Msg.TYPEIN_STATEMENT_TOOLTIP);
-      this.setHelpUrl("");
+      this.setTooltip(Blockly.Msg.TYPEIN_EXPRESSION_TOOLTIP);
+      //this.setHelpUrl(Blockly.Msg.TYPEIN_EXPRESSION_HELPURL);
       //var thisBlock = this;
       this.onchange = parseAndConvertToBlocks.bind(this, props);
     }
@@ -74,8 +74,8 @@
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(60);
-      this.setTooltip(Blockly.Msg.TYPEIN_EXPRESSION_TOOLTIP);
-      this.setHelpUrl("");
+      this.setTooltip(Blockly.Msg.TYPEIN_STATEMENT_TOOLTIP);
+      //this.setHelpUrl(Blockly.Msg.TYPEIN_EXPRESSION_HELPURL);
       //var thisBlock = this;
       this.onchange = parseAndConvertToBlocks.bind(this, props);
     }
