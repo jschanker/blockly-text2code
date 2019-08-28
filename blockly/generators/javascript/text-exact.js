@@ -109,7 +109,7 @@ if(document.getElementById("consoleDisplay")) {
   var printCode = function(funcName, block) {
     // Print statement.
     var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
-        Blockly.JavaScript.ORDER_NONE) || '\'\'';
+        Blockly.JavaScript.ORDER_NONE) || '""';
     return funcName + '(' + msg + ');\n';  	
   };
   Blockly.JavaScript['js_text_print'] = printCode.bind(null, 'console.log');
@@ -118,8 +118,8 @@ if(document.getElementById("consoleDisplay")) {
   var promptCode = function(funcName, block) {
     // Prompt user for input.
     var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
-        Blockly.JavaScript.ORDER_NONE) || '\'\'';
-    var code = funcName + '(' + msg + ');\n';
+        Blockly.JavaScript.ORDER_NONE) || '""';
+    var code = funcName + '(' + msg + ')';
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
 
@@ -127,17 +127,17 @@ if(document.getElementById("consoleDisplay")) {
   Blockly.JavaScript['text_input'] = promptCode.bind(null, 'getInputByAsking');
 
   Blockly.JavaScript['t2c_text_join'] = function(block) {
-    var argument0 = Blockly.JavaScript.valueToCode(block, 'A', Blockly.JavaScript.ORDER_NONE) || '\'\'';
-    var argument1 = Blockly.JavaScript.valueToCode(block, 'B', Blockly.JavaScript.ORDER_NONE) || '\'\'';
+    var argument0 = Blockly.JavaScript.valueToCode(block, 'A', Blockly.JavaScript.ORDER_NONE) || '""';
+    var argument1 = Blockly.JavaScript.valueToCode(block, 'B', Blockly.JavaScript.ORDER_NONE) || '""';
     return [argument0 + " + " + argument1, Blockly.JavaScript.ORDER_ADDITION];
   };
 
   var indexOfCode = function(funcName, block) {
     // Search the text for a substring.
     var substring = Blockly.JavaScript.valueToCode(block, 'FIND',
-        Blockly.JavaScript.ORDER_NONE) || '\'\'';
+        Blockly.JavaScript.ORDER_NONE) || '""';
     var text = Blockly.JavaScript.valueToCode(block, 'VALUE',
-        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+        Blockly.JavaScript.ORDER_MEMBER) || '""';
     var code = text + '.' + funcName + '(' + substring + ')';
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
@@ -150,7 +150,7 @@ if(document.getElementById("consoleDisplay")) {
     var at = Blockly.JavaScript.valueToCode(block, 'AT',
         Blockly.JavaScript.ORDER_NONE);
     var text = Blockly.JavaScript.valueToCode(block, 'VALUE',
-        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+        Blockly.JavaScript.ORDER_MEMBER) || '""';
     var code = text + '.' + funcName + '(' + at + ')';
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
@@ -161,7 +161,7 @@ if(document.getElementById("consoleDisplay")) {
   Blockly.JavaScript['js_text_getsubstring'] = function(block) {
     // Get substring.
     var text = Blockly.JavaScript.valueToCode(block, 'STRING',
-        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+        Blockly.JavaScript.ORDER_MEMBER) || '""';
     var at1 = Blockly.JavaScript.valueToCode(block, 'AT1');
     var at2 = Blockly.JavaScript.valueToCode(block, 'AT2');
   
@@ -173,7 +173,7 @@ if(document.getElementById("consoleDisplay")) {
   Blockly.JavaScript['t2c_text_getsubstring'] = function(block) {
     // Get substring.
     var text = Blockly.JavaScript.valueToCode(block, 'STRING',
-        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+        Blockly.JavaScript.ORDER_MEMBER) || '""';
     var at1 = Blockly.JavaScript.valueToCode(block, 'AT1');
     var at2 = Blockly.JavaScript.valueToCode(block, 'AT2');
   
@@ -187,7 +187,7 @@ if(document.getElementById("consoleDisplay")) {
     var sub = Blockly.JavaScript.valueToCode(block, 'SUB',
         Blockly.JavaScript.ORDER_NONE);
     var text = Blockly.JavaScript.valueToCode(block, 'TEXT',
-        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+        Blockly.JavaScript.ORDER_MEMBER) || '""';
     var code = text + '.' + funcName + '(' + sub + ')';
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };

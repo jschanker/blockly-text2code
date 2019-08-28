@@ -81,7 +81,7 @@ if(document.getElementById("consoleDisplay")) {
     // Prompt user for input.
     var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
         Blockly.JavaScript.ORDER_NONE) || '\'\'';
-    var code = funcName + '(' + msg + ');\n';
+    var code = funcName + '(' + msg + ')';
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
 
