@@ -98,6 +98,33 @@ const parseTopDown = s => {
     }
   };
 
+  const maxPathLengthToTerminalOrSplit = (ruleSets, start) => {
+    const arrOfDepths =
+      (start ? [start] : Object.keys(ruleSets)).map(ruleLHS => {
+        if(!ruleSets[ruleLHS]) {
+          return [ruleLHS];
+        }
+        else {
+          return Array.from(ruleSets[ruleLHS])
+            .filter(rhs => {
+              return Array.isArray(rhs) && rhs.length === 1 && ruleSets[rhs[0]];
+            })
+            .map(rhs => {
+              return [ruleLHS].concat(maxPathLengthToTerminalOrSplit(ruleSets, rhs[0]));
+            });
+        }
+      });
+
+    const candidates = start ? arrOfDepths[0] : [].concat(...arrOfDepths);
+
+    if(candidates.length === 0) {
+      return [start];
+    }
+    else {
+      return candidates.reduce((acc, arr) => (acc.length > arr.length) ? acc : arr);
+    }
+  };
+
   const flattenOneLevel = arr => arr.reduce((acc, subArr) => acc.concat(subArr), []);
   const joinEachItemToFront = (items, arrs) => flattenOneLevel(arrs.map(arr => items.map(item => [item].concat(arr))));
   const getRHSOfTokenMatch = (lhs, token) => {
@@ -128,6 +155,8 @@ const parseTopDown = s => {
   });
 
   totalNumOfRules = Object.values(ruleSets).reduce((acc, s) => acc + s.size, 0);
+  const maxPath = maxPathLengthToTerminalOrSplit(ruleSets);
+  console.log(maxPath, maxPath.length);
 
 /*
   for(let startIndex = 0; startIndex < tokenArr.length; startIndex++) {
@@ -174,9 +203,9 @@ const parseTopDown = s => {
     else {
       let parseTrees = [];
       for(let partitionIndex = startIndex; partitionIndex < endIndex; partitionIndex++) {
-        let prefix = memoizedFunc(parseHelper, [startFragment[0],startIndex,partitionIndex,Math.max(maxRules-1, (partitionIndex-startIndex+1)*totalNumOfRules)]);
+        let prefix = memoizedFunc(parseHelper, [startFragment[0],startIndex,partitionIndex, maxPath.length*(partitionIndex-startIndex+1)*totalNumOfRules]);
         if(prefix.length > 0) {
-          let tail = memoizedFunc(parseHelper, [startFragment.slice(1),partitionIndex+1,endIndex,Math.max(maxRules-1, (endIndex-partitionIndex+1)*totalNumOfRules)]);
+          let tail = memoizedFunc(parseHelper, [startFragment.slice(1),partitionIndex+1,endIndex, maxPath.length*(partitionIndex-startIndex+1)*totalNumOfRules]);
           if(tail.length > 0) {
             parseTrees.push(...joinEachItemToFront(prefix, tail));
           }
@@ -187,7 +216,7 @@ const parseTopDown = s => {
   };
 
   console.log("Token Array:", tokenArr);
-  let result = memoizedFunc(parseHelper, ["statement", 0, tokenArr.length-1, 0*totalNumOfRules*tokenArr.length+20]);
+  let result = memoizedFunc(parseHelper, ["statement", 0, tokenArr.length-1, maxPath.length*tokenArr.length]);
   memoizedFunc.clear();
   return result;
 }
