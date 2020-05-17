@@ -22,19 +22,26 @@
       <h1><span id = "textHeader">Text</span> <span id = "twoHeader">2</span> <span id = "codeTextHeader">Code</span></h1>
     </header>
     <div id = "all-content">
+      <form style = "text-align:right; font-size: x-large;">
+        Language:
+        <select id = "language" style = "text-align:right; font-size: x-large;">
+          <option value = "en">English</option>
+          <option value = "hi">हिंदी</option>
+        </select>
+      </form>
         <div id = "blockly-div">
           <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
-              <category name="PseudoJS Input/Output" colour="160">
+              <category name="PseudoJS Input/Output" colour="160" data-name="TOOLBOX_CATEGORY_PSEUDO_JS_IO">
                 <block type="text_print"></block>
                 <block type="text_input"></block>
               </category>
-              <category name="JavaScript Input/Output" colour="160">
+              <category name="JavaScript Input/Output" colour="160" data-name="TOOLBOX_CATEGORY_JS_IO">
                 <block type="js_text_print"></block>
                 <block type="js_text_input"></block>
               </category>
-              <category name="Variables" custom="VARIABLE" colour="330">
+              <category name="Variables" custom="VARIABLE" colour="330" data-name="TOOLBOX_CATEGORY_VARIABLES">
               </category>
-              <category name="Math" colour="#5C68A6">
+              <category name="Math" colour="#5C68A6" data-name="TOOLBOX_CATEGORY_MATH">
                 <block type="math_number">
                   <field name="NUM">0</field>
                 </block>
@@ -52,7 +59,7 @@
                   </value>
                 </block>
               </category>
-              <category name="PseudoJS Text" colour="160">
+              <category name="PseudoJS Text" colour="160" data-name="TOOLBOX_CATEGORY_PSEUDO_JS_TEXT">
                 <block type="text"></block>
                 <block type="t2c_text_join"></block>
                 <!--<block type="before_substring"></block>
@@ -62,7 +69,7 @@
                 <block type="t2c_text_charat"></block>
                 <block type="t2c_text_getsubstring"></block>
               </category>
-              <category name="JavaScript Text" colour="160">
+              <category name="JavaScript Text" colour="160" data-name="TOOLBOX_CATEGORY_JS_TEXT">
                 <block type="text"></block>
                 <block type="t2c_text_join"></block>
                 <block type="text_length"></block>
@@ -70,7 +77,7 @@
                 <block type="js_text_charat"></block>
                 <block type="js_text_getsubstring"></block>
               </category>
-              <category name = "Type in Code Blocks" colour="60">
+              <category name = "Type in Code Blocks" colour="60" data-name="TOOLBOX_CATEGORY_TYPE_IN_CODE">
                 <block type = "code_expression"></block>
                 <block type = "code_statement"></block>
               </category>
@@ -99,6 +106,8 @@
     <footer>
         <h3><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
     </footer>
+    <script src = "msg/en.js"></script>
+    <script src = "msg/hi.js"></script>
     <script src="blockly/generators/javascript/text-exact.js"></script>
     <script src = "grammar.js"></script>
     <script src = "parser.js"></script>

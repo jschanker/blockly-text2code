@@ -79,7 +79,11 @@ function afterSubstring(str, substr) {
 var display = function() {
   console.log.apply(console, arguments);
 };
+var प्रिंट_करें = display;
+
 var getInputByAsking = prompt;
+var पूछकर_इनपुट_पाएँ = getInputByAsking;
+
 String.prototype.plus = function(y) { return this + y;};
 String.prototype.toNumber = function() { return parseFloat(this); };
 String.prototype.getBeforeTEXT = function(substr) { return beforeSubstring(this, substr); };
@@ -110,10 +114,13 @@ if(document.getElementById("consoleDisplay")) {
     // Print statement.
     var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
         Blockly.JavaScript.ORDER_NONE) || '""';
-    return funcName + '(' + msg + ');\n';  	
+    return funcName + '(' + msg + ');\n';   
   };
   Blockly.JavaScript['js_text_print'] = printCode.bind(null, 'console.log');
-  Blockly.JavaScript['text_print'] = printCode.bind(null, 'display');
+  Blockly.JavaScript['text_print'] = function(block) {
+    return printCode(T2C.MSG.currentLanguage['TEXT_PRINT_TITLE']
+      .substring(0, T2C.MSG.currentLanguage['TEXT_PRINT_TITLE'].indexOf("(")), block);
+  };
 
   var promptCode = function(funcName, block) {
     // Prompt user for input.
@@ -124,7 +131,10 @@ if(document.getElementById("consoleDisplay")) {
   };
 
   Blockly.JavaScript['js_text_input'] = promptCode.bind(null, 'prompt');
-  Blockly.JavaScript['text_input'] = promptCode.bind(null, 'getInputByAsking');
+  Blockly.JavaScript['text_input'] = function(block) {
+    return promptCode(T2C.MSG.currentLanguage['TEXT_INPUT_TITLE']
+      .substring(0, T2C.MSG.currentLanguage['TEXT_INPUT_TITLE'].indexOf("(")), block);
+  }
 
   Blockly.JavaScript['t2c_text_join'] = function(block) {
     var argument0 = Blockly.JavaScript.valueToCode(block, 'A', Blockly.JavaScript.ORDER_NONE) || '""';

@@ -30,7 +30,7 @@ Blockly.Blocks['text_print'] = {
    */
   init: function() {
     this.jsonInit({
-      "message0": "display(%1);",
+      "message0": T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"],
       "args0": [
         {
           "type": "input_value",
@@ -72,7 +72,7 @@ Blockly.Blocks['js_text_print'] = {
 Blockly.Blocks['text_input'] = {
   init: function() {
     this.jsonInit({
-      "message0": "getInputByAsking(%1)",
+      "message0": T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"],
       "args0": [
         {
           "type": "input_value",

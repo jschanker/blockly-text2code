@@ -92,6 +92,29 @@
     }
     return code;
   }
+  function updateToolbox(langCode) {
+    document.getElementById("toolbox").querySelectorAll("category")
+      .forEach(category => {
+        category.setAttribute("name", 
+          T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
+      });
+
+    T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
+    workspace.updateToolbox(toolbox);
+  }
+
+  if(window.location && typeof window.location.href === "string") {
+    const startLangLocation = window.location.href.indexOf("lang=")+5;
+    const language = window.location.href.substring(startLangLocation, startLangLocation+2);
+    if(startLangLocation !== 4) {
+      document.getElementById("language").value = language;
+      updateToolbox(language);
+    }
+  }
+
+  document.getElementById("language").addEventListener("change", function() {
+    updateToolbox(document.getElementById("language").value);
+  });
   document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
     if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
     document.getElementById("textCodeBox").value = runCode();

@@ -1,0 +1,13 @@
+const T2C = {};
+T2C.MSG = {}
+T2C.MSG.currentLanguage = T2C.MSG.EN = {};
+
+T2C.MSG.EN["TOOLBOX_CATEGORY_PSEUDO_JS_IO"] = "PseudoJS Input/Output";
+T2C.MSG.EN["TOOLBOX_CATEGORY_JS_IO"] = "JavaScript Input/Output";
+T2C.MSG.EN["TOOLBOX_CATEGORY_VARIABLES"] = "Variables";
+T2C.MSG.EN["TOOLBOX_CATEGORY_MATH"] = "Math";
+T2C.MSG.EN["TOOLBOX_CATEGORY_PSEUDO_JS_TEXT"] = "PseudoJS Text";
+T2C.MSG.EN["TOOLBOX_CATEGORY_JS_TEXT"] = "JavaScript Text";
+T2C.MSG.EN["TOOLBOX_CATEGORY_TYPE_IN_CODE"] = "Type in Code Blocks";
+T2C.MSG.EN["TEXT_PRINT_TITLE"] = "display(%1);";
+T2C.MSG.EN["TEXT_INPUT_TITLE"] = "getInputByAsking(%1)";
