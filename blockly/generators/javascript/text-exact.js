@@ -88,9 +88,17 @@ String.prototype.plus = function(y) { return this + y;};
 String.prototype.toNumber = function() { return parseFloat(this); };
 String.prototype.getBeforeTEXT = function(substr) { return beforeSubstring(this, substr); };
 String.prototype.getAfterTEXT = function(substr) { return afterSubstring(this, substr); };
+
 String.prototype.positionNumberOfTEXT = function(substr) { return this.indexOf(substr); };
+String.prototype.के_पाठ_में = function(substr){
+  var that = this;
+  return {
+    के_स्थिति_संख्या: that.indexOf(substr)
+  };
+};
+
 String.prototype.lastPositionNumberOfTEXT = function(substr) { return this.lastIndexOf(substr); };
-String.prototype.getCharacterNUMBER = function(position) { return this.charAt(position); };
+String.prototype.वर्ण_संख्या_पाएँ = String.prototype.getCharacterNUMBER = function(position) { return this.charAt(position); };
 String.prototype.getTextFromPositionNUMBER = function(startPos) {
   var that = this;
   return {
@@ -98,6 +106,17 @@ String.prototype.getTextFromPositionNUMBER = function(startPos) {
       return that.substring(startPos,endPos);
     }
   }; 
+};
+
+String.prototype.पाठ_की_स्थिति_संख्या = function(startPos) {
+  var that = this;
+  return {
+    से_स्थिति_संख्या: function(endPos) {
+      return {
+        तक_पाएँ: that.substring(startPos,endPos)
+      };
+    }
+  };
 };
 
 if(document.getElementById("consoleDisplay")) {
@@ -153,7 +172,18 @@ if(document.getElementById("consoleDisplay")) {
   };
 
   Blockly.JavaScript['js_text_indexof'] = indexOfCode.bind(null, 'indexOf');
-  Blockly.JavaScript['t2c_text_indexof'] = indexOfCode.bind(null, 'positionNumberOfTEXT');
+  //Blockly.JavaScript['t2c_text_indexof'] = indexOfCode.bind(null, 'positionNumberOfTEXT');
+  Blockly.JavaScript['t2c_text_indexof'] = function(block) {
+    // Get substring.
+    var substring = Blockly.JavaScript.valueToCode(block, 'FIND',
+        Blockly.JavaScript.ORDER_NONE) || '""';
+    var text = Blockly.JavaScript.valueToCode(block, 'VALUE',
+        Blockly.JavaScript.ORDER_MEMBER) || '""';
+    var code = T2C.MSG.currentLanguage['TEXT_T2C_INDEXOF_TITLE']
+      .replace("%1", text).replace("%2", substring);
+
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+  };
 
   var charAtCode = function(funcName, block) {
     // Get letter at index.
@@ -166,7 +196,12 @@ if(document.getElementById("consoleDisplay")) {
   };
 
   Blockly.JavaScript['js_text_charat'] = charAtCode.bind(null, 'charAt');
-  Blockly.JavaScript['t2c_text_charat'] = charAtCode.bind(null, 'getCharacterNUMBER');
+  //Blockly.JavaScript['t2c_text_charat'] = charAtCode.bind(null, 'getCharacterNUMBER');
+  Blockly.JavaScript['t2c_text_charat'] = function(block) {
+    return charAtCode(T2C.MSG.currentLanguage['TEXT_T2C_CHARAT_TITLE']
+      .substring(3, T2C.MSG.currentLanguage['TEXT_T2C_CHARAT_TITLE'].indexOf("(")), block);
+  };
+
 
   Blockly.JavaScript['js_text_getsubstring'] = function(block) {
     // Get substring.
@@ -186,8 +221,10 @@ if(document.getElementById("consoleDisplay")) {
         Blockly.JavaScript.ORDER_MEMBER) || '""';
     var at1 = Blockly.JavaScript.valueToCode(block, 'AT1');
     var at2 = Blockly.JavaScript.valueToCode(block, 'AT2');
+    var code = T2C.MSG.currentLanguage['TEXT_T2C_GET_SUBSTRING_TITLE']
+      .replace("%1", text).replace("%2", at1).replace("%3", at2);
   
-    var code = text + '.getTextFromPositionNUMBER(' + at1 + ').toPositionNUMBER(' + at2 + ')';
+    //var code = text + '.getTextFromPositionNUMBER(' + at1 + ').toPositionNUMBER(' + at2 + ')';
 
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };

@@ -43,7 +43,7 @@
     init: function() {
       var props = {editing: false};
       this.appendDummyInput("STRING")
-          .appendField("Enter Code Expression:")
+          .appendField(T2C.MSG.currentLanguage.TYPEIN_EXPRESSION_TITLE)
           .appendField(new Blockly.FieldTextInput("", function(exp) {
               if(exp) {
                   props.editing = true;
@@ -52,7 +52,7 @@
       this.setInputsInline(true);
       this.setOutput(true);
       this.setColour(60);
-      this.setTooltip(Blockly.Msg.TYPEIN_EXPRESSION_TOOLTIP);
+      this.setTooltip(T2C.MSG.currentLanguage.TYPEIN_EXPRESSION_TOOLTIP);
       //this.setHelpUrl(Blockly.Msg.TYPEIN_EXPRESSION_HELPURL);
       //var thisBlock = this;
       this.onchange = parseAndConvertToBlocks.bind(this, props);
@@ -63,7 +63,7 @@
     init: function() {
       var props = {editing: false};
       this.appendDummyInput("STRING")
-          .appendField("Enter Code Statement:")
+          .appendField(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TITLE)
           .appendField(new Blockly.FieldTextInput("", function(exp) {
               if(exp) {
                   props.editing = true;
@@ -74,7 +74,7 @@
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(60);
-      this.setTooltip(Blockly.Msg.TYPEIN_STATEMENT_TOOLTIP);
+      this.setTooltip(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TOOLTIP);
       //this.setHelpUrl(Blockly.Msg.TYPEIN_EXPRESSION_HELPURL);
       //var thisBlock = this;
       this.onchange = parseAndConvertToBlocks.bind(this, props);
