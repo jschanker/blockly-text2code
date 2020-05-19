@@ -125,15 +125,20 @@ const parseTopDown = s => {
     }
   };
 
+  const matchLanguageToken = (rhs, token) => 
+    Object.keys(T2C.MSG).map(langCode => langCode.toUpperCase())
+      .some(langCodeUpper => T2C.MSG[langCodeUpper] && T2C.MSG[langCodeUpper]["TERMINAL_" + rhs.toUpperCase()] === token.value);
+
   const flattenOneLevel = arr => arr.reduce((acc, subArr) => acc.concat(subArr), []);
   const joinEachItemToFront = (items, arrs) => flattenOneLevel(arrs.map(arr => items.map(item => [item].concat(arr))));
   const getRHSOfTokenMatch = (lhs, token) => {
     if(Object.keys(tokens).indexOf(lhs) !== -1 && token.tokenType === lhs) {
       return token.value;
     }
+    // matchLanguageToken can use left side instead; then remove duplicate constants in msg language files
     else if(rules.terminals.indexOf(lhs) !== -1 && 
             Array.from(ruleSets[lhs])
-                 .some(rhs => rhs === token.value)) {
+             .some(rhs => rhs === token.value || matchLanguageToken(rhs,token))) {
       return token.value;
     }
     else return null;

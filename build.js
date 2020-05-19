@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 The Text2Code Authors.
+ * Copyright 2018-2020 The Text2Code Authors.
  * https://github.com/jschanker/blockly-text2code
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,8 @@
 
 const {readFileSync, writeFileSync, readdirSync} = require("fs");
 
+let grammarHeader;
+let blockInterpretationHeader;
 let rules = {rules:{}, terminals:[]};
 let tokens;
 let interpretations = {};
@@ -45,6 +47,9 @@ readdirSync("grammar").forEach(file => {
   else if(file.toLowerCase() === "tokens.json") {
     tokens = JSON.parse(readFileSync("grammar/tokens.json", "utf8"));
   }
+  else if(file.toLowerCase() === "grammar-header.js") {
+    grammarHeader = readFileSync("grammar/grammar-header.js", "utf8");
+  }
 });
 
 readdirSync("block-interpretation").forEach(file => {
@@ -52,15 +57,18 @@ readdirSync("block-interpretation").forEach(file => {
     let interpretationFile = JSON.parse(readFileSync("block-interpretation/" + file, "utf8"));
     Object.keys(interpretationFile).forEach(lhs => interpretations[lhs] = interpretationFile[lhs]);
   }
+  else if(file.toLowerCase() === "block-interpretation-header.js") {
+    blockInterpretationHeader = readFileSync("block-interpretation/block-interpretation-header.js", "utf8");
+  }
 });
 
 try {
-	//writeFileSync("grammar.js", "export let rules = " + JSON.stringify(rules) + ";\nexport let tokens = " + JSON.stringify(tokens) + ";");
-	//appendFileSync
-	const escapeChars = s => s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-	let escapedRules = 
-	writeFileSync("grammar.js", "let rules = JSON.parse('" + escapeChars(JSON.stringify(rules)) + "');\nlet tokens = JSON.parse('" + escapeChars(JSON.stringify(tokens)) + "');");
-	writeFileSync("block-interpretations.js", "let interpretations = JSON.parse('" + escapeChars(JSON.stringify(interpretations)) + "');");
+  //writeFileSync("grammar.js", "export let rules = " + JSON.stringify(rules) + ";\nexport let tokens = " + JSON.stringify(tokens) + ";");
+  //appendFileSync
+  const escapeChars = s => s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  let escapedRules = 
+  writeFileSync("grammar.js", grammarHeader + "\n" + "let rules = JSON.parse('" + escapeChars(JSON.stringify(rules)) + "');\nlet tokens = JSON.parse('" + escapeChars(JSON.stringify(tokens)) + "');");
+  writeFileSync("block-interpretations.js", blockInterpretationHeader + "\n" + "let interpretations = JSON.parse('" + escapeChars(JSON.stringify(interpretations)) + "');");
 } catch(err) {
-	console.log(err);
+  console.log(err);
 }
