@@ -1,5 +1,5 @@
 {
-	"terminals": ["semicolon"],
+	"terminals": ["semicolon", "newLine", "carriageReturn"],
 	"rules": {
 		"expression": {
 			"expressionText": ["stringExp"],
@@ -9,8 +9,21 @@
 			"statementSingle": ["expression"],
 			"statementVariable": ["variableStatement"],
 			"statementPrint": ["stringDisplay"],
-			"statementSemicolon": ["statement", "semicolon"]
+			"statementSemicolon": ["statement", "semicolon"],
+			"statementBlockExp": ["expression", "statementSeparator", "statement"],
+			"statementBlockVariable": ["variableStatement", "statementSeparator", "statement"],
+			"statementBlockPrint": ["stringDisplay", "statementSeparator", "statement"]
 		},
-		"semicolon": ";"
+		"statementSeparator": {
+			"semicolonEnd": ["semicolon"],
+			"newLineEnd": ["newLine"],
+			"carriageReturnEnd": ["carriageReturn"],
+			"semicolonMultiSeparator": ["semicolon", "statementSeparator"],
+			"newLineMultiSeparator": ["newLine", "statementSeparator"],
+			"carriageReturnMultiSeparator": ["carriageReturn", "statementSeparator"]
+		},
+		"semicolon": ";",
+		"newLine": "\n",
+		"carriageReturn": "\r"
 	}
 }

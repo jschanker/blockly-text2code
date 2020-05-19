@@ -1,0 +1,11 @@
+{
+  "statementBlockExp": {
+    "blocks": ["%1", "%3"]
+  },
+  "statementBlockVariable": {
+  	"blocks": ["%1", "%3"]
+  },
+  "statementBlockPrint": {
+  	"blocks": ["%1", "%3"]
+  }
+}

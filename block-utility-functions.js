@@ -1,5 +1,5 @@
 /**
- * Copyright 2018 Text2Code Authors
+ * Copyright 2018-2020 Text2Code Authors
  * https://github.com/jschanker/blockly-text2code
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,23 @@ function setValueInput(sourceBlock, inputName, inputBlock) {
       blockInput.connection.connect(valueBlockConnection);
     }
 }
+
+// The following is in the updated version of Blockly as of 5/19/20:
+// https://github.com/google/blockly/blob/master/core/block.js#L603
+/**
+ * Return the previous statement block directly connected to this block.
+ * @return {Blockly.Block} The previous statement block or null.
+ */
+Blockly.Block.prototype.getPreviousBlock = function() {
+  return this.previousConnection && this.previousConnection.targetBlock();
+};
+
+function setNextBlock(sourceBlock, nextBlock) {
+  if(sourceBlock.nextConnection && nextBlock.previousConnection) {
+    sourceBlock.nextConnection.connect(nextBlock.previousConnection);
+  }
+}
+
 function moveInputBlock(sourceBlock, destinationBlock, sourceInputName, destinationInputName) {
   var inputBlock = sourceBlock && sourceBlock.getInputTargetBlock(sourceInputName);
   destinationInputName = typeof destinationInputName === "undefined" ? 
@@ -57,7 +74,7 @@ function copyBlock(block, deep) {
   
   if(deep) {
     block.getChildren().slice().forEach(function(childBlock) {
-  	  if(block.getNextBlock() !== childBlock) {
+      if(block.getNextBlock() !== childBlock) {
         var blockInput = block.getInputWithBlock(childBlock);
         setValueInput(blockCp, blockInput.name, copyBlock(childBlock, true));
       }
@@ -104,7 +121,7 @@ function replaceWithBlock(block, replaceBlock, dispose) {
   });
   
   if(parentBlock) {
-  	parentInput = parentBlock.getInputWithBlock(block);
+    parentInput = parentBlock.getInputWithBlock(block);
     parentConnection = parentInput ? parentInput.connection : parentBlock.nextConnection;
     blockConnectionType = parentConnection.targetConnection.type;
     if(blockConnectionType === Blockly.OUTPUT_VALUE) {
@@ -119,18 +136,18 @@ function replaceWithBlock(block, replaceBlock, dispose) {
   }
   
   block.getChildren().slice().forEach(function(childBlock) {
-  	if(block.getNextBlock() !== childBlock) {
-  		// assume the child block connection is INPUT_VALUE/OUTPUT_VALUE since it's not 
-  		// PREVIOUS_STATEMENT/NEXT_STATEMENT
-  		var blockInput = block.getInputWithBlock(childBlock);
-  		var replaceBlockInput = replaceBlock.getInput(blockInput.name);
-  		if(replaceBlockInput) {
-  		  blockInput = replaceBlockInput.connection.connect(childBlock.outputConnection);
-  		}
-  	}
-  	else {
-  		replaceBlock.nextConnection.connect(block.getNextBlock().previousConnection);
-  	}
+    if(block.getNextBlock() !== childBlock) {
+      // assume the child block connection is INPUT_VALUE/OUTPUT_VALUE since it's not 
+      // PREVIOUS_STATEMENT/NEXT_STATEMENT
+      var blockInput = block.getInputWithBlock(childBlock);
+      var replaceBlockInput = replaceBlock.getInput(blockInput.name);
+      if(replaceBlockInput) {
+        blockInput = replaceBlockInput.connection.connect(childBlock.outputConnection);
+      }
+    }
+    else {
+      replaceBlock.nextConnection.connect(block.getNextBlock().previousConnection);
+    }
   });
 
   if(dispose) block.dispose();
