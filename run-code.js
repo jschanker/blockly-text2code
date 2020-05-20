@@ -123,6 +123,25 @@
   document.getElementById("convertXMLToBlocksButton").addEventListener("click", function() {
     generateBlocksFromXML();
   });
+  document.getElementById("convertTextToBlocksButton").addEventListener("click", function() {
+    const displayLog = console.log;
+    console.log = console.realLog; // temporarily reset for debugging
+    console.log("Parsing", document.getElementById("textCodeBox").value);
+    const parseTree = parseTopDown(document.getElementById("textCodeBox").value)[0];
+    if(parseTree && confirm("Clear workspace blocks and replace with blocks from below textual code?")) {
+      workspace.clear();
+      const evaluation = evaluate(parseTree);
+      const tempBlock = workspace.newBlock();
+      tempBlock.moveBy(50, 50); // workspace.getWidth()/2
+      console.log("Parse Tree:", parseTree);
+      console.log("Evaluation: ", evaluation);
+      console.log(createBlocks(evaluation, tempBlock).toString());
+    }
+    else if(!parseTree) {
+      alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
+    }
+    console.log = displayLog; // restore
+  });
   document.getElementById("convertToJSButton").addEventListener("click", function() {
     var workspace = workspace || Blockly.getMainWorkspace();
         workspace.getAllBlocks().forEach(convertTextBlocksToJSBlocks);
