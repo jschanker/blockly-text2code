@@ -97,15 +97,14 @@
       .forEach(category => {
         category.setAttribute("name", 
           T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
- 
       });
-    document.getElementById("convertToJSButton").innerText = T2C.MSG[langCode.toUpperCase()][BUTTON_CONVERT_TO_JS]);
-    document.getElementById("convertXMLToBlocksButton").innerText = T2C.MSG[langCode.toUpperCase()][BUTTON_CONVERT_XML_TO_BLOCKS]);
-    document.getElementById("convertTextToBlocksButton").innerText = T2C.MSG[langCode.toUpperCase()][BUTTON_CONVERT_TEXT_TO_BLOCKS]);
-    document.getElementById("convertToJSText2CodeButton").innerText = T2C.MSG[langCode.toUpperCase()][BUTTON_RUN_CODE]);
 
     T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
     workspace.updateToolbox(toolbox);
+    document.getElementById("convertToJSButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TO_JS;
+    document.getElementById("convertXMLToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_XML_TO_BLOCKS;
+    document.getElementById("convertTextToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TEXT_TO_BLOCKS;
+    document.getElementById("convertToJSText2CodeButton").innerText = T2C.MSG.currentLanguage.BUTTON_RUN_CODE;
   }
 
   if(window.location && typeof window.location.href === "string") {
