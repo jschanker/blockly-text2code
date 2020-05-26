@@ -101,11 +101,7 @@
 
     T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
     workspace.updateToolbox(toolbox);
-    document.getElementById("convertToJSButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TO_JS;
-    document.getElementById("convertXMLToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_XML_TO_BLOCKS;
-    document.getElementById("convertTextToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TEXT_TO_BLOCKS;
-    document.getElementById("convertToJSText2CodeButton").innerText = T2C.MSG.currentLanguage.BUTTON_RUN_CODE;
-  }
+    }
 
   if(window.location && typeof window.location.href === "string") {
     const startLangLocation = window.location.href.indexOf("lang=")+5;
@@ -118,6 +114,11 @@
 
   document.getElementById("language").addEventListener("change", function() {
     updateToolbox(document.getElementById("language").value);
+    document.getElementById("convertToJSButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TO_JS;
+    document.getElementById("convertXMLToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_XML_TO_BLOCKS;
+    document.getElementById("convertTextToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TEXT_TO_BLOCKS;
+    document.getElementById("convertToJSText2CodeButton").innerText = T2C.MSG.currentLanguage.BUTTON_RUN_CODE;
+
   });
   document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
     if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
