@@ -95,12 +95,10 @@
   function updateToolbox(langCode) {
     document.getElementById("toolbox").querySelectorAll("category")
       .forEach(category => {
-        category.setAttribute("name", 
-          T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
+        category.setAttribute("name", T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
       });
 
     T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
-    workspace.updateToolbox(toolbox);
     }
 
   if(window.location && typeof window.location.href === "string") {
