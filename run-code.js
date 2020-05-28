@@ -97,7 +97,7 @@
       .forEach(category => {
         category.setAttribute("name", T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
       });
-
+    workspace.updateToolbox(toolbox);
     T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
     }
 
