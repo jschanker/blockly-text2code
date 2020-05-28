@@ -83,21 +83,21 @@
               </category>
             </xml>
         </div>
-        <div>
-          <button id = "convertToJSText2CodeButton">RUN BLOCK CODE!</button>
-          <button id = "convertTextToBlocksButton">Convert text to blocks</button>
-          <button id = "convertToJSButton">Convert to pure JavaScript blocks</button>
-          <button id = "convertXMLToBlocksButton">Convert XML to Blocks</button>
+        <div id = "changeButtons" >
+          <button id = "convertToJSText2CodeButton" name = "BUTTON_RUN_CODE" >RUN BLOCK CODE!</button>
+          <button id = "convertTextToBlocksButton" name = "BUTTON_CONVERT_TEXT_TO_BLOCKS">Convert text to blocks</button>
+          <button id = "convertToJSButton" name = "BUTTON_CONVERT_TO_JS">Convert to pure JavaScript blocks</button>
+          <button id = "convertXMLToBlocksButton" name = "BUTTON_CONVERT_XML_TO_BLOCKS">Convert XML to Blocks</button>
         </div>
-        <h3>Output will appear below</h3>
+        <h3 id = "outputAppearsBelow" name = "HEADING_OUTPUT_APPEARS_BELOW">Output will appear below</h3>
         <pre>
         <div id = "consoleDisplay">
         </div>
         </pre>
         <div id = "text-code">
             <form>
-              <textarea id = "textCodeBox">Code to appear here.</textarea>
-              <textarea id = "xmlData" placeholder = "Copy text here to save/load blocks."></textarea>
+              <textarea id = "textCodeBox" name = "TEXTAREA_CODE_APPEARS_BELOW" placeholder = "Code to appear here."></textarea>
+              <textarea id = "xmlData" name = "TEXTAREA_COPY_TEXT_HERE" placeholder="Copy text here to save/load blocks."></textarea>
             </form>
         </div>
     </div>
@@ -105,7 +105,7 @@
       <iframe height="400px" width="100%" src="https://repl.it/@jschanker/Text2Code-Strings-Exact?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals"></iframe>
     </div>
     <footer>
-        <h3><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
+        <h3 id = "bottomText" name = "HEADING_BOTTOM_TEXT"><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
     </footer>
     <script src = "msg/en.js"></script>
     <script src = "msg/hi.js"></script>
