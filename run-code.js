@@ -95,11 +95,13 @@
   function updateToolbox(langCode) {
     document.getElementById("toolbox").querySelectorAll("category")
       .forEach(category => {
-        category.setAttribute("name", T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
+        category.setAttribute("name", 
+          T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
       });
-    workspace.updateToolbox(toolbox);
-    T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
-    }
+
+      workspace.updateToolbox(toolbox);
+       T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
+  }
 
   if(window.location && typeof window.location.href === "string") {
     const startLangLocation = window.location.href.indexOf("lang=")+5;
@@ -109,14 +111,25 @@
       updateToolbox(language);
     }
   }
-
+function updateWords() {
+    document.getElementById("changeButtons").querySelectorAll("button")
+    .forEach(button => {
+        button.textContent = T2C.MSG.currentLanguage[button.name];
+      });
+  };
+function updateTexts() {
+    document.getElementById("text-code").querySelectorAll("textarea")
+    .forEach(textarea => {
+        textarea.placeholder = T2C.MSG.currentLanguage[textarea.name];
+      });
+  };
   document.getElementById("language").addEventListener("change", function() {
     updateToolbox(document.getElementById("language").value);
-    document.getElementById("convertToJSButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TO_JS;
-    document.getElementById("convertXMLToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_XML_TO_BLOCKS;
-    document.getElementById("convertTextToBlocksButton").innerText = T2C.MSG.currentLanguage.BUTTON_CONVERT_TEXT_TO_BLOCKS;
-    document.getElementById("convertToJSText2CodeButton").innerText = T2C.MSG.currentLanguage.BUTTON_RUN_CODE;
-
+    updateWords()
+    updateTexts()
+    document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
+    document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
+    document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
   });
   document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
     if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
@@ -130,8 +143,9 @@
     const displayLog = console.log;
     console.log = console.realLog; // temporarily reset for debugging
     console.log("Parsing", document.getElementById("textCodeBox").value);
+    const confirmMessage = T2C.MSG.currentLanguage.CONFIRM_MESSAGE;
     const parseTree = parseTopDown(document.getElementById("textCodeBox").value)[0];
-    if(parseTree && confirm("Clear workspace blocks and replace with blocks from below textual code?")) {
+    if(parseTree && confirm(confirmMessage)) {
       workspace.clear();
       const evaluation = evaluate(parseTree);
       const tempBlock = workspace.newBlock();
