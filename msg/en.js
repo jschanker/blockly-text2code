@@ -45,4 +45,4 @@ T2C.MSG.EN["HEADING_OUTPUT_APPEARS_BELOW"] = "Output will appear below";
 T2C.MSG.EN["TEXTAREA_CODE_APPEARS_BELOW"] = "Code to appear here.";
 T2C.MSG.EN["TEXTAREA_COPY_TEXT_HERE"] = "Copy text here to save/load blocks.";
 T2C.MSG.EN["HEADING_BOTTOM_TEXT"] = "If you can describe the solution, you can code it. (At least that's the goal.)";
-T2C.MSG.EN["CONFIRM_MESSAGE"] = "Clear workspace blocks and replace with blocks from below textual code?";
+T2C.MSG.EN["CONFIRM_DELETE_REPLACE"] = "Clear workspace blocks and replace with blocks from below textual code?";
