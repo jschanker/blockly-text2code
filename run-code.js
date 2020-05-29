@@ -128,7 +128,6 @@ function updateTexts() {
     updateWords()
     updateTexts()
     document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
-    document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
     document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
   });
   document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
@@ -143,9 +142,9 @@ function updateTexts() {
     const displayLog = console.log;
     console.log = console.realLog; // temporarily reset for debugging
     console.log("Parsing", document.getElementById("textCodeBox").value);
-    const confirmMessage = T2C.MSG.currentLanguage.CONFIRM_MESSAGE;
+    const confirmDeleteNReplace = T2C.MSG.currentLanguage.CONFIRM_DELETE_REPLACE;
     const parseTree = parseTopDown(document.getElementById("textCodeBox").value)[0];
-    if(parseTree && confirm(confirmMessage)) {
+    if(parseTree && confirm(confirmDeleteNReplace)) {
       workspace.clear();
       const evaluation = evaluate(parseTree);
       const tempBlock = workspace.newBlock();
