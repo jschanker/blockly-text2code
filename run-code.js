@@ -142,9 +142,9 @@ function updateTexts() {
     const displayLog = console.log;
     console.log = console.realLog; // temporarily reset for debugging
     console.log("Parsing", document.getElementById("textCodeBox").value);
-    const confirmDeleteNReplace = T2C.MSG.currentLanguage.CONFIRM_DELETE_REPLACE;
+    const confirmConvertTextToBlocks = T2C.MSG.currentLanguage.CONFIRM_CONVERT_TEXT_TO_BLOCKS;
     const parseTree = parseTopDown(document.getElementById("textCodeBox").value)[0];
-    if(parseTree && confirm(confirmDeleteNReplace)) {
+    if(parseTree && confirm(confirmConvertTextToBlocks)) {
       workspace.clear();
       const evaluation = evaluate(parseTree);
       const tempBlock = workspace.newBlock();
