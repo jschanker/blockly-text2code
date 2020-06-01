@@ -144,6 +144,16 @@ if(document.getElementById("consoleDisplay")) {
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
 
+  var lengthCode = function(funcName, block) {
+    // length of string.
+    var text = Blockly.JavaScript.valueToCode(block, 'STRING',
+        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+    var code = text + funcName;
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];   
+  };
+
+  Blockly.JavaScript['t2c_text_length'] = lengthCode.bind(null, '.length');
+
   var getBeforeAfterCode = function(funcName, block) {
     // Get text appearing before or after.
     var sub = Blockly.JavaScript.valueToCode(block, 'SUB',
