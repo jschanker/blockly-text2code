@@ -44,3 +44,4 @@ T2C.MSG.HI["TEXTAREA_CODE_APPEARS_BELOW"] = "कोड यहाँ दिखा
 T2C.MSG.HI["TEXTAREA_COPY_TEXT_HERE"] = "ब्लॉक को बचाने और लोड करने के लिए यहां टेक्स्ट कॉपी करें";
 T2C.MSG.HI["HEADING_BOTTOM_TEXT"] = "यदि आप समाधान का वर्णन कर सकते हैं, तो आप इसे कोड कर सकते हैं (कम से कम यही लक्ष्य है)";
 T2C.MSG.HI["CONFIRM_CONVERT_TEXT_TO_BLOCKS"] = "सभी ब्लॉक हटाएं और पाठ कोड के नीचे से ब्लॉक के साथ बदलें?";
+T2C.MSG.HI["TEXT_T2C_GET_STRING_LENGTH"] = ".लंबाई"
