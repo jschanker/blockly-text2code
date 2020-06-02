@@ -338,3 +338,22 @@ Blockly.Blocks['js_text_getsubstring'] = {
     this.setHelpUrl(Blockly.Msg.TEXT_GET_SUBSTRING_HELPURL);
   }
 };
+
+Blockly.Blocks['t2c_text_length'] = {
+  init: function() {
+    this.jsonInit({
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "STRING",
+          "check": "String"
+        }],
+      "message0": "%1" + T2C.MSG.currentLanguage.TEXT_T2C_GET_STRING_LENGTH,
+      "inputsInline": true,
+      "output": "Number",
+      "colour": Blockly.Blocks.texts.HUE,
+      "tooltip": '',
+      "helpUrl": ''
+    });
+  }
+};
