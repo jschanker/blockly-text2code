@@ -99,8 +99,8 @@
           T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
       });
 
-    T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
-    workspace.updateToolbox(toolbox);
+      workspace.updateToolbox(toolbox);
+       T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
   }
 
   if(window.location && typeof window.location.href === "string") {
@@ -111,9 +111,24 @@
       updateToolbox(language);
     }
   }
-
+function updateWords() {
+    document.getElementById("changeButtons").querySelectorAll("button")
+    .forEach(button => {
+        button.textContent = T2C.MSG.currentLanguage[button.name];
+      });
+  };
+function updateTexts() {
+    document.getElementById("text-code").querySelectorAll("textarea")
+    .forEach(textarea => {
+        textarea.placeholder = T2C.MSG.currentLanguage[textarea.name];
+      });
+  };
   document.getElementById("language").addEventListener("change", function() {
     updateToolbox(document.getElementById("language").value);
+    updateWords()
+    updateTexts()
+    document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
+    document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
   });
   document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
     if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
@@ -127,8 +142,9 @@
     const displayLog = console.log;
     console.log = console.realLog; // temporarily reset for debugging
     console.log("Parsing", document.getElementById("textCodeBox").value);
+    const confirmConvertTextToBlocks = T2C.MSG.currentLanguage.CONFIRM_CONVERT_TEXT_TO_BLOCKS;
     const parseTree = parseTopDown(document.getElementById("textCodeBox").value)[0];
-    if(parseTree && confirm("Clear workspace blocks and replace with blocks from below textual code?")) {
+    if(parseTree && confirm(confirmConvertTextToBlocks)) {
       workspace.clear();
       const evaluation = evaluate(parseTree);
       const tempBlock = workspace.newBlock();
