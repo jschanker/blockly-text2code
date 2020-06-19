@@ -20,6 +20,15 @@ var options = {
 
 /* Inject your workspace */ 
 var workspace = Blockly.inject("blockly-div", options);
+function init() {
+  const lexer = new Tokenizer(tokens);
+  const parser = new Parser(lexer, rules, Object.keys(interpretations).concat("statement"));
+  const parseTreeBlockConnector = new ParseTreeBlockConnector();
+  const evaluator = new BlockEvaluator(interpretations);
+  return {lexer, parser, parseTreeBlockConnector, evaluator};
+}
+
+const shared = init();
 
 /* Load Workspace Blocks from XML to workspace. Remove all code below if no blocks to load */
 

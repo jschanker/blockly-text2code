@@ -23,6 +23,43 @@
 
 "use strict";
 
+class BlockEvaluator {
+  constructor(blockInterpretations) {
+    this.interpretations_ = blockInterpretations;
+  }
+
+  /**
+   * Creates blueprint for blocks from block parse tree
+   * @param{ParseTreeBlockNode} root the root of the tree to convert to blueprint
+   * @return{Object} blueprint object from parse tree: matches form from 
+   * block-interpretation JSON files;
+   * blueprint formed by replacing each %d with blueprint for corresponding block
+   */
+  evaluate(root) {
+    if(root !== null && !(root instanceof ParseTreeBlockNode)) {
+      console.assert(root !== null && !(root instanceof ParseTreeBlockNode), 
+        {msg: "Non-null is invalid root type", expectedType: ParseTreeBlockNode, actual: root});
+      throw new Error("Invalid root type");
+    }
+
+    else if(!root) return {};
+
+    else {
+      const args = (typeof root.rhs === "string")
+        ? [root.rhs.replace(/\"/g, "'")]
+        : root.rhs.map(this.evaluate.bind(this));
+      const returnBlock = JSON.stringify(this.interpretations_[root.lhs]);
+      if(returnBlock) {
+        return JSON.parse(returnBlock.replace(/"%(\d+)"/g, (match, argNum) => {
+          return (typeof args[argNum-1] === "string" ? '"' + args[argNum-1] + '"' : JSON.stringify(args[argNum-1]));
+        }));
+      } else {
+        return args[0];
+      } 
+    }
+  }
+}
+
 const evaluate = root => {
   if(!root) return {};
   else if(typeof root === "string") return root.replace(/\"/g, "'");

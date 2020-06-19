@@ -143,10 +143,13 @@ function updateTexts() {
     console.log = console.realLog; // temporarily reset for debugging
     console.log("Parsing", document.getElementById("textCodeBox").value);
     const confirmConvertTextToBlocks = T2C.MSG.currentLanguage.CONFIRM_CONVERT_TEXT_TO_BLOCKS;
-    const parseTree = parseTopDown(document.getElementById("textCodeBox").value)[0];
+    //const parseTree = shared.parser.parseTopDown(document.getElementById("textCodeBox").value)[0];
+    const parseTree = shared.parser.parseBottomUpCYK(document.getElementById("textCodeBox").value, 
+      shared.parseTreeBlockConnector)[0];
+
     if(parseTree && confirm(confirmConvertTextToBlocks)) {
       workspace.clear();
-      const evaluation = evaluate(parseTree);
+      const evaluation = shared.evaluator.evaluate(parseTree);
       const tempBlock = workspace.newBlock();
       tempBlock.moveBy(50, 50); // workspace.getWidth()/2
       console.log("Parse Tree:", parseTree);
