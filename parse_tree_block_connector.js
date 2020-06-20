@@ -26,20 +26,23 @@
 
 class ParseTreeBlockConnector {
   /**
-   * Converts all derivation trees represented by the supplied root
+   * Converts up to given maximum number of 
+   * derivation trees represented by the supplied root
    * to ones used for their interpretations as blocks and returns 
    * Array of corresponding roots  
    * @param{ParseTreeRHSidesNode} parseTreeRHSidesRoot
+   * @param{number} [max=1] the maximum number of derivation trees to return 
    * @return{Array.<ParseTreeBlockNode>} Array of parse tree roots
    */
-	convertToBlockParseTrees(parseTreeRHSidesRoot) {
+	convertToBlockParseTrees(parseTreeRHSidesRoot, max=1) {
 		return parseTreeRHSidesRoot.rhsides.map(rhs => {
 			if(typeof rhs === "string") {
 				return [new ParseTreeBlockNode(parseTreeRHSidesRoot.lhs, rhs)];
 			} else {
-				return cartesianProductArray(rhs.map(this.convertToBlockParseTrees.bind(this)))
+				return cartesianProductArray(rhs.map(node => this.convertToBlockParseTrees(node, max)))
 				  .map(rhsOfRhs => (new ParseTreeBlockNode(parseTreeRHSidesRoot.lhs, rhsOfRhs)));
 			}
 		}).reduce((acc, arr) => acc.concat(arr), []) // flatten Array
+		  .slice(0,max); // cut off at first max many derivations
 	}
 }

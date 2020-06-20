@@ -112,19 +112,35 @@ class Parser {
     })
   }
 
+  getTranslations_(symbol) {
+    return Object.keys(T2C.MSG).map(langCode => 
+      T2C.MSG[langCode][Object.keys(T2C.MSG[langCode]).find(key => key === "TERMINAL_" + symbol.toUpperCase())])
+    .filter(langValue => typeof langValue !== "undefined");
+  }
+
   createRuleSetFromGrammar_(grammar) {
     this.ruleSets_ = {};
     Object.keys(grammar.rules).forEach(ruleLHS => {
-      let rhs = grammar.rules[ruleLHS];
+      const potentialTerminals = [ruleLHS]; // this is hacky, should get this from terminals from grammar
+      const rhs = grammar.rules[ruleLHS];
       if(typeof rhs !== "string" && !(rhs instanceof Array)) {
-        Object.keys(rhs).forEach(lhs => this.addRule_(ruleLHS, [lhs]));
         Object.keys(rhs).forEach(lhs => {
+          this.addRule_(ruleLHS, [lhs]);
           //if(rhs[lhs] !== "token_") 
-          this.addRule_(lhs, rhs[lhs])
+          this.addRule_(lhs, rhs[lhs]);
+          potentialTerminals.push(lhs);
+          if(typeof rhs[lhs] === "string") {
+            potentialTerminals.push(rhs[lhs]);
+          }
         });
       } else {
+        if(typeof rhs === "string") {
+          potentialTerminals.push(rhs);
+        }
         this.addRule_(ruleLHS, rhs);
       }
+      potentialTerminals.forEach(terminal => this.getTranslations_(terminal)
+        .forEach(langValue => this.addRule_(ruleLHS, langValue)));
     });
   }
 
@@ -158,16 +174,6 @@ class Parser {
   getOppositeRules_() {
     const oppositeRules = {};
 
-    this.terminals_.forEach(terminal => {
-      Object.keys(T2C.MSG)
-        .map(langCode => langCode.toUpperCase())
-        .forEach(langCodeUpper => {
-          if(T2C.MSG[langCodeUpper] && T2C.MSG[langCodeUpper]["TERMINAL_" + terminal.toUpperCase()]) {
-            this.addRule_(T2C.MSG[langCodeUpper]["TERMINAL_" + terminal.toUpperCase()], terminal, oppositeRules);
-          }
-        });
-    });
-
     Object.keys(this.ruleSets_).forEach(lhs => {
       //console.warn(lhs, Array.from(this.ruleSets_[lhs]));
       Array.from(this.ruleSets_[lhs]).forEach(rhs => {
@@ -197,7 +203,6 @@ class Parser {
             });
           }
         } else {
-          //console.warn(rhs, lhs)
           this.addRule_(rhs, lhs, oppositeRules);
         }
       });
@@ -243,19 +248,15 @@ class Parser {
     const oppositeRules = this.getOppositeRules_();
     console.warn("TOKEN ARRAY:", tokenArr);
 
-    const levels = [tokenArr.map(token => {
-      if(oppositeRules[token.value]) {
-        return Array.from(oppositeRules[token.value]).map(lhs => 
-          new ParseForest(lhs, token.value));
-      } 
-      else {
-        return [new ParseForest(token.tokenType, token.value)]; 
-      }
-    })];
+    const levels = [tokenArr.map(token => 
+      Array.from(oppositeRules[token.value] || []).concat(token.tokenType)
+        .filter((lhs, index, arr) => arr.indexOf(lhs) === index)
+        .map(lhs => new ParseForest(lhs, token.value)))];
 
     for(let startPos = 0; startPos < tokenArr.length; startPos++) {
       levels[0][startPos].push(...
         this.getUnitRules_(levels[0][startPos], oppositeRules, maxPath.length));
+      ParseForest.mergeForests(levels[0][startPos]);
     }
 
     for(let i = 1; i < tokenArr.length; i++) {
@@ -291,6 +292,7 @@ class Parser {
         // handle unit rules
         currentLevel[startPos].push(...
           this.getUnitRules_(currentLevel[startPos], oppositeRules, maxPath.length));
+        ParseForest.mergeForests(currentLevel[startPos]);
       }
 
       levels.push(currentLevel);
@@ -298,7 +300,7 @@ class Parser {
 
     console.warn("LEVELS", levels);
     const result = levels[levels.length-1][0].find(parseForest => parseForest.rootLHS === "statement")
-      .parseTrees(ptbc)
+      .parseTrees(ptbc);
     console.warn("RESULT", result);
 
     return result; 
