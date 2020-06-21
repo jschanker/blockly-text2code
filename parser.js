@@ -256,7 +256,7 @@ class Parser {
     for(let startPos = 0; startPos < tokenArr.length; startPos++) {
       levels[0][startPos].push(...
         this.getUnitRules_(levels[0][startPos], oppositeRules, maxPath.length));
-      ParseForest.mergeForests(levels[0][startPos]);
+      levels[0][startPos] = ParseForest.mergeForests(levels[0][startPos]);
     }
 
     for(let i = 1; i < tokenArr.length; i++) {
@@ -292,7 +292,7 @@ class Parser {
         // handle unit rules
         currentLevel[startPos].push(...
           this.getUnitRules_(currentLevel[startPos], oppositeRules, maxPath.length));
-        ParseForest.mergeForests(currentLevel[startPos]);
+        currentLevel[startPos] = ParseForest.mergeForests(currentLevel[startPos]);
       }
 
       levels.push(currentLevel);

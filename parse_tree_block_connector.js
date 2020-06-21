@@ -31,7 +31,7 @@ class ParseTreeBlockConnector {
    * to ones used for their interpretations as blocks and returns 
    * Array of corresponding roots  
    * @param{ParseTreeRHSidesNode} parseTreeRHSidesRoot
-   * @param{number} [max=1] the maximum number of derivation trees to return 
+   * @param{number} [max=1] the maximum number of derivation trees to return (may return less) 
    * @return{Array.<ParseTreeBlockNode>} Array of parse tree roots
    */
 	convertToBlockParseTrees(parseTreeRHSidesRoot, max=1) {
