@@ -23,7 +23,12 @@
  */
 
 "use strict";
+import ParseTreeBlockNode from "./parse_tree_block_node.js";
+import {cartesianProductArray} from "./array_utility_functions.js";
 
+/**
+ * ParseTreeBlockConnector class
+ */
 class ParseTreeBlockConnector {
   /**
    * Converts up to given maximum number of 
@@ -46,3 +51,5 @@ class ParseTreeBlockConnector {
 		  .slice(0,max); // cut off at first max many derivations
 	}
 }
+
+export default ParseTreeBlockConnector;

@@ -22,16 +22,25 @@
  */
 
 "use strict";
+import ParseTreeBlockNode from "./parse_tree_block_node.js";
+import BlockBlueprint from "./block_blueprint.js";
 
+/**
+ * DESCRIPTION
+ */
 class BlockEvaluator {
+  /**
+   * constructor
+   * @param {Object} blockInterpretations
+   */
   constructor(blockInterpretations) {
     this.interpretations_ = blockInterpretations;
   }
 
   /**
    * Creates blueprint for blocks from block parse tree
-   * @param{ParseTreeBlockNode} root the root of the tree to convert to blueprint
-   * @return{Object} blueprint object from parse tree: matches form from 
+   * @param {ParseTreeBlockNode} root the root of the tree to convert to blueprint
+   * @return {BlockBlueprint|string} blueprint object from parse tree: matches form from 
    * block-interpretation JSON files;
    * blueprint formed by replacing each %d with blueprint for corresponding block
    */
@@ -42,17 +51,20 @@ class BlockEvaluator {
       throw new Error("Invalid root type");
     }
 
-    else if(!root) return {};
+    else if(!root) return "";
 
     else {
       const args = (typeof root.rhs === "string")
         ? [root.rhs.replace(/\"/g, "'")]
         : root.rhs.map(this.evaluate.bind(this));
-      const returnBlock = JSON.stringify(this.interpretations_[root.lhs]);
-      if(returnBlock) {
-        return JSON.parse(returnBlock.replace(/"%(\d+)"/g, (match, argNum) => {
-          return (typeof args[argNum-1] === "string" ? '"' + args[argNum-1] + '"' : JSON.stringify(args[argNum-1]));
-        }));
+      const returnBlockTemplate = this.interpretations_[root.lhs];
+      if(typeof returnBlockTemplate === "string") {
+        return returnBlockTemplate;
+      } 
+      else if(returnBlockTemplate) {
+        const returnBlock = new BlockBlueprint(JSON.stringify(returnBlockTemplate));
+        returnBlock.args = args;
+        return returnBlock;
       } else {
         return args[0];
       } 
@@ -76,3 +88,5 @@ const evaluate = root => {
   }
   else throw new Error("Invalid Root Type", root);
 };
+
+export default BlockEvaluator;

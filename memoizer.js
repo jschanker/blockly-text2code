@@ -32,7 +32,7 @@ class Memoizer {
 
   /**
    * Serializes Array
-   * @param{!Array} argArr the Array to serialize
+   * @param {!Array} argArr the Array to serialize
    * @return {string} serialized Array
    */
 	serialize_(argArr) {
@@ -42,8 +42,8 @@ class Memoizer {
   /**
    * Computes and stores output from function applied to given
    * arguments from Array, reusing previously computed values
-   * @param {Function!} func the function to compute
-   * @param {Array!} argArr the Array of arguments to supply to func
+   * @param {!Function} func the function to compute
+   * @param {!Array} argArr the Array of arguments to supply to func
    * @return the output of func applied to argArr
    */
 	compute(func, argArr) {

@@ -36,8 +36,8 @@
 class ParseTreeRHSidesNode {
 	/**
 	 * construct a new Node for a single left-hand side and Array of right-hand sides
-	 * @param{string} lhs - left-hand side of rule
-	 * @param{Array.<string|Array.<ParseTreeRHSidesNode>>} [rhsides=[]] represents parse trees 
+	 * @param {string} lhs - left-hand side of rule
+	 * @param {Array.<string|Array.<ParseTreeRHSidesNode>>} [rhsides=[]] represents parse trees 
 	 * of immediate children
 	 */
 	constructor(lhs, rhsides=[]) {
@@ -47,7 +47,7 @@ class ParseTreeRHSidesNode {
 
   /**
    * Merges right-hand sides of given node into this one if lefthand sides match
-   * @param{ParseTreeRHSidesNode} node to merge righthand sides
+   * @param {ParseTreeRHSidesNode} node to merge righthand sides
    */
   merge(node) {
   	console.assert(this.lhs_ === node.lhs_, 
@@ -57,14 +57,14 @@ class ParseTreeRHSidesNode {
   }
 
   /**
-   * @property{string} lhs the root's lefthand side
+   * @property {string} lhs the root's lefthand side
    */
 	get lhs() {
 		return this.lhs_;
 	}
 
   /**
-   * @property{Array.<string|Array.<ParseTreeRHSidesNode>>} rhsides the node's immediate
+   * @property {Array.<string|Array.<ParseTreeRHSidesNode>>} rhsides the node's immediate
    * child parse trees
    */
 	get rhsides() {
@@ -75,13 +75,15 @@ class ParseTreeRHSidesNode {
    * Creates new ParseTreeRHSidesNode with given lhs 
    * and right-hand sides by concatenating second Array
    * to each of the ones from the first
-   * @param{string} lhs lefthand side of new ParseTreeRHSidesNode
-   * @param{ParseTreeRHSidesNode} sourceNode node with right hand sides to append to
-   * @param{ParseTreeRHSidesNode} appendRHSNodes Nodes to append
-   * @return{ParseTreeRHSidesNode} resulting ParseTreeRHSidesNode after concatenation
+   * @param {string} lhs lefthand side of new ParseTreeRHSidesNode
+   * @param {ParseTreeRHSidesNode} sourceNode node with right hand sides to append to
+   * @param {ParseTreeRHSidesNode} appendRHSNodes Nodes to append
+   * @return {ParseTreeRHSidesNode} resulting ParseTreeRHSidesNode after concatenation
    */ 
 	static concatToEach(lhs, sourceNode, appendRHSNodes) {
   	return new ParseTreeRHSidesNode(lhs, 
   	  sourceNode.rhsides_.map(rhs => rhs.concat(appendRHSNodes)));
   }
 }
+
+export default ParseTreeRHSidesNode;

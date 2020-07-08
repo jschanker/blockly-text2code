@@ -20,6 +20,7 @@
  */
 
 function convertTextBlocksToJSBlocks(block) {
+	const workspace = block.workspace;
 	if(block.type === "text_print") replaceWithBlock(block, workspace.newBlock("js_text_print"), true);
 	else if(block.type === "text_input") replaceWithBlock(block, workspace.newBlock("js_text_input"), true);
 	else if(block.type === "t2c_text_indexof") {

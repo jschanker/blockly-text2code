@@ -22,6 +22,7 @@
  */
 
 "use strict";
+import ParseTreeRHSidesNode from "./parse_tree_rhsides_node.js";
 
 /** 
  * Public class for maintaining/accessing all parse trees with a given start symbol 
@@ -62,8 +63,8 @@ class ParseForest {
   /**
    * Produces a new Array of forests in which all forests from supplied Array 
    * with a common left-hand side root have been merged
-   * @param{Array.<ParseForest>!} arrOfForests Array of forests to merge
-   * @return{Array.<ParseForest>} Merged Array of forests
+   * @param {Array.<ParseForest>!} arrOfForests Array of forests to merge
+   * @return {Array.<ParseForest>} Merged Array of forests
    */
 	static mergeForests(arrOfForests) {
 		const arrOfForestsCp = arrOfForests.slice();
@@ -95,3 +96,5 @@ class ParseForest {
 		return ptbc.convertToBlockParseTrees(this.root_);
 	}
 }
+
+export default ParseForest;

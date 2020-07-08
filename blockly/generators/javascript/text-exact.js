@@ -59,66 +59,63 @@
   }
   Number.prototype.charAt = function() {
     throw new Error("You tried to call charAt/getCharacterNUMBER on a number " + this.toString());
-  }  
+  }
+  window.प्रिंट_करें = window.display = function() {
+    console.log.apply(console, arguments);
+  };
+
+  window.पूछकर_इनपुट_पाएँ = window.getInputByAsking = window.prompt;
+  String.prototype.plus = function(y) { return this + y;};
+  String.prototype.toNumber = function() { return parseFloat(this); };
+  String.prototype.getBeforeTEXT = function(substr) { return beforeSubstring(this, substr); };
+  String.prototype.getAfterTEXT = function(substr) { return afterSubstring(this, substr); };
+
+  String.prototype.positionNumberOfTEXT = function(substr) { return this.indexOf(substr); };
+  String.prototype.के_पाठ_में = function(substr){
+    var that = this;
+    return {
+      के_स्थिति_संख्या: that.indexOf(substr)
+    };
+  };
+
+  String.prototype.lastPositionNumberOfTEXT = function(substr) { return this.lastIndexOf(substr); };
+  String.prototype.वर्ण_संख्या_पाएँ = String.prototype.getCharacterNUMBER = function(position) { return this.charAt(position); };
+  String.prototype.getTextFromPositionNUMBER = function(startPos) {
+    var that = this;
+    return {
+      toPositionNUMBER: function(endPos) {
+        return that.substring(startPos,endPos);
+      }
+    }; 
+  };
+
+  String.prototype.पाठ_की_स्थिति_संख्या = function(startPos) {
+    var that = this;
+    return {
+      से_स्थिति_संख्या: function(endPos) {
+        return {
+          तक_पाएँ: that.substring(startPos,endPos)
+        };
+      }
+    };
+  };
+
+  window.beforeSubstring = function(str, substr) {
+    var endIndex = str.indexOf(substr);
+    return endIndex >= 0 ? str.substring(0, endIndex) : str;
+  };
+
+  window.beforeLastSubstring = function(str, substr) {
+    var endIndex = str.lastIndexOf(substr);
+    return endIndex >= 0 ? str.substring(0, endIndex) : str;
+  };
+
+  window.afterSubstring = function(str, substr) {
+    return str.substring(str.indexOf(substr) + substr.length);
+  };
 })();
 
-function beforeSubstring(str, substr) {
-  var endIndex = str.indexOf(substr);
-  return endIndex >= 0 ? str.substring(0, endIndex) : str;
-}
-
-function beforeLastSubstring(str, substr) {
-  var endIndex = str.lastIndexOf(substr);
-  return endIndex >= 0 ? str.substring(0, endIndex) : str;
-}
-
-function afterSubstring(str, substr) {
-  return str.substring(str.indexOf(substr) + substr.length);
-}
-
-var display = function() {
-  console.log.apply(console, arguments);
-};
-var प्रिंट_करें = display;
-
-var getInputByAsking = prompt;
-var पूछकर_इनपुट_पाएँ = getInputByAsking;
-
-String.prototype.plus = function(y) { return this + y;};
-String.prototype.toNumber = function() { return parseFloat(this); };
-String.prototype.getBeforeTEXT = function(substr) { return beforeSubstring(this, substr); };
-String.prototype.getAfterTEXT = function(substr) { return afterSubstring(this, substr); };
-
-String.prototype.positionNumberOfTEXT = function(substr) { return this.indexOf(substr); };
-String.prototype.के_पाठ_में = function(substr){
-  var that = this;
-  return {
-    के_स्थिति_संख्या: that.indexOf(substr)
-  };
-};
-
-String.prototype.lastPositionNumberOfTEXT = function(substr) { return this.lastIndexOf(substr); };
-String.prototype.वर्ण_संख्या_पाएँ = String.prototype.getCharacterNUMBER = function(position) { return this.charAt(position); };
-String.prototype.getTextFromPositionNUMBER = function(startPos) {
-  var that = this;
-  return {
-    toPositionNUMBER: function(endPos) {
-      return that.substring(startPos,endPos);
-    }
-  }; 
-};
-
-String.prototype.पाठ_की_स्थिति_संख्या = function(startPos) {
-  var that = this;
-  return {
-    से_स्थिति_संख्या: function(endPos) {
-      return {
-        तक_पाएँ: that.substring(startPos,endPos)
-      };
-    }
-  };
-};
-
+/*
 if(document.getElementById("consoleDisplay")) {
   if(!console) console = {};
   console.realLog = console.log; // keep reference to actual log for debugging purposes
@@ -127,6 +124,7 @@ if(document.getElementById("consoleDisplay")) {
         document.createTextNode(Array.prototype.join.call(arguments, " ") + "\n"));
   };
 }
+*/
 
 (function() {
   var printCode = function(funcName, block) {

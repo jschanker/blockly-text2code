@@ -24,11 +24,14 @@
 
 "use strict";
 
+/**
+ * ParseTreeBlockNode class
+ */
 class ParseTreeBlockNode {
 	/**
 	 * construct a new Node for a single parse tree
-	 * @param{string} lhs - root of parse tree
-	 * @param{string|Array.<ParseTreeBlockNode>} rhs parse tree(s) 
+	 * @param {string} lhs - root of parse tree
+	 * @param {string|Array.<ParseTreeBlockNode>} rhs parse tree(s) 
 	 * rooted at immediate children
 	 */
 	constructor(lhs, rhs) {
@@ -37,16 +40,18 @@ class ParseTreeBlockNode {
 	}
 
   /**
-   * @property{string} lhs
+   * @property {string} lhs
    */
 	get lhs() {
 		return this.lhs_;
 	}
 
  /**
-  * @property{string|Array.<ParseTreeBlockNode>} rhs
+  * @property {string|Array.<ParseTreeBlockNode>} rhs
   */
 	get rhs() {
 		return this.rhs_;
 	}
 }
+
+export default ParseTreeBlockNode;

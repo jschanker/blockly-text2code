@@ -19,7 +19,11 @@
  * @author Jason Schanker
  */
 
-function convertTextBlocksToJSBlocks(block) {
+import {replaceWithBlock, setValueInput, getParentStatementBlock, 
+  moveToSameLocation} from "../../block_utility_functions.js";
+
+export function convertTextBlocksToJSBlocks(block) {
+	const workspace = block.workspace;
 	if(block.type === "text_print") replaceWithBlock(block, workspace.newBlock("js_text_print"), true);
 	else if(block.type === "text_input") replaceWithBlock(block, workspace.newBlock("js_text_input"), true);
 	else if(block.type === "t2c_text_indexof") replaceWithBlock(block, workspace.newBlock("js_text_indexof"), true);
@@ -56,7 +60,7 @@ function convertTextBlocksToJSBlocks(block) {
 	      //var tempVariableName = Blockly.Variables.generateUniqueName(workspace);
 	                    
 	      // get next unused temp variable name
-	      var tempVariableName = createNewTempVariable();
+	      var tempVariableName = createNewTempVariable(workspace);
 	      var setBlock = workspace.newBlock("variables_set");
 	      setBlock.setFieldValue(tempVariableName, "VAR");
 	      setValueInput(setBlock, "VALUE", textBlock);
@@ -101,7 +105,7 @@ function convertTextBlocksToJSBlocks(block) {
 	  if(textBlock) {
 	    if(textBlock.type !== "text" && textBlock.type !== "variables_get") {
 	      var textVariableSetBlock = workspace.newBlock("variables_set");
-	      var tempVariableName = createNewTempVariable();
+	      var tempVariableName = createNewTempVariable(workspace);
 	      textVariableSetBlock.setFieldValue(tempVariableName, "VAR");
 	      setValueInput(textVariableSetBlock, "VALUE", textBlock);
 	      // append before statement
@@ -128,7 +132,7 @@ function convertTextBlocksToJSBlocks(block) {
 	  if(needleBlock) {
 	    if(needleBlock.type !== "text" && needleBlock.type !== "variables_get") {
 	      var needleVariableSetBlock = workspace.newBlock("variables_set");
-	      var tempVariableNeedleName = createNewTempVariable();
+	      var tempVariableNeedleName = createNewTempVariable(workspace);
 	      needleVariableSetBlock.setFieldValue(tempVariableNeedleName, "VAR");
 	      setValueInput(needleVariableSetBlock, "VALUE", needleBlock);
 	      // append before statement

@@ -17,6 +17,9 @@
 
 "use strict";
 
+/**
+ * Lexer
+ */
 class Tokenizer {
 
 	/**
@@ -84,3 +87,5 @@ class Tokenizer {
 	  return helper(codeString);
 	}
 }
+
+export default Tokenizer;
