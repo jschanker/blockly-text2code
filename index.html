@@ -8,33 +8,36 @@
     <script src="blockly/blockly_compressed.js"></script>
     <script src="blockly/blocks_compressed.js"></script>
     <script src="blockly/javascript_compressed.js"></script>
-    <!--<script src="blockly/python_compressed.js"></script>-->
     <script src="blockly/msg/js/en.js"></script>
-    <script src="blockly/blocks/math.js"></script>
-    <script src="blockly/blocks/text.js"></script>
-    <script src="blockly/blocks/type-in-code.js"></script>
-    <script src="blockly/generators/javascript/math.js"></script>
-    <!--<script src="blockly/generators/javascript/text.js"></script> Included below output div-->
-    <script src="blockly/generators/javascript/type-in-code.js"></script>
+    <script src = "core/msg/en.js"></script>
+    <script src = "core/msg/hi.js"></script>
+    <script src="dist/text2code_blocks.js"></script>
   </head>
   <body>
     <header>
       <h1><span id = "textHeader">Text</span> <span id = "twoHeader">2</span> <span id = "codeTextHeader">Code</span></h1>
     </header>
     <div id = "all-content">
+      <form style = "text-align:right; font-size: x-large;">
+        Language:
+        <select id = "language" style = "text-align:right; font-size: x-large;">
+          <option value = "en">English</option>
+          <option value = "hi">हिंदी</option>
+        </select>
+      </form>
         <div id = "blockly-div">
           <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
-              <category name="Text2Code Input/Output" colour="160">
+              <category name="PseudoJS Input/Output" colour="160" data-name="TOOLBOX_CATEGORY_PSEUDO_JS_IO">
                 <block type="text_print"></block>
                 <block type="text_input"></block>
               </category>
-              <category name="JavaScript Input/Output" colour="160">
+              <category name="JavaScript Input/Output" colour="160" data-name="TOOLBOX_CATEGORY_JS_IO">
                 <block type="js_text_print"></block>
                 <block type="js_text_input"></block>
               </category>
-              <category name="Variables" custom="VARIABLE" colour="330">
+              <category name="Variables" custom="VARIABLE" colour="330" data-name="TOOLBOX_CATEGORY_VARIABLES">
               </category>
-              <category name="Math" colour="#5C68A6">
+              <category name="Math" colour="#5C68A6" data-name="TOOLBOX_CATEGORY_MATH">
                 <block type="math_number">
                   <field name="NUM">0</field>
                 </block>
@@ -52,7 +55,7 @@
                   </value>
                 </block>
               </category>
-              <category name="Text2Code Text" colour="160">
+              <category name="PseudoJS Text" colour="160" data-name="TOOLBOX_CATEGORY_PSEUDO_JS_TEXT">
                 <block type="text"></block>
                 <block type="t2c_text_join"></block>
                 <!--<block type="before_substring"></block>
@@ -62,7 +65,7 @@
                 <block type="t2c_text_charat"></block>
                 <block type="t2c_text_getsubstring"></block>
               </category>
-              <category name="JavaScript Text" colour="160">
+              <category name="JavaScript Text" colour="160" data-name="TOOLBOX_CATEGORY_JS_TEXT">
                 <block type="text"></block>
                 <block type="t2c_text_join"></block>
                 <block type="text_length"></block>
@@ -70,44 +73,37 @@
                 <block type="js_text_charat"></block>
                 <block type="js_text_getsubstring"></block>
               </category>
-              <category name = "Type in Code Blocks" colour="60">
+              <category name = "Type in Code Blocks" colour="60" data-name="TOOLBOX_CATEGORY_TYPE_IN_CODE">
                 <block type = "code_expression"></block>
                 <block type = "code_statement"></block>
               </category>
             </xml>
         </div>
-        <div>
-          <button id = "convertToJSButton">Convert to pure JavaScript blocks</button>
-          <button id = "convertXMLToBlocksButton">Convert XML to Blocks</button>
-          <button id = "convertToJSText2CodeButton">Convert to JS Text2Code instructions</button>
+        <div id = "changeButtons" >
+          <button id = "convertToJSText2CodeButton" name = "BUTTON_RUN_CODE" >RUN BLOCK CODE!</button>
+          <button id = "convertTextToBlocksButton" name = "BUTTON_CONVERT_TEXT_TO_BLOCKS">Convert text to blocks</button>
+          <button id = "convertToJSButton" name = "BUTTON_CONVERT_TO_JS">Convert PseudoJS blocks to JavaScript blocks</button>
+          <button id = "convertXMLToBlocksButton" name = "BUTTON_CONVERT_XML_TO_BLOCKS">Convert XML to Blocks</button>
         </div>
-        <h3>Output will appear below</h3>
+        <h3 id = "outputAppearsBelow" name = "HEADING_OUTPUT_APPEARS_BELOW">Output will appear below</h3>
         <pre>
         <div id = "consoleDisplay">
         </div>
         </pre>
         <div id = "text-code">
             <form>
-              <textarea disabled = "true" id = "textCodeBox">Code to appear here.</textarea>
-              <textarea id = "xmlData" placeholder = "Copy text here to save/load blocks."></textarea>
+              <textarea id = "textCodeBox" name = "TEXTAREA_CODE_APPEARS_BELOW" placeholder = "Code to appear here."></textarea>
+              <textarea id = "xmlData" name = "TEXTAREA_COPY_TEXT_HERE" placeholder="Copy text here to save/load blocks."></textarea>
             </form>
         </div>
     </div>
     <div>
-      <iframe height="400px" width="100%" src="https://repl.it/@jschanker/Text2Code-Strings?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals"></iframe>
+      <iframe height="400px" width="100%" src="https://repl.it/@jschanker/Text2Code-Strings-Exact?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals"></iframe>
     </div>
     <footer>
-        <h3><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
+        <h3 id = "bottomText" name = "HEADING_BOTTOM_TEXT"><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
     </footer>
-    <script src="blockly/generators/javascript/text.js"></script>
-    <script src = "grammar.js"></script>
-    <script src = "parser.js"></script>
-    <script src = "block-interpretations.js"></script>
-    <script src = "block-evaluator.js"></script>
-    <script src = "workspace1.js"></script>
-    <script src = "block-utility-functions.js"></script>
-    <script src = "block-generator.js"></script>
-    <script src = "block-converters/javascript/text.js"></script>
-    <script src = "run-code.js"></script>
+    <script src = "dist/text2code_generators.js"></script>
+    <script src = "dist/text2code_core.js"></script>
   </body>
 </html>
