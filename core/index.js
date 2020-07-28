@@ -36,7 +36,7 @@ import {interpretations} from "./block_interpretations.js";
 import BlockEvaluator from "./block_evaluator.js";
 import createBlocks from "./block_generator.js";
 import {convertTextBlocksToJSBlocks} from "./block-converters/javascript/text_exact.js";
-import "./block_utility_functions.js";
+import {newBlock, refreshWorkspace} from "./block_utility_functions.js";
 
 // for type-in-code blocks
 export const parseAndConvertToBlocks = function(props, e) {
@@ -52,9 +52,9 @@ export const parseAndConvertToBlocks = function(props, e) {
     if(parseTree) {
       const evaluation = shared.evaluator.evaluate(parseTree);
       console.log("Parse Tree:", parseTree);
-      console.log("Evaluation: ", evaluation);
-        console.warn("E", evaluation, this);
-      console.log(createBlocks(evaluation, this).toString());
+      console.log("Evaluation: ", evaluation, this);
+      console.log(createBlocks(evaluation, this, shared.workspace));
+      // console.log(createBlocks(evaluation, this, shared.workspace).toString());
     }
     else alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
     //console.log = displayLog; // restore
@@ -76,7 +76,7 @@ const shared = (function() {
         disable : false, 
         maxBlocks : Infinity, 
         trashcan : true, 
-        horizontalLayout : false, 
+        horizontalLayout : window.innerHeight > window.innerWidth, 
         toolboxPosition : 'start', 
         css : true, 
         media : 'https://blockly-demo.appspot.com/static/media/', 
@@ -100,6 +100,15 @@ const shared = (function() {
         }
       }
 
+/*
+      window.addEventListener("resize", function() {
+        if(window.innerHeight > window.innerWidth) {
+
+        } else {
+
+        }
+      });
+*/
       document.getElementById("language").addEventListener("change", function() {
         updateToolbox(document.getElementById("language").value);
         updateWords()
@@ -127,11 +136,11 @@ const shared = (function() {
         if(parseTree && confirm(confirmConvertTextToBlocks)) {
           shared.workspace.clear();
           const evaluation = shared.evaluator.evaluate(parseTree);
-          const tempBlock = shared.workspace.newBlock();
+          const tempBlock = newBlock(shared.workspace); // pass e.g., "math_number" if not replaced
           tempBlock.moveBy(50, 50); // shared.workspace.getWidth()/2
           console.log("Parse Tree:", parseTree);
           console.log("Evaluation: ", evaluation);
-          console.log(createBlocks(evaluation, tempBlock).toString());
+          console.log(createBlocks(evaluation, tempBlock));
         }
         else if(!parseTree) {
           alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
@@ -140,18 +149,8 @@ const shared = (function() {
       });
       document.getElementById("convertToJSButton").addEventListener("click", function() {
         var workspace = shared.workspace || Blockly.getMainWorkspace();
-            workspace.getAllBlocks().forEach(convertTextBlocksToJSBlocks);
-        // THIS SNIPPET OF CODE FOR REFRESHING THE WORKSPACE
-        // AFTER THE CODE BLOCK IS REPLACED CAME FROM 
-        // (I THINK) @author fraser@google.com (Neil Fraser): 
-        // https://github.com/google/blockly/blob/4e42a1b78ee7bce8f6c4ae8a6600bfc6dbcc3209/demos/code/code.js
-        // IS THERE ANOTHER WAY?
-        // THIS CODE IS DUPLICATED - SHOULD BE FACTORED IN FUNCTION
-        var xmlDom = Blockly.Xml.workspaceToDom(workspace);
-        if (xmlDom) {
-          workspace.clear();
-          Blockly.Xml.domToWorkspace(xmlDom, workspace);
-        }
+        workspace.getAllBlocks().forEach(convertTextBlocksToJSBlocks);
+        refreshWorkspace(workspace);
       });
       /*
       if(document.getElementById("consoleDisplay")) {
@@ -215,8 +214,10 @@ const shared = (function() {
     try {
       xmlDom = Blockly.Xml.textToDom(xmlText);
     } catch (e) {
+      // Message XML - add constant for message for bad XML
+      // T2C.MSG.currentLanguage['badXml'].replace('%1', e)
       var q =
-          window.confirm(MSG['badXml'].replace('%1', e));
+        window.confirm(e);
       if (!q) {
         return;
       }
@@ -226,7 +227,7 @@ const shared = (function() {
       Blockly.Xml.domToWorkspace(xmlDom, workspace);
     }
 
-    Blockly.svgResize(workspace);   
+    Blockly.svgResize(workspace);
   }
 
   function runCode() {

@@ -205,8 +205,10 @@ if(document.getElementById("consoleDisplay")) {
     // Get substring.
     var text = Blockly.JavaScript.valueToCode(block, 'STRING',
         Blockly.JavaScript.ORDER_MEMBER) || '""';
-    var at1 = Blockly.JavaScript.valueToCode(block, 'AT1');
-    var at2 = Blockly.JavaScript.valueToCode(block, 'AT2');
+    var at1 = Blockly.JavaScript.valueToCode(block, 'AT1',
+      Blockly.JavaScript.ORDER_NONE);
+    var at2 = Blockly.JavaScript.valueToCode(block, 'AT2',
+      Blockly.JavaScript.ORDER_NONE);
   
     var code = text + '.substring(' + at1 + ', ' + at2 + ')';
 
@@ -217,8 +219,10 @@ if(document.getElementById("consoleDisplay")) {
     // Get substring.
     var text = Blockly.JavaScript.valueToCode(block, 'STRING',
         Blockly.JavaScript.ORDER_MEMBER) || '""';
-    var at1 = Blockly.JavaScript.valueToCode(block, 'AT1');
-    var at2 = Blockly.JavaScript.valueToCode(block, 'AT2');
+    var at1 = Blockly.JavaScript.valueToCode(block, 'AT1',
+      Blockly.JavaScript.ORDER_NONE);
+    var at2 = Blockly.JavaScript.valueToCode(block, 'AT2',
+      Blockly.JavaScript.ORDER_NONE);
     var code = T2C.MSG.currentLanguage['TEXT_T2C_GET_SUBSTRING_TITLE']
       .replace("%1", text).replace("%2", at1).replace("%3", at2);
   

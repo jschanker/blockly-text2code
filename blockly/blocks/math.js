@@ -56,7 +56,7 @@ Blockly.Blocks['math_arithmetic_basic'] = {
       ],
       "inputsInline": true,
       "output": "Number",
-      "colour": Blockly.Blocks.math.HUE,
+      "colour": Blockly.Msg["MATH_HUE"],
       "helpUrl": Blockly.Msg.MATH_ARITHMETIC_HELPURL
     });
     // Assign 'this' to a variable for use in the tooltip closure below.

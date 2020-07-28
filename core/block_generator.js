@@ -24,12 +24,13 @@
 import BlockBlueprint from "./block_blueprint.js";
 //import {shared} from "./index.js";
 //import "./block_utility_functions.js";
-import {setNextBlock, replaceWithBlock, setValueInput} from "./block_utility_functions.js";
+import {setNextBlock, replaceWithBlock, setValueInput, setFieldValue, 
+  newBlock, refreshWorkspace} from "./block_utility_functions.js";
 
 function createBlocks_(blocksBlueprint, workspace) {
   var block;
   if(blocksBlueprint && blocksBlueprint.type) {
-    block = workspace.newBlock(blocksBlueprint.type);
+    block = newBlock(workspace, blocksBlueprint.type);
     if(blocksBlueprint.inputs) {
       Object.keys(blocksBlueprint.inputs).forEach(function(blockInputName) {
         setValueInput(block, blockInputName, 
@@ -38,7 +39,7 @@ function createBlocks_(blocksBlueprint, workspace) {
     }
     if(blocksBlueprint && blocksBlueprint.fields) {
       Object.keys(blocksBlueprint.fields).forEach(function(blockFieldName) {
-        block.setFieldValue(blocksBlueprint.fields[blockFieldName], blockFieldName);
+        setFieldValue(block, blocksBlueprint.fields[blockFieldName], blockFieldName);
       });         
     }
 
@@ -65,18 +66,11 @@ function createBlocks_(blocksBlueprint, workspace) {
 function createBlocks(blocksBlueprint, codeBlockToReplace) {
   const workspace = codeBlockToReplace.workspace;
   const block = createBlocks_(blocksBlueprint, workspace);
-  replaceWithBlock(codeBlockToReplace, block, true);
   
-  // THIS SNIPPET OF CODE FOR REFRESHING THE WORKSPACE
-  // AFTER THE CODE BLOCK IS REPLACED CAME FROM 
-  // (I THINK) @author fraser@google.com (Neil Fraser): 
-  // https://github.com/google/blockly/blob/4e42a1b78ee7bce8f6c4ae8a6600bfc6dbcc3209/demos/code/code.js
-  // IS THERE ANOTHER WAY?
-  var xmlDom = Blockly.Xml.workspaceToDom(workspace);
-  if (xmlDom) {
-    workspace.clear();
-    Blockly.Xml.domToWorkspace(xmlDom, workspace);
-  }
+  replaceWithBlock(codeBlockToReplace, block, true);  
+  
+  // refresh workspace to render new blocks
+  refreshWorkspace(workspace);
 
   return block;
 };

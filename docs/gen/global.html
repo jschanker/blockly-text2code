@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#cartesianProductArray">cartesianProductArray</a></li><li><a href="global.html#cartesianProductPairArray">cartesianProductPairArray</a></li><li><a href="global.html#copyBlock">copyBlock</a></li><li><a href="global.html#createBlocks">createBlocks</a></li><li><a href="global.html#createNewTempVariable">createNewTempVariable</a></li><li><a href="global.html#getParentStatementBlock">getParentStatementBlock</a></li><li><a href="global.html#moveInputBlock">moveInputBlock</a></li><li><a href="global.html#moveToSameLocation">moveToSameLocation</a></li><li><a href="global.html#replaceWithBlock">replaceWithBlock</a></li><li><a href="global.html#setNextBlock">setNextBlock</a></li><li><a href="global.html#setValueInput">setValueInput</a></li>
+					<li><a href="global.html#cartesianProductArray">cartesianProductArray</a></li><li><a href="global.html#cartesianProductPairArray">cartesianProductPairArray</a></li><li><a href="global.html#copyBlock">copyBlock</a></li><li><a href="global.html#createBlocks">createBlocks</a></li><li><a href="global.html#createNewTempVariable">createNewTempVariable</a></li><li><a href="global.html#getParentStatementBlock">getParentStatementBlock</a></li><li><a href="global.html#moveInputBlock">moveInputBlock</a></li><li><a href="global.html#moveToSameLocation">moveToSameLocation</a></li><li><a href="global.html#newBlock">newBlock</a></li><li><a href="global.html#refreshWorkspace">refreshWorkspace</a></li><li><a href="global.html#replaceWithBlock">replaceWithBlock</a></li><li><a href="global.html#setFieldValue">setFieldValue</a></li><li><a href="global.html#setNextBlock">setNextBlock</a></li><li><a href="global.html#setValueInput">setValueInput</a></li>
 				</ul>
 			</li>
 			
@@ -560,7 +560,7 @@ recursively does this for all descendants if deep is true</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -670,7 +670,7 @@ recursively does this for all descendants if deep is true</p>
     </dt>
     <dd>
         
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -761,7 +761,7 @@ creating the new blocks</p></td>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1085,7 +1085,7 @@ creating the new blocks</p></td>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1171,7 +1171,7 @@ creating the new blocks</p></td>
     </dt>
     <dd>
         
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1239,7 +1239,7 @@ creating the new blocks</p></td>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1271,7 +1271,7 @@ creating the new blocks</p></td>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1474,7 +1474,7 @@ uses the input with the same name as the source if not supplied</p></td>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1498,7 +1498,7 @@ uses the input with the same name as the source if not supplied</p></td>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1510,6 +1510,310 @@ uses the input with the same name as the source if not supplied</p></td>
             
 
             <td class="description last"><p>the block to move</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="newBlock"><span class="type-signature"></span>newBlock(workspace, type)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Wrapper for workspace.newBlock that also initializes Svg</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>workspace</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Workspace</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the workspace to add the block</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the type of block to add</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>the newly created Block</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Blockly.Block</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="refreshWorkspace"><span class="type-signature"></span>refreshWorkspace(workspace)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Refreshes workspace; used to render blocks after adding new ones</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>workspace</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Workspace</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the workspace to refresh</p></td>
         </tr>
 
     
@@ -1629,7 +1933,7 @@ disposing of the old block if dispose is true</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1653,7 +1957,7 @@ disposing of the old block if dispose is true</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1689,6 +1993,182 @@ disposing of the old block if dispose is true</p>
             
 
             <td class="description last"><p>true exactly when the block should be disposed after replacing</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="setFieldValue"><span class="type-signature"></span>setFieldValue(block, value, fieldName)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Wrapper for Blockly.Block.prototype.setFieldValue to handle special case logic</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>block</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Block</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the block for which to call setFieldValue</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the value to set the field name to</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the name of the field to set</p></td>
         </tr>
 
     
@@ -1805,7 +2285,7 @@ disposing of the old block if dispose is true</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1829,7 +2309,7 @@ disposing of the old block if dispose is true</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -1957,7 +2437,7 @@ disposing of the old block if dispose is true</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -2005,7 +2485,7 @@ disposing of the old block if dispose is true</p>
             <td class="type">
             
                 
-<span class="param-type"><a href="Blockly.Block.html">Blockly.Block</a></span>
+<span class="param-type">Blockly.Block</span>
 
 
 
@@ -2128,9 +2608,9 @@ disposing of the old block if dispose is true</p>
 
 
 <span class="jsdoc-message">
-	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.4</a>
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.5</a>
 	
-		on July 8th 2020, 3:04:54 am
+		on July 28th 2020, 2:02:54 am
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

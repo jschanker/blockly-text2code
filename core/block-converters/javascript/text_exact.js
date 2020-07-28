@@ -20,37 +20,40 @@
  */
 
 import {replaceWithBlock, setValueInput, getParentStatementBlock, 
-  moveToSameLocation} from "../../block_utility_functions.js";
+  moveToSameLocation, setFieldValue, newBlock} from "../../block_utility_functions.js";
 
 export function convertTextBlocksToJSBlocks(block) {
-	const workspace = block.workspace;
-	if(block.type === "text_print") replaceWithBlock(block, workspace.newBlock("js_text_print"), true);
-	else if(block.type === "text_input") replaceWithBlock(block, workspace.newBlock("js_text_input"), true);
-	else if(block.type === "t2c_text_indexof") replaceWithBlock(block, workspace.newBlock("js_text_indexof"), true);
-	else if(block.type === "t2c_text_charat") replaceWithBlock(block, workspace.newBlock("js_text_charat"), true);
-	else if(block.type === "t2c_text_getsubstring") replaceWithBlock(block, workspace.newBlock("js_text_getsubstring"), true);
+  const workspace = block.workspace;	
+	if(block.type === "text_print") replaceWithBlock(block, newBlock(workspace, "js_text_print"), true);
+	else if(block.type === "text_input") replaceWithBlock(block, newBlock(workspace, "js_text_input"), true);
+	else if(block.type === "t2c_text_indexof") replaceWithBlock(block, newBlock(workspace, "js_text_indexof"), true);
+	else if(block.type === "t2c_text_charat") replaceWithBlock(block, newBlock(workspace, "js_text_charat"), true);
+	else if(block.type === "t2c_text_getsubstring") replaceWithBlock(block, newBlock(workspace, "js_text_getsubstring"), true);
 
 	else if(block.type === "t2c_text_before") {
 	  var needleBlock = block.getInputTargetBlock("SUB");
 	  var textBlock = block.getInputTargetBlock("TEXT");
 	  var textBlockCp = null;
-	  var substringBlock = workspace.newBlock("js_text_getsubstring");
-	  var startBlock = workspace.newBlock("math_number");
-	  var indexOfBlock = workspace.newBlock("js_text_indexof");
-	              
-	  startBlock.setFieldValue(0, "NUM");
+	  var substringBlock = newBlock(workspace, "js_text_getsubstring");
+	  var startBlock = newBlock(workspace, "math_number");
+	  var indexOfBlock = newBlock(workspace, "js_text_indexof");
+
+	  //startBlock.setFieldValue(0, "NUM");
+	  setFieldValue(startBlock, 0, "NUM");
 	              
 	  if(textBlock) {
 	    if(textBlock.type === "text") {
-	      textBlockCp = workspace.newBlock(textBlock.type);
-	      textBlockCp.setFieldValue(textBlock.getFieldValue("TEXT"), "TEXT");
+	      textBlockCp = newBlock(workspace, textBlock.type);
+	      // textBlockCp.setFieldValue(textBlock.getFieldValue("TEXT"), "TEXT");
+	      setFieldValue(textBlockCp, textBlock.getFieldValue("TEXT"), "TEXT");
 	                  
 	      indexOfBlock.getInput("VALUE").connection.connect(textBlockCp.outputConnection);
 	      substringBlock.getInput("STRING").connection.connect(textBlock.outputConnection);
 	    }
 	    else if(textBlock.type === "variables_get") {
-	      textBlockCp = workspace.newBlock(textBlock.type);
-	      textBlockCp.setFieldValue(textBlock.getFieldValue("VAR"), "VAR");
+	      textBlockCp = newBlock(workspace, textBlock.type);
+	      // textBlockCp.setFieldValue(textBlock.getFieldValue("VAR"), "VAR");
+	      setFieldValue(textBlockCp, textBlock.getFieldValue("VAR"), "VAR");
 	                  
 	      indexOfBlock.getInput("VALUE").connection.connect(textBlockCp.outputConnection);
 	      substringBlock.getInput("STRING").connection.connect(textBlock.outputConnection);
@@ -61,12 +64,14 @@ export function convertTextBlocksToJSBlocks(block) {
 	                    
 	      // get next unused temp variable name
 	      var tempVariableName = createNewTempVariable(workspace);
-	      var setBlock = workspace.newBlock("variables_set");
-	      setBlock.setFieldValue(tempVariableName, "VAR");
+	      var setBlock = newBlock(workspace, "variables_set");
+	      //setBlock.setFieldValue(tempVariableName, "VAR");
+	      setFieldValue(setBlock, tempVariableName, "VAR");
 	      setValueInput(setBlock, "VALUE", textBlock);
 	                    
-	      var tempVariableBlock = workspace.newBlock("variables_get");
-	      tempVariableBlock.setFieldValue(tempVariableName, "VAR");
+	      var tempVariableBlock = newBlock(workspace, "variables_get");
+	      //tempVariableBlock.setFieldValue(tempVariableName, "VAR");
+	      setFieldValue(tempVariableBlock, tempVariableName, "VAR");
 	      var tempVariableBlockCp = copyBlock(tempVariableBlock);
 	      setValueInput(indexOfBlock, "VALUE", tempVariableBlockCp);
 	      setValueInput(substringBlock, "STRING", tempVariableBlock);
@@ -93,20 +98,22 @@ export function convertTextBlocksToJSBlocks(block) {
 
 	else if(block.type === "t2c_text_after") {
 	  var parentBlock = block.getParent();
-	  var substringBlock = workspace.newBlock("js_text_getsubstring");
+	  var substringBlock = newBlock(workspace, "js_text_getsubstring");
 	  var textBlock = block.getInputTargetBlock("TEXT");
 	  var needleBlock = block.getInputTargetBlock("SUB");
-	  var indexOfBlock = workspace.newBlock("js_text_indexof");
-	  var textLengthBlock = workspace.newBlock("text_length");
-	  var needleLengthBlock = workspace.newBlock("text_length");
-	  var plusBlock = workspace.newBlock("math_arithmetic_basic");
-	  plusBlock.setFieldValue('ADD', "OP"); 
+	  var indexOfBlock = newBlock(workspace, "js_text_indexof");
+	  var textLengthBlock = newBlock(workspace, "text_length");
+	  var needleLengthBlock = newBlock(workspace, "text_length");
+	  var plusBlock = newBlock(workspace, "math_arithmetic_basic");
+	  //plusBlock.setFieldValue('ADD', "OP");
+	  setFieldValue(plusBlock, 'ADD', "OP"); 
 	  
 	  if(textBlock) {
 	    if(textBlock.type !== "text" && textBlock.type !== "variables_get") {
-	      var textVariableSetBlock = workspace.newBlock("variables_set");
+	      var textVariableSetBlock = newBlock(workspace, "variables_set");
 	      var tempVariableName = createNewTempVariable(workspace);
-	      textVariableSetBlock.setFieldValue(tempVariableName, "VAR");
+	      //textVariableSetBlock.setFieldValue(tempVariableName, "VAR");
+	      setFieldValue(textVariableSetBlock, tempVariableName, "VAR");
 	      setValueInput(textVariableSetBlock, "VALUE", textBlock);
 	      // append before statement
 	      var parentStatementBlock = getParentStatementBlock(block);
@@ -118,8 +125,9 @@ export function convertTextBlocksToJSBlocks(block) {
 	        parentStatementBlock.previousConnection.connect(textVariableSetBlock.nextConnection);
 	      }
 	      //setValueInput(block, "TEXT", workspace.newBlock(""));
-	      textBlock = workspace.newBlock("variables_get");
-	      textBlock.setFieldValue(tempVariableName, "VAR");
+	      textBlock = newBlock(workspace, "variables_get");
+	      //textBlock.setFieldValue(tempVariableName, "VAR");
+	      setFieldValue(textBlock, tempVariableName, "VAR");
 	      setValueInput(substringBlock, "STRING", textBlock);
 	    }
 	    else {
@@ -131,9 +139,10 @@ export function convertTextBlocksToJSBlocks(block) {
 	  
 	  if(needleBlock) {
 	    if(needleBlock.type !== "text" && needleBlock.type !== "variables_get") {
-	      var needleVariableSetBlock = workspace.newBlock("variables_set");
+	      var needleVariableSetBlock = newBlock(workspace, "variables_set");
 	      var tempVariableNeedleName = createNewTempVariable(workspace);
-	      needleVariableSetBlock.setFieldValue(tempVariableNeedleName, "VAR");
+	      //needleVariableSetBlock.setFieldValue(tempVariableNeedleName, "VAR");
+	      setFieldValue(needleVariableSetBlock, tempVariableNeedleName, "VAR");
 	      setValueInput(needleVariableSetBlock, "VALUE", needleBlock);
 	      // append before statement
 	      var parentStatementBlock2 = getParentStatementBlock(block);
@@ -145,15 +154,17 @@ export function convertTextBlocksToJSBlocks(block) {
 	        parentStatementBlock2.previousConnection.connect(needleVariableSetBlock.nextConnection);
 	      }
 	      //setValueInput(block, "TEXT", workspace.newBlock(""));
-	      needleBlock = workspace.newBlock("variables_get");
-	      needleBlock.setFieldValue(tempVariableNeedleName, "VAR");
+	      needleBlock = newBlock(workspace, "variables_get");
+	      //needleBlock.setFieldValue(tempVariableNeedleName, "VAR");
+	      setFieldValue(needleBlock, tempVariableNeedleName, "VAR");
 	    }
 	    if(needleBlock.type === "variables_get") {
 	      setValueInput(plusBlock, "B", needleLengthBlock);
 	      setValueInput(needleLengthBlock, "VALUE", copyBlock(needleBlock));
 	    } else {
-	      var lengthNumberBlock = workspace.newBlock("math_number");
-	      lengthNumberBlock.setFieldValue(needleBlock.getFieldValue("TEXT").length, "NUM");
+	      var lengthNumberBlock = newBlock(workspace, "math_number");
+	      //lengthNumberBlock.setFieldValue(needleBlock.getFieldValue("TEXT").length, "NUM");
+	      setFieldValue(lengthNumberBlock, needleBlock.getFieldValue("TEXT").length, "NUM");
 	      setValueInput(plusBlock, "B", lengthNumberBlock);
 	      needleLengthBlock.dispose();
 	    }

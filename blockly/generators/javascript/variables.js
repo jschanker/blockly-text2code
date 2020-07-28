@@ -27,7 +27,7 @@
 
 function getValidVariableName(variableName) {
   var varName = variableName.replace(/[^\w\$ऀ-ॣ०-९ॱ-ॿ]/g, "_");
-  return varName[0].replace(/[^_\\$|A-Z|a-z|ऄ-ह|ऽ|ॐ|क़-ॡ|ॱ-ॿ]/, "_") + varName.substring(1);	
+  return varName[0].replace(/[^_\\$|A-Z|a-z|ऄ-ह|ऽ|ॐ|क़-ॡ|ॱ-ॿ]/, "_") + varName.substring(1); 
 }
 
 Blockly.JavaScript['variables_get'] = function(block) {
@@ -35,7 +35,7 @@ Blockly.JavaScript['variables_get'] = function(block) {
   // Variable getter.
   //  var code = Blockly.JavaScript.variableDB_.getName(block.getFieldValue('VAR'),
   //      Blockly.VARIABLE_CATEGORY_NAME);
-  var code = getValidVariableName(block.getFieldValue('VAR'));
+  var code = getValidVariableName(block.getField('VAR').getText());
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
@@ -45,6 +45,6 @@ Blockly.JavaScript['variables_set'] = function(block) {
       Blockly.JavaScript.ORDER_ASSIGNMENT) || '0';
   //var varName = Blockly.JavaScript.variableDB_.getName(
   //    block.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
-  var varName = getValidVariableName(block.getFieldValue('VAR'));
+  var varName = getValidVariableName(block.getField('VAR').getText());
   return 'let ' + varName + ' = ' + argument0 + ';\n';
 };

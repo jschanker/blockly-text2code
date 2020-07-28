@@ -39,7 +39,7 @@ Blockly.Blocks['text_print'] = {
       ],
       "previousStatement": null,
       "nextStatement": null,
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_PRINT_TOOLTIP,
       "helpUrl": Blockly.Msg.TEXT_PRINT_HELPURL
     });
@@ -62,7 +62,7 @@ Blockly.Blocks['js_text_print'] = {
       ],
       "previousStatement": null,
       "nextStatement": null,
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_PRINT_TOOLTIP,
       "helpUrl": Blockly.Msg.TEXT_PRINT_HELPURL
     });
@@ -81,7 +81,7 @@ Blockly.Blocks['text_input'] = {
         }
       ],
       "output": "String",
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_PROMPT_TOOLTIP_TEXT,
       "helpUrl": Blockly.Msg.TEXT_PROMPT_HELPURL
     });
@@ -100,7 +100,7 @@ Blockly.Blocks['js_text_input'] = {
         }
       ],
       "output": "String",
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_PROMPT_TOOLTIP_TEXT,
       "helpUrl": Blockly.Msg.TEXT_PROMPT_HELPURL
     });
@@ -129,7 +129,7 @@ Blockly.Blocks['t2c_text_join'] = {
       ],
       "inputsInline": true,
       "output": "String",
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_PLUS_TOOLTIP_TEXT,
       "helpUrl": ""
     });
@@ -154,7 +154,7 @@ Blockly.Blocks['t2c_text_indexof'] = {
       ],
       "inputsInline": true,
       "output": "Number",
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TOOLTIP,
       "helpUrl": ""
     });
@@ -172,7 +172,7 @@ Blockly.Blocks['js_text_indexof'] = {
         .appendField(")");
     this.setInputsInline(true);
     this.setOutput(true, "Number");
-    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setColour(Blockly.Msg["TEXTS_HUE"]);
     this.setTooltip(T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TOOLTIP.replace("%1", 0));
     this.setHelpUrl(Blockly.Msg.TEXT_INDEXOF_HELPURL);
   }
@@ -196,7 +196,7 @@ Blockly.Blocks['t2c_text_charat'] = {
       ],
       "inputsInline": true,
       "output": "String",
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_CHARAT_FROM_START_TOOLTIP,
       "helpUrl": Blockly.Msg.TEXT_CHARAT_HELPURL
     });
@@ -242,7 +242,7 @@ Blockly.Blocks['t2c_text_getsubstring'] = {
       ],
       "inputsInline": true,
       "output": "String",
-      "colour": Blockly.Blocks.texts.HUE,
+      "colour": Blockly.Msg["TEXTS_HUE"],
       "tooltip": T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TOOLTIP,
       "helpUrl": Blockly.Msg.TEXT_GET_SUBSTRING_HELPURL
     });
@@ -279,7 +279,7 @@ Blockly.Blocks['t2c_text_after'] = {
         .appendField(")");
     this.setInputsInline(true);
     this.setOutput(true, "String");
-    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setColour(Blockly.Msg["TEXTS_HUE"]);
     this.setTooltip('returns all text appearing after second text in the first text');
     this.setHelpUrl('');
   }
@@ -296,7 +296,7 @@ Blockly.Blocks['t2c_text_before'] = {
         .appendField(")");
     this.setInputsInline(true);
     this.setOutput(true, "String");
-    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setColour(Blockly.Msg["TEXTS_HUE"]);
     this.setTooltip('returns all text appearing before second text in the first text');
     this.setHelpUrl('');
   }
@@ -313,7 +313,7 @@ Blockly.Blocks['js_text_charat'] = {
         .appendField(")");
     this.setInputsInline(true);
     this.setOutput(true, "String");
-    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setColour(Blockly.Msg["TEXTS_HUE"]);
     this.setTooltip(T2C.MSG.currentLanguage.TEXT_CHARAT_FROM_START_TOOLTIP);
     this.setHelpUrl(Blockly.Msg.TEXT_CHARAT_HELPURL);
   }
@@ -333,7 +333,7 @@ Blockly.Blocks['js_text_getsubstring'] = {
         .appendField(")");
     this.setInputsInline(true);
     this.setOutput(true, "String");
-    this.setColour(Blockly.Blocks.texts.HUE);
+    this.setColour(Blockly.Msg["TEXTS_HUE"]);
     this.setTooltip(T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TOOLTIP);
     this.setHelpUrl(Blockly.Msg.TEXT_GET_SUBSTRING_HELPURL);
   }

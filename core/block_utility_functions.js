@@ -38,15 +38,14 @@ export function setValueInput(sourceBlock, inputName, inputBlock) {
   }
 }
 
-// The following is in the updated version of Blockly as of 5/19/20:
-// https://github.com/google/blockly/blob/master/core/block.js#L603
 /**
- * Return the previous statement block directly connected to this block.
- * @return {Blockly.Block} The previous statement block or null.
+ * Refreshes workspace; used to render blocks after adding new ones
+ * @param {Blockly.Workspace} workspace the workspace to refresh
  */
-Blockly.Block.prototype.getPreviousBlock = function() {
-  return this.previousConnection && this.previousConnection.targetBlock();
-};
+export function refreshWorkspace(workspace) {
+  Blockly.Xml.clearWorkspaceAndLoadFromXml(Blockly.Xml.workspaceToDom(workspace), workspace);
+  Blockly.svgResize(workspace);
+}
 
 /**
  * Sets next block of given block
@@ -57,6 +56,18 @@ export function setNextBlock(sourceBlock, nextBlock) {
   if(sourceBlock.nextConnection && nextBlock.previousConnection) {
     sourceBlock.nextConnection.connect(nextBlock.previousConnection);
   }
+}
+
+/**
+ * Wrapper for workspace.newBlock that also initializes Svg
+ * @param {Blockly.Workspace} workspace the workspace to add the block
+ * @param {string} type the type of block to add
+ * @return {Blockly.Block} the newly created Block
+ */
+export function newBlock(workspace, type) {
+  const block = workspace.newBlock(type);
+  block.initSvg();
+  return block;
 }
 
 /**
@@ -97,7 +108,7 @@ export function copyBlock(block, deep) {
   if(!block) return null;
   const workspace = block.workspace;
   
-  const blockCp = workspace.newBlock(block.type);
+  const blockCp = newBlock(workspace, block.type);
   block.inputList.forEach(function(input) {
     input.fieldRow.forEach(function(field) {
         blockCp.setFieldValue(field.getValue(), field.name);
@@ -126,13 +137,35 @@ export function createNewTempVariable(workspace, prefix) {
   // get next unused temp variable name
   let tempVariableName = prefix || "temp";
   let index = 1;
+  let variableNames = workspace.getAllVariableNames
+    .filter(varName => varName.startsWith(tempVariableName));
   
-  while(workspace.variableIndexOf(tempVariableName + index) !== -1) { //deprecated
+  //while(workspace.variableIndexOf(tempVariableName + index) !== -1) { //deprecated
+  while(variableNames.indexOf(tempVariableName + index) !== -1) {
     index++;
   }
+
   tempVariableName += index; 
   workspace.createVariable(tempVariableName, "STRING");
   return tempVariableName;
+}
+
+/**
+ * Wrapper for Blockly.Block.prototype.setFieldValue to handle special case logic
+ * @param {Blockly.Block} block the block for which to call setFieldValue
+ * @param {string} value the value to set the field name to
+ * @param {string} fieldName the name of the field to set
+ */
+export function setFieldValue(block, value, fieldName) {
+  const workspace = block.workspace;
+  let setValue = value;
+  if(block.type.toLowerCase().startsWith("variables_")
+    && fieldName === "VAR") { 
+      setValue = workspace.getAllVariableNames().indexOf(value) === -1 ?
+        workspace.createVariable(value).getId() : 
+        workspace.getVariable(value).getId();
+  }
+  block.setFieldValue(setValue, fieldName);
 }
 
 /**
@@ -159,6 +192,7 @@ export function getParentStatementBlock(block) {
  * @param {boolean} dispose true exactly when the block should be disposed after replacing
  */
 export function replaceWithBlock(block, replaceBlock, dispose) {
+  // replaceBlock.initSvg();
   const parentBlock = block.getParent();
   let parentInput = null;
   let parentConnection = null;
@@ -203,5 +237,6 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
   });
 
   if(dispose) block.dispose();
+  //if(!block.type) block.dispose();
   return replaceBlock;
 }

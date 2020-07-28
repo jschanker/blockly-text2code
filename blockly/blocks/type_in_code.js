@@ -52,7 +52,8 @@ import {parseAndConvertToBlocks} from "../../core/index.js";
       var props = {editing: false};
       this.appendDummyInput("STRING")
           .appendField(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TITLE)
-          .appendField(new Blockly.FieldTextInput("", function(exp) {
+          //.appendField(new Blockly.FieldTextInput("", function(exp) {
+          .appendField(new Blockly.FieldMultilineInput("", function(exp) {
               if(exp) {
                   props.editing = true;
               }
