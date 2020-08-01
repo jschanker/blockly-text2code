@@ -2,7 +2,8 @@
   "terminals": ["variablesLet", "equalsSign"],
   "rules": {
   	"variableStatement": {
-    	"variableAssignment": ["variablesLet", "identifier", "equalsSign", "expression"]
+    	"variableAssignment": ["variablesLet", "identifier", "equalsSign", "expression"],
+    	"variableAssignmentNoLet": ["identifier", "equalsSign", "expression"]
     },
     "variablesLet": "let",
     "equalsSign": "=",

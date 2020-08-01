@@ -23,6 +23,7 @@ function convertTextBlocksToJSBlocks(block) {
 	if(block.type === "text_print") replaceWithBlock(block, workspace.newBlock("js_text_print"), true);
 	else if(block.type === "text_input") replaceWithBlock(block, workspace.newBlock("js_text_input"), true);
 	else if(block.type === "t2c_text_indexof") replaceWithBlock(block, workspace.newBlock("js_text_indexof"), true);
+	else if(block.type === "t2c_text_length") replaceWithBlock(block, workspace.newBlock("text_length"), true);
 	else if(block.type === "t2c_text_charat") replaceWithBlock(block, workspace.newBlock("js_text_charat"), true);
 	else if(block.type === "t2c_text_getsubstring") replaceWithBlock(block, workspace.newBlock("js_text_getsubstring"), true);
 

@@ -1,0 +1,131 @@
+body {
+  overflow: hidden;
+}
+
+#all-content {
+  height: 100%;
+}
+
+#twoHeader {
+	background-color: #aaa;
+	color: #292929; 
+	padding: 0px 5px;
+	border-radius:5px;
+}
+
+header {
+	text-align: left;
+	height: 10%;
+	width: 100%;
+	/*box-sizing: content-box !important;*/
+	box-sizing: border-box !important;
+	overflow: hidden;
+	display: table;
+/*	border-spacing: 2%;
+	border-collapse: separate;*/
+	padding: 1% 0;
+}
+
+.table-row {
+	display: table-row;
+}
+
+header h1 {
+	font-size: 120%;
+	/*position: absolute;*/
+	display: table-cell;
+	vertical-align: middle;
+	/*right: 1.5%;
+	top: 1.5%;*/
+	background-color: rgba(0, 0, 0, 0) !important;
+}
+
+#run-code-button {
+  color: #00aa00;
+}
+
+#output-container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	padding: 0;
+	margin: 0;
+}
+
+.table-container {
+	display: table;
+	height: 100%;
+	width: 100%;
+	/*text-align: center;*/
+}
+
+.show-container {
+	display: block;
+	z-index: 1000;
+}
+
+.hide-container {
+	display: none;
+}
+
+#blockly-div {
+	height: 100%;
+}
+
+#all-content {
+  /*margin: 0.5% 0%;*/
+  height: 90%;
+  margin: 0;
+}
+
+.header-button {
+  background-color: #aaa !important;
+  font-weight: bold;
+  /*padding: 5px 5px !important;*/
+  border-radius: 10px;
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  width: 15%;
+}
+
+header .table-cell {
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  border: 3px solid #292929;
+  padding: 2px;
+/*  padding: 5%;*/
+}
+
+.table-cell {
+	display: table-cell;
+	vertical-align: middle;	
+}
+
+#text-code-container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+.xmlData-show {
+	display: block;
+}
+
+textarea {
+	width: 100%;
+}
+
+h3 {
+	background-color: #aaa;
+}

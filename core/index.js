@@ -83,7 +83,8 @@ const shared = (function() {
         rtl : false, 
         scrollbars : true, 
         sounds : true, 
-        oneBasedIndex : true
+        oneBasedIndex : true,
+        zoom: {controls:true}
       };
 
       shared.workspace = Blockly.inject("blockly-div", options);
@@ -93,10 +94,14 @@ const shared = (function() {
         if(startLangLocation !== 4) {
           document.getElementById("language").value = language;
           updateToolbox(language);
+          // Quick fix: Change built-in variables set language block to take language-specific
+          //             text and adjust languages files accordingly
+          Blockly.Msg["VARIABLES_SET"] = T2C.MSG.currentLanguage === T2C.MSG.PY ? 
+            "%1 = %2" : "let %1 = %2;";
           updateWords()
           updateTexts()
           document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
-          document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
+          if(document.getElementById("bottomText")) document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
         }
       }
 
@@ -111,16 +116,61 @@ const shared = (function() {
 */
       document.getElementById("language").addEventListener("change", function() {
         updateToolbox(document.getElementById("language").value);
+        // Quick fix: Change built-in variables set language block to take language-specific
+        //             text and adjust languages files accordingly
+        Blockly.Msg["VARIABLES_SET"] = T2C.MSG.currentLanguage === T2C.MSG.PY ? 
+          "%1 = %2" : "let %1 = %2;";
         updateWords()
         updateTexts()
+        refreshWorkspace(shared.workspace || Blockly.getMainWorkspace());
         document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
-        document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
+        if(document.getElementById("bottomText")) document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
       });
       document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
         if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
         document.getElementById("textCodeBox").value = runCode();
         document.getElementById("xmlData").value = generateXML();
       });
+      
+      // REMOVE IF AFTER CONSOLIDATING MOBILE/DESKTOP VERSIONS
+      if(document.getElementById("run-code-button")) {
+        document.getElementById("run-code-button").addEventListener("click", function() {
+          document.getElementById("output-container").classList.remove("hide-container");
+          document.getElementById("output-container").classList.add("show-container");
+          if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
+          if(T2C.MSG.currentLanguage === T2C.MSG.PY) {
+            T2C.MSG.currentLanguage = T2C.MSG.JS; // reset for running purposes
+          }
+          document.getElementById("textCodeBox").value = runCode();
+          T2C.MSG.currentLanguage = T2C.MSG.PY; // restore language
+          document.getElementById("xmlData").value = generateXML();
+        });
+        document.getElementById("save-code-button").addEventListener("click", function() {
+          document.getElementById("text-code-container").classList.remove("hide-container");
+          document.getElementById("text-code-container").classList.add("show-container");
+          document.getElementById("textCodeBox").value = generateCode();
+          document.getElementById("xmlData").value = generateXML();
+        });
+        document.getElementById("load-code-button").addEventListener("click", function() {
+          document.getElementById("text-code-container").classList.remove("hide-container");
+          document.getElementById("text-code-container").classList.add("show-container");
+          document.getElementById("textCodeBox").value = generateCode();
+          document.getElementById("xmlData").value = generateXML();
+        });
+        document.getElementById("output-container").addEventListener("click", function(e) {
+          // factor out repetition and class name should be something like "close"
+          if(e.target.className === "table-cell") {
+            document.getElementById("output-container").classList.remove("show-container");
+            document.getElementById("output-container").classList.add("hide-container");
+          }
+        });
+        document.getElementById("text-code-container").addEventListener("click", function(e) {
+          if(e.target.className === "table-cell") {
+            document.getElementById("text-code-container").classList.remove("show-container");
+            document.getElementById("text-code-container").classList.add("hide-container");
+          }
+        });
+      }
       document.getElementById("convertXMLToBlocksButton").addEventListener("click", function() {
         generateBlocksFromXML();
       });
@@ -195,7 +245,10 @@ const shared = (function() {
 
   function generateCode() {
     var code = Blockly.JavaScript.workspaceToCode(shared.workspace || Blockly.getMainWorkspace());
-    return varsToLets(code);    
+    // Quick fix: Change built-in variables set language block to take language-specific
+    //             text and adjust languages files accordingly
+    return document.getElementById("language").value.toUpperCase() === "PY" ?
+      (alert(code) || code) : varsToLets(code);    
   }
 
   function generateXML() {
@@ -270,7 +323,9 @@ const shared = (function() {
   }
 
   function updateTexts() {
-    document.getElementById("text-code").querySelectorAll("textarea")
+    const container = document.getElementById("text-code-container") || 
+      document.getElementById("text-code")
+    container.querySelectorAll("textarea")
     .forEach(textarea => {
       textarea.placeholder = T2C.MSG.currentLanguage[textarea.name];
     });

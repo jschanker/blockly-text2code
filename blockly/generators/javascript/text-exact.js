@@ -100,6 +100,12 @@
     };
   };
 
+  Object.defineProperty(String.prototype, 'लंबाई', {
+    get: function () {
+      return this.length;
+    }
+  });
+
   window.beforeSubstring = function(str, substr) {
     var endIndex = str.indexOf(substr);
     return endIndex >= 0 ? str.substring(0, endIndex) : str;
@@ -198,6 +204,13 @@ if(document.getElementById("consoleDisplay")) {
   Blockly.JavaScript['t2c_text_charat'] = function(block) {
     return charAtCode(T2C.MSG.currentLanguage['TEXT_T2C_CHARAT_TITLE']
       .substring(3, T2C.MSG.currentLanguage['TEXT_T2C_CHARAT_TITLE'].indexOf("(")), block);
+  };
+
+  Blockly.JavaScript['t2c_text_length'] = function(block) {
+  // String or array length.
+    var text = Blockly.JavaScript.valueToCode(block, 'VALUE',
+      Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
+    return [text + T2C.MSG.currentLanguage['TEXT_T2C_LENGTH_TITLE'].substring(3), Blockly.JavaScript.ORDER_MEMBER];
   };
 
 

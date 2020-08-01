@@ -136,6 +136,26 @@ Blockly.Blocks['t2c_text_join'] = {
   }
 };
 
+Blockly.Blocks['t2c_text_length'] = {
+  init: function() {
+    this.jsonInit({
+      "message0": T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TITLE,
+      "args0": [
+        {
+          "type": "input_value",
+          "name": "VALUE",
+          "check": "String"
+        }
+      ],
+      "inputsInline": true,
+      "output": "Number",
+      "colour": Blockly.Msg["TEXTS_HUE"],
+      "tooltip": T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TOOLTIP,
+      "helpUrl": ""
+    });
+  }
+};
+
 Blockly.Blocks['t2c_text_indexof'] = {
   init: function() {
     this.jsonInit({

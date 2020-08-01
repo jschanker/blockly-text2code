@@ -11,18 +11,21 @@
       "stringGroupedExp": ["openParenthesis", "stringExp", "closeParenthesis"],
       "stringConcatenationFullExpression": ["stringExp", "plusStr", "stringExp"],
       "stringCharAtFullExpression": ["stringExp", "dot", "getCharacterNumber", "openParenthesis", "wholeNumberExp", "closeParenthesis"],
+      "py_stringCharAtFullExpression": ["stringExp", "openBracket", "wholeNumberExp", "closeBracket"],
       "js_stringCharAtFullExpression": ["stringExp", "dot", "getCharacterNumberJS", "openParenthesis", "wholeNumberExp", "closeParenthesis"],
       "stringAfterTextFullExpression": ["stringExp", "dot", "getAfterText", "openParenthesis", "stringExp", "closeParenthesis"],
       "stringBeforeTextFullExpression": ["stringExp", "dot", "getBeforeText", "openParenthesis", "stringExp", "closeParenthesis"],
       "stringSubstringFullExpression": ["stringExp", "dot", "getTextFrom", "openParenthesis", "wholeNumberExp", "closeParenthesis", "dot", 
                                                             "getTextTo", "openParenthesis", "wholeNumberExp", "stringSubstringCloseParenthesisOptionalTail"],
+      "py_stringSubstringFullExpression": ["stringExp", "openBracket", "wholeNumberExp", "colon", "wholeNumberExp", "closeBracket"],
       "js_stringSubstringFullExpression": ["stringExp", "dot", "getSubstringJS", "openParenthesis", "wholeNumberExp", "comma", "wholeNumberExp", "closeParenthesis"],
       "stringLiteral": "token_"
     },
     "stringExpWholeNumber": {
       "stringFindFirstFullExpression": ["stringExp", "dot", "findFirstOccurrenceOfText", "openParenthesis", "stringExp", "stringFindFirstCloseParenthesisOptionalTail"],
       "js_stringFindFirstFullExpression": ["stringExp", "dot", "jsIndexOf", "openParenthesis", "stringExp", "closeParenthesis"],
-      "stringExpLength": ["stringExp", "dot", "length"]
+      "stringExpLength": ["stringExp", "dot", "length"],
+      "py_stringExpLength": ["len", "openParenthesis", "stringExp", "closeParenthesis"]
     },
     "stringDisplay": {
       "js_ConsoleLogStatement": ["console", "dot", "log", "openParenthesis", "expression", "closeParenthesis"],
@@ -42,11 +45,14 @@
     "display": "display",
     "openParenthesis": "token_",
     "closeParenthesis": "token_",
+    "openBracket": "token_",
+    "closeBracket": "token_",
     "comma": "token_",
     "semicolon": "token_",
     "stringGetInput": "getInputByAsking",
     "stringPrompt": "prompt",
     "length": "length",
+    "len": "len",
     "getTextFrom": "getTextFromPositionNUMBER",
     "getTextTo": "toPositionNUMBER",
     "getSubstringJS": "substring",

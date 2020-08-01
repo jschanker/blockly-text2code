@@ -73,7 +73,7 @@ function generateGammarAndInterpretationVars(cb) {
     const escapeChars = s => s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
     let escapedRules = 
     writeFileSync("./core/grammar.js", grammarHeader + "\n" + "export const rules = JSON.parse('" + escapeChars(JSON.stringify(rules)) + "');\nexport const tokens = JSON.parse('" + escapeChars(JSON.stringify(tokens)) + "');");
-    writeFileSync("./core/block-interpretations.js", blockInterpretationHeader + "\n" + "export const interpretations = JSON.parse('" + escapeChars(JSON.stringify(interpretations)) + "');");
+    writeFileSync("./core/block_interpretations.js", blockInterpretationHeader + "\n" + "export const interpretations = JSON.parse('" + escapeChars(JSON.stringify(interpretations)) + "');");
   } catch(err) {
     console.log(err);
   }

@@ -28,6 +28,7 @@ export function convertTextBlocksToJSBlocks(block) {
 	else if(block.type === "text_input") replaceWithBlock(block, newBlock(workspace, "js_text_input"), true);
 	else if(block.type === "t2c_text_indexof") replaceWithBlock(block, newBlock(workspace, "js_text_indexof"), true);
 	else if(block.type === "t2c_text_charat") replaceWithBlock(block, newBlock(workspace, "js_text_charat"), true);
+	else if(block.type === "t2c_text_length") replaceWithBlock(block, newBlock(workspace, "text_length"), true);
 	else if(block.type === "t2c_text_getsubstring") replaceWithBlock(block, newBlock(workspace, "js_text_getsubstring"), true);
 
 	else if(block.type === "t2c_text_before") {

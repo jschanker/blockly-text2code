@@ -23,6 +23,10 @@
     "type": "text_length",
     "inputs": {"VALUE": "%1"}
   },
+  "py_stringExpLength": {
+    "type": "t2c_text_length",
+    "inputs": {"VALUE": "%3"}
+  },
   "stringFindFirstFullExpression": {
     "type": "%3",
     "inputs": {"VALUE": "%1", "FIND": "%5"}
@@ -39,9 +43,17 @@
     "type": "%3",
     "inputs": {"VALUE": "%1", "AT": "%5"}
   },
+  "py_stringCharAtFullExpression": {
+    "type": "t2c_text_charat",
+    "inputs": {"VALUE": "%1", "AT": "%3"}
+  },
   "js_stringCharAtFullExpression": {
     "type": "%3",
     "inputs": {"VALUE": "%1", "AT": "%5"}
+  },
+  "py_stringSubstringFullExpression": {
+    "type": "t2c_text_getsubstring",
+    "inputs": {"STRING": "%1", "AT1": "%3", "AT2": "%5"}
   },
   "js_stringSubstringFullExpression": {
     "type": "%3",
