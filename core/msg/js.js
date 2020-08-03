@@ -19,6 +19,7 @@ T2C.MSG.JS["TEXT_T2C_LENGTH_TOOLTIP"] = "Returns the number of letters (includin
 T2C.MSG.JS["TERMINAL_GETCHARACTERNUMBER"] = "charAt";
 T2C.MSG.JS["TEXT_T2C_CHARAT_TITLE"] = "%1.charAt(%2)";
 T2C.MSG.JS["TEXT_CHARAT_FROM_START_TOOLTIP"] = "Returns the letter at the specified position.";
+T2C.MSG.JS["TERMINAL_LENGTH"] = "length";
 T2C.MSG.JS["TERMINAL_GETTEXTFROM"] = "substring";
 T2C.MSG.JS["TERMINAL_GETTEXTFROMPOSITIONNUMBER"] = "substring";
 T2C.MSG.JS["TERMINAL_GETTEXTTO"] = "";

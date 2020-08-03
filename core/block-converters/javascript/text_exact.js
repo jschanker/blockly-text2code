@@ -22,6 +22,18 @@
 import {replaceWithBlock, setValueInput, getParentStatementBlock, 
   moveToSameLocation, setFieldValue, newBlock} from "../../block_utility_functions.js";
 
+export function convertJSToTextBlocks(block) {
+  const workspace = block.workspace;	
+	if(block.type === "js_text_print" || block.type === "js_text_input") {
+		replaceWithBlock(block, newBlock(workspace, block.type.substring(3)), true);
+	} else if(block.type === "js_text_indexof" || block.type === "js_text_charat"
+		|| block.type === "js_text_getsubstring") {
+		replaceWithBlock(block, newBlock(workspace, block.type.replace("js", "t2c")), true);
+	} else if(block.type === "text_length") {
+		replaceWithBlock(block, newBlock(workspace, "t2c_" + block.type), true);
+	}
+}
+
 export function convertTextBlocksToJSBlocks(block) {
   const workspace = block.workspace;	
 	if(block.type === "text_print") replaceWithBlock(block, newBlock(workspace, "js_text_print"), true);

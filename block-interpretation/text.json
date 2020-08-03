@@ -20,7 +20,7 @@
     "inputs": {"TEXT": "%5"}
   },
   "stringExpLength": {
-    "type": "text_length",
+    "type": "t2c_text_length",
     "inputs": {"VALUE": "%1"}
   },
   "py_stringExpLength": {

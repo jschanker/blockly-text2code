@@ -35,7 +35,7 @@ import ParseTreeBlockConnector from "./parse_tree_block_connector.js";
 import {interpretations} from "./block_interpretations.js";
 import BlockEvaluator from "./block_evaluator.js";
 import createBlocks from "./block_generator.js";
-import {convertTextBlocksToJSBlocks} from "./block-converters/javascript/text_exact.js";
+import {convertTextBlocksToJSBlocks, convertJSToTextBlocks} from "./block-converters/javascript/text_exact.js";
 import {newBlock, refreshWorkspace} from "./block_utility_functions.js";
 
 // for type-in-code blocks
@@ -93,15 +93,7 @@ const shared = (function() {
         const language = window.location.href.substring(startLangLocation, startLangLocation+2);
         if(startLangLocation !== 4) {
           document.getElementById("language").value = language;
-          updateToolbox(language);
-          // Quick fix: Change built-in variables set language block to take language-specific
-          //             text and adjust languages files accordingly
-          Blockly.Msg["VARIABLES_SET"] = T2C.MSG.currentLanguage === T2C.MSG.PY ? 
-            "%1 = %2" : "let %1 = %2;";
-          updateWords()
-          updateTexts()
-          document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
-          if(document.getElementById("bottomText")) document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
+          setLanguage();
         }
       }
 
@@ -114,17 +106,24 @@ const shared = (function() {
         }
       });
 */
-      document.getElementById("language").addEventListener("change", function() {
+      const setLanguage = function() {
         updateToolbox(document.getElementById("language").value);
         // Quick fix: Change built-in variables set language block to take language-specific
         //             text and adjust languages files accordingly
         Blockly.Msg["VARIABLES_SET"] = T2C.MSG.currentLanguage === T2C.MSG.PY ? 
           "%1 = %2" : "let %1 = %2;";
-        updateWords()
-        updateTexts()
+        updateWords();
+        updateTexts();
         refreshWorkspace(shared.workspace || Blockly.getMainWorkspace());
         document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
         if(document.getElementById("bottomText")) document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
+      };
+
+      document.getElementById("language").addEventListener("change", function() {
+        setLanguage();
+        const workspace = shared.workspace || Blockly.getMainWorkspace();
+        workspace.getAllBlocks().forEach(convertJSToTextBlocks);
+        refreshWorkspace(workspace);
       });
       document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
         if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
@@ -244,11 +243,15 @@ const shared = (function() {
   }
 
   function generateCode() {
-    var code = Blockly.JavaScript.workspaceToCode(shared.workspace || Blockly.getMainWorkspace());
+    //var code = Blockly.JavaScript.workspaceToCode(shared.workspace || Blockly.getMainWorkspace());
     // Quick fix: Change built-in variables set language block to take language-specific
     //             text and adjust languages files accordingly
-    return document.getElementById("language").value.toUpperCase() === "PY" ?
-      (alert(code) || code) : varsToLets(code);    
+    const codeGen = document.getElementById("language").value.toUpperCase() === "PY" ? 
+      "Python" : "JavaScript";
+    const convertVarsToLets = (codeGen === "JavaScript");
+    const code = Blockly[codeGen].workspaceToCode(shared.workspace || Blockly.getMainWorkspace()); 
+    return codeGen === "Python" ?
+      code : varsToLets(code);    
   }
 
   function generateXML() {

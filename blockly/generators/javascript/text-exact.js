@@ -144,6 +144,7 @@ if(document.getElementById("consoleDisplay")) {
     return printCode(T2C.MSG.currentLanguage['TEXT_PRINT_TITLE']
       .substring(0, T2C.MSG.currentLanguage['TEXT_PRINT_TITLE'].indexOf("(")), block);
   };
+  Blockly.Python['js_text_print'] = Blockly.Python['text_print']; 
 
   var promptCode = function(funcName, block) {
     // Prompt user for input.
@@ -158,11 +159,25 @@ if(document.getElementById("consoleDisplay")) {
     return promptCode(T2C.MSG.currentLanguage['TEXT_INPUT_TITLE']
       .substring(0, T2C.MSG.currentLanguage['TEXT_INPUT_TITLE'].indexOf("(")), block);
   }
+  //Blockly.Python['js_text_input'] = Blockly.Python['text_input'] = Blockly.Python['text_prompt'];
+  Blockly.Python['js_text_input'] = Blockly.Python['text_input'] = function(block) {
+    // Prompt user for input.
+    var msg = Blockly.Python.valueToCode(block, 'TEXT',
+        Blockly.Python.ORDER_NONE) || '\'\'';
+    var code = T2C.MSG.PY["TEXT_INPUT_TITLE"].replace("%1", msg);
+    return [code, Blockly.Python.ORDER_FUNCTION_CALL];    
+  };
 
   Blockly.JavaScript['t2c_text_join'] = function(block) {
     var argument0 = Blockly.JavaScript.valueToCode(block, 'A', Blockly.JavaScript.ORDER_NONE) || '""';
     var argument1 = Blockly.JavaScript.valueToCode(block, 'B', Blockly.JavaScript.ORDER_NONE) || '""';
     return [argument0 + " + " + argument1, Blockly.JavaScript.ORDER_ADDITION];
+  };
+  // Blockly.Python['t2c_text_join'] = Blockly.Python['text_join'];
+  Blockly.Python['t2c_text_join'] =  function(block) {
+    var argument0 = Blockly.Python.valueToCode(block, 'A', Blockly.Python.ORDER_NONE) || '\'\'';
+    var argument1 = Blockly.Python.valueToCode(block, 'B', Blockly.Python.ORDER_NONE) || '\'\'';
+    return [argument0 + " + " + argument1, Blockly.Python.ORDER_ADDITIVE];
   };
 
   var indexOfCode = function(funcName, block) {
@@ -188,6 +203,18 @@ if(document.getElementById("consoleDisplay")) {
 
     return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
   };
+  //Blockly.Python['js_text_indexof'] = Blockly.Python['t2c_text_indexof'] = Blockly.Python['text_indexOf'];
+  Blockly.Python['js_text_indexof'] = Blockly.Python['t2c_text_indexof'] = function(block) {
+    // Get substring.
+    var substring = Blockly.Python.valueToCode(block, 'FIND',
+        Blockly.Python.ORDER_NONE) || '""';
+    var text = Blockly.Python.valueToCode(block, 'VALUE',
+        Blockly.Python.ORDER_MEMBER) || '""';
+    var code = T2C.MSG.currentLanguage['TEXT_T2C_INDEXOF_TITLE']
+      .replace("%1", text).replace("%2", substring);
+
+    return [code, Blockly.Python.ORDER_FUNCTION_CALL];
+  };
 
   var charAtCode = function(funcName, block) {
     // Get letter at index.
@@ -205,14 +232,26 @@ if(document.getElementById("consoleDisplay")) {
     return charAtCode(T2C.MSG.currentLanguage['TEXT_T2C_CHARAT_TITLE']
       .substring(3, T2C.MSG.currentLanguage['TEXT_T2C_CHARAT_TITLE'].indexOf("(")), block);
   };
+  // Blockly.Python['t2c_text_charat'] = Blockly.Python['js_text_charat'] = Blockly.Python['text_charAt'];
+  Blockly.Python['t2c_text_charat'] = Blockly.Python['js_text_charat'] = function(block) {
+    // Get letter at index.
+    var at = Blockly.Python.valueToCode(block, 'AT',
+        Blockly.Python.ORDER_NONE);
+    var text = Blockly.Python.valueToCode(block, 'VALUE',
+        Blockly.Python.ORDER_MEMBER) || '""';
+    var code = T2C.MSG.PY["TEXT_T2C_CHARAT_TITLE"]
+      .replace("%1", text).replace("%2", at);
+    return [code, Blockly.Python.ORDER_FUNCTION_CALL];
+  };
 
   Blockly.JavaScript['t2c_text_length'] = function(block) {
   // String or array length.
     var text = Blockly.JavaScript.valueToCode(block, 'VALUE',
       Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-    return [text + T2C.MSG.currentLanguage['TEXT_T2C_LENGTH_TITLE'].substring(3), Blockly.JavaScript.ORDER_MEMBER];
+    return [T2C.MSG.currentLanguage['TEXT_T2C_LENGTH_TITLE'].replace("%1", text), Blockly.JavaScript.ORDER_MEMBER];
   };
 
+  Blockly.Python['t2c_text_length'] = Blockly.Python['text_length'];
 
   Blockly.JavaScript['js_text_getsubstring'] = function(block) {
     // Get substring.
@@ -236,6 +275,24 @@ if(document.getElementById("consoleDisplay")) {
       Blockly.JavaScript.ORDER_NONE);
     var at2 = Blockly.JavaScript.valueToCode(block, 'AT2',
       Blockly.JavaScript.ORDER_NONE);
+    var code = T2C.MSG.currentLanguage['TEXT_T2C_GET_SUBSTRING_TITLE']
+      .replace("%1", text).replace("%2", at1).replace("%3", at2);
+  
+    //var code = text + '.getTextFromPositionNUMBER(' + at1 + ').toPositionNUMBER(' + at2 + ')';
+
+    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+  };
+
+  // Blockly.Python['t2c_text_getsubstring'] = Blockly.Python['js_text_getsubstring'] = Blockly.Python['text_getSubstring'];
+
+  Blockly.Python['t2c_text_getsubstring'] = function(block) {
+    // Get substring.
+    var text = Blockly.Python.valueToCode(block, 'STRING',
+        Blockly.Python.ORDER_MEMBER) || '""';
+    var at1 = Blockly.Python.valueToCode(block, 'AT1',
+      Blockly.Python.ORDER_NONE);
+    var at2 = Blockly.Python.valueToCode(block, 'AT2',
+      Blockly.Python.ORDER_NONE);
     var code = T2C.MSG.currentLanguage['TEXT_T2C_GET_SUBSTRING_TITLE']
       .replace("%1", text).replace("%2", at1).replace("%3", at2);
   

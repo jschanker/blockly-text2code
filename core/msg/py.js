@@ -19,6 +19,7 @@ T2C.MSG.PY["TEXT_T2C_LENGTH_TOOLTIP"] = "Returns the number of letters (includin
 T2C.MSG.PY["TERMINAL_GETCHARACTERNUMBER"] = "charAt";
 T2C.MSG.PY["TEXT_T2C_CHARAT_TITLE"] = "%1[%2]";
 T2C.MSG.PY["TEXT_CHARAT_FROM_START_TOOLTIP"] = "Returns the letter at the specified position.";
+T2C.MSG.PY["TERMINAL_LENGTH"] = "len";
 T2C.MSG.PY["TERMINAL_GETTEXTFROM"] = "substring";
 T2C.MSG.PY["TERMINAL_GETTEXTFROMPOSITIONNUMBER"] = "substring";
 T2C.MSG.PY["TERMINAL_GETTEXTTO"] = "";

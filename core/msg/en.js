@@ -21,6 +21,7 @@ T2C.MSG.EN["TEXT_T2C_LENGTH_TOOLTIP"] = "Returns the number of letters (includin
 T2C.MSG.EN["TERMINAL_GETCHARACTERNUMBER"] = "getCharacterNUMBER";
 T2C.MSG.EN["TEXT_T2C_CHARAT_TITLE"] = "%1.getCharacterNUMBER(%2)";
 T2C.MSG.EN["TEXT_CHARAT_FROM_START_TOOLTIP"] = "Returns the letter at the specified position.";
+T2C.MSG.EN["TERMINAL_LENGTH"] = "length";
 T2C.MSG.EN["TERMINAL_GETTEXTFROM"] = "getTextFromPositionNUMBER";
 T2C.MSG.EN["TERMINAL_GETTEXTFROMPOSITIONNUMBER"] = "getTextFromPositionNUMBER";
 T2C.MSG.EN["TERMINAL_GETTEXTTO"] = "toPositionNUMBER";

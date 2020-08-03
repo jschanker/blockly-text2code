@@ -19,6 +19,7 @@ T2C.MSG.HI["TEXT_T2C_LENGTH_TOOLTIP"] = "दिए गये टेक्स्�
 T2C.MSG.HI["TERMINAL_GETCHARACTERNUMBER"] = "वर्ण_संख्या_पाएँ";
 T2C.MSG.HI["TEXT_T2C_CHARAT_TITLE"] = "%1.वर्ण_संख्या_पाएँ(%2)";
 T2C.MSG.HI["TEXT_CHARAT_FROM_START_TOOLTIP"] = "बताई गयी जगह से अक्षर रिटर्न करता है";
+T2C.MSG.HI["TERMINAL_LENGTH"] = "लंबाई";
 T2C.MSG.HI["TERMINAL_GETTEXTFROM"] = "पाठ_की_स्थिति_संख्या";
 T2C.MSG.EN["TERMINAL_GETTEXTFROMPOSITIONNUMBER"] = "पाठ_की_स्थिति_संख्या";
 T2C.MSG.HI["TERMINAL_GETTEXTTO"] = "से_स्थिति_संख्या";
