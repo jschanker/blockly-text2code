@@ -46,7 +46,11 @@ export const parseAndConvertToBlocks = function(props, e) {
     //console.log = console.realLog; // temporarily reset for debugging
     console.log("Parsing", this.getFieldValue("EXP"));
     //let parseTree = parseTopDown(this.getFieldValue("EXP"))[0];
-    const parseTree = shared.parser.parseBottomUpCYK(this.getFieldValue("EXP"), 
+
+    // quick fix to handle Python's non-use of semicolons
+    const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
+      this.getFieldValue("EXP").replace(/[\r\n]+/g, ";") : this.getFieldValue("EXP"); 
+    const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
       shared.parseTreeBlockConnector)[0];
     //if(parseTree) console.log(createBlocks(evaluation, thisBlock).toString());
     if(parseTree) {
@@ -88,6 +92,20 @@ const shared = (function() {
       };
 
       shared.workspace = Blockly.inject("blockly-div", options);
+
+      const setLanguage = function() {
+        updateToolbox(document.getElementById("language").value);
+        // Quick fix: Change built-in variables set language block to take language-specific
+        //             text and adjust languages files accordingly
+        Blockly.Msg["VARIABLES_SET"] = T2C.MSG.currentLanguage === T2C.MSG.PY ? 
+          "%1 = %2" : "let %1 = %2;";
+        updateWords();
+        updateTexts();
+        refreshWorkspace(shared.workspace || Blockly.getMainWorkspace());
+        document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
+        if(document.getElementById("bottomText")) document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
+      };
+
       if(window.location && typeof window.location.href === "string") {
         const startLangLocation = window.location.href.indexOf("lang=")+5;
         const language = window.location.href.substring(startLangLocation, startLangLocation+2);
@@ -106,19 +124,6 @@ const shared = (function() {
         }
       });
 */
-      const setLanguage = function() {
-        updateToolbox(document.getElementById("language").value);
-        // Quick fix: Change built-in variables set language block to take language-specific
-        //             text and adjust languages files accordingly
-        Blockly.Msg["VARIABLES_SET"] = T2C.MSG.currentLanguage === T2C.MSG.PY ? 
-          "%1 = %2" : "let %1 = %2;";
-        updateWords();
-        updateTexts();
-        refreshWorkspace(shared.workspace || Blockly.getMainWorkspace());
-        document.getElementById("outputAppearsBelow").innerText = T2C.MSG.currentLanguage.HEADING_OUTPUT_APPEARS_BELOW;
-        if(document.getElementById("bottomText")) document.getElementById("bottomText").innerText = T2C.MSG.currentLanguage.HEADING_BOTTOM_TEXT;
-      };
-
       document.getElementById("language").addEventListener("change", function() {
         setLanguage();
         const workspace = shared.workspace || Blockly.getMainWorkspace();
@@ -141,7 +146,7 @@ const shared = (function() {
             T2C.MSG.currentLanguage = T2C.MSG.JS; // reset for running purposes
           }
           document.getElementById("textCodeBox").value = runCode();
-          T2C.MSG.currentLanguage = T2C.MSG.PY; // restore language
+          T2C.MSG.currentLanguage = T2C.MSG[document.getElementById("language").value.toUpperCase()]; // restore language
           document.getElementById("xmlData").value = generateXML();
         });
         document.getElementById("save-code-button").addEventListener("click", function() {
@@ -179,7 +184,11 @@ const shared = (function() {
         console.log("Parsing", document.getElementById("textCodeBox").value);
         const confirmConvertTextToBlocks = T2C.MSG.currentLanguage.CONFIRM_CONVERT_TEXT_TO_BLOCKS;
         //const parseTree = shared.parser.parseTopDown(document.getElementById("textCodeBox").value)[0];
-        const parseTree = shared.parser.parseBottomUpCYK(document.getElementById("textCodeBox").value, 
+        // quick fix to handle Python's non-use of semicolons
+        const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
+          document.getElementById("textCodeBox").value.replace(/[\r\n]+/g, ";") 
+          : document.getElementById("textCodeBox").value; 
+        const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
           shared.parseTreeBlockConnector)[0];
 
         if(parseTree && confirm(confirmConvertTextToBlocks)) {
@@ -246,10 +255,15 @@ const shared = (function() {
     //var code = Blockly.JavaScript.workspaceToCode(shared.workspace || Blockly.getMainWorkspace());
     // Quick fix: Change built-in variables set language block to take language-specific
     //             text and adjust languages files accordingly
-    const codeGen = document.getElementById("language").value.toUpperCase() === "PY" ? 
+    //const codeGen = document.getElementById("language").value.toUpperCase() === "PY" ? 
+    const codeGen = T2C.MSG.currentLanguage === T2C.MSG.PY ?
       "Python" : "JavaScript";
     const convertVarsToLets = (codeGen === "JavaScript");
+    // temporary fix to remove Python variable declarations
+    Blockly.Python.tempFinish = Blockly.Python.finish;
+    Blockly.Python.finish = code => code;
     const code = Blockly[codeGen].workspaceToCode(shared.workspace || Blockly.getMainWorkspace()); 
+    Blockly.Python.finish = Blockly.Python.tempFinish;
     return codeGen === "Python" ?
       code : varsToLets(code);    
   }

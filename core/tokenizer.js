@@ -59,7 +59,7 @@ class Tokenizer {
 
 	/**
    * Tokenizes the code string, yielding an Array of tokens
-   * @param codeString the code string to tokenize 
+   * @param {string} codeString the code string to tokenize 
    * @return {!Array.<{tokenType: string, value: string}>} Array of tokens from code string
    */
   tokenize(codeString) {
