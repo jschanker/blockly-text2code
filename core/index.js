@@ -40,6 +40,33 @@ import {newBlock, refreshWorkspace} from "./block_utility_functions.js";
 
 // for type-in-code blocks
 export const parseAndConvertToBlocks = function(props, e) {
+  document.querySelectorAll(".blocklyHtmlTextAreaInput")
+    .forEach(x => {
+      //console.warn(Object.keys(x.__proto__.__proto__));
+      //console.warn(x.offsetLeft)
+      console.warn(x.left)
+      x.style.width = window.innerWidth + "px";
+    });
+  if(props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n"))) {
+    console.log("Attempting to parse", this.getFieldValue("EXP"));
+
+    // quick fix to handle Python's non-use of semicolons
+    const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
+      this.getFieldValue("EXP").replace(/[\r\n]+/g, ";") : this.getFieldValue("EXP"); 
+    const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
+      shared.parseTreeBlockConnector)[0];
+    //if(parseTree) console.log(createBlocks(evaluation, thisBlock).toString());
+    if(parseTree) {
+      props.editing = false;
+      const evaluation = shared.evaluator.evaluate(parseTree);
+      console.log("Parse Tree:", parseTree);
+      console.log("Evaluation: ", evaluation, this);
+      console.log(createBlocks(evaluation, this, shared.workspace));
+      // console.log(createBlocks(evaluation, this, shared.workspace).toString());
+    }    
+    //const fillBlock = props.candidateBlockArr.find(a => a.text.test(this.getFieldValue("EXP")));
+    //if(fillBlock) newBlock(shared.workspace, fillBlock.type);
+  }
   if(props.editing && e.type !== Blockly.Events.CHANGE) {
     props.editing = false;
     //const displayLog = console.log;
@@ -66,6 +93,17 @@ export const parseAndConvertToBlocks = function(props, e) {
 };
 
 const shared = (function() {
+  // hack to get textarea on mobile instead of prompt
+  // https://github.com/google/blockly/blob/develop/core/field_textinput.js#L279
+  // Blockly.Blocks['code_statement'].getField("EXP").showEditor_ 
+  //  = Blockly.FieldTextInput.prototype.showInlineEditor_;
+  Blockly.FieldTextInput.prototype.showEditor_ = function(_opt_e,
+    opt_quietInput) {
+    this.workspace_ =
+      (/** @type {!Blockly.BlockSvg} */ (this.sourceBlock_)).workspace;
+    var quietInput = opt_quietInput || false;
+    this.showInlineEditor_(quietInput);
+  };
   const init = () => {
     window.addEventListener('DOMContentLoaded', (event) => {
       // hack to deal with incorrect module import conversion done by having multiple
@@ -73,6 +111,9 @@ const shared = (function() {
       if(document.getElementById("blockly-div").getAttribute("hasWorkspace")) return;
       document.getElementById("blockly-div").setAttribute("hasWorkspace", true);
       shared.toolbox = document.getElementById("toolbox");
+      const isMobile = Blockly.utils.userAgent.MOBILE ||
+                       Blockly.utils.userAgent.ANDROID ||
+                       Blockly.utils.userAgent.IPAD;
       const options = { 
         toolbox : toolbox, 
         collapse : false, 
@@ -80,7 +121,7 @@ const shared = (function() {
         disable : false, 
         maxBlocks : Infinity, 
         trashcan : true, 
-        horizontalLayout : window.innerHeight > window.innerWidth, 
+        horizontalLayout : isMobile || window.innerHeight > window.innerWidth, 
         toolboxPosition : 'start', 
         css : true, 
         media : 'https://blockly-demo.appspot.com/static/media/', 
@@ -92,6 +133,9 @@ const shared = (function() {
       };
 
       shared.workspace = Blockly.inject("blockly-div", options);
+      // hack to get textarea on mobile instead of prompt
+      // https://github.com/google/blockly/blob/develop/core/field_textinput.js#L279
+
 
       const setLanguage = function() {
         updateToolbox(document.getElementById("language").value);
@@ -115,20 +159,27 @@ const shared = (function() {
         }
       }
 
-/*
+
       window.addEventListener("resize", function() {
+        document.getElementById("top-header").style.height = 
+          Math.max(0.1*window.innerHeight, 50) + 'px';
+        document.getElementById("all-content").style.height = 
+          Math.min(0.9*window.innerHeight, window.innerHeight-50) + 'px';        
+        Blockly.svgResize(shared.workspace);
+        /*
         if(window.innerHeight > window.innerWidth) {
 
         } else {
 
         }
+        */
       });
-*/
+
       document.getElementById("language").addEventListener("change", function() {
-        setLanguage();
-        const workspace = shared.workspace || Blockly.getMainWorkspace();
-        workspace.getAllBlocks().forEach(convertJSToTextBlocks);
-        refreshWorkspace(workspace);
+          setLanguage();
+          const workspace = shared.workspace || Blockly.getMainWorkspace();
+          workspace.getAllBlocks().forEach(convertJSToTextBlocks);
+          refreshWorkspace(workspace);
       });
       document.getElementById("convertToJSText2CodeButton").addEventListener("click", function() {
         if(document.getElementById("consoleDisplay")) document.getElementById("consoleDisplay").textContent = "";
@@ -154,13 +205,62 @@ const shared = (function() {
           document.getElementById("text-code-container").classList.add("show-container");
           document.getElementById("textCodeBox").value = generateCode();
           document.getElementById("xmlData").value = generateXML();
+          document.getElementById("load-save-text-code").textContent = T2C.MSG.currentLanguage["BUTTON_SAVE_TEXT_CODE"];
+          document.getElementById("load-save-xml").textContent = T2C.MSG.currentLanguage["BUTTON_SAVE_XML"];
         });
         document.getElementById("load-code-button").addEventListener("click", function() {
           document.getElementById("text-code-container").classList.remove("hide-container");
           document.getElementById("text-code-container").classList.add("show-container");
-          document.getElementById("textCodeBox").value = generateCode();
-          document.getElementById("xmlData").value = generateXML();
+          document.getElementById("textCodeBox").value = "";
+          document.getElementById("xmlData").value = "";
+          document.getElementById("load-save-text-code").textContent = T2C.MSG.currentLanguage["BUTTON_LOAD_TEXT_CODE"];
+          document.getElementById("load-save-xml").textContent = T2C.MSG.currentLanguage["BUTTON_LOAD_XML"];
         });
+        document.getElementById("load-save-text-code").addEventListener("click", function() {
+          if(document.getElementById("load-save-text-code").textContent === T2C.MSG.currentLanguage["BUTTON_LOAD_TEXT_CODE"]) {
+            console.log("Parsing", document.getElementById("textCodeBox").value);
+            const confirmConvertTextToBlocks = T2C.MSG.currentLanguage.CONFIRM_CONVERT_TEXT_TO_BLOCKS;
+            const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
+              document.getElementById("textCodeBox").value.replace(/[\r\n]+/g, ";") 
+              : document.getElementById("textCodeBox").value; 
+            const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
+              shared.parseTreeBlockConnector)[0];
+
+            if(parseTree && confirm(confirmConvertTextToBlocks)) {
+              shared.workspace.clear();
+              const evaluation = shared.evaluator.evaluate(parseTree);
+              const tempBlock = newBlock(shared.workspace); // pass e.g., "math_number" if not replaced
+              tempBlock.moveBy(50, 50); // shared.workspace.getWidth()/2
+              console.log("Parse Tree:", parseTree);
+              console.log("Evaluation: ", evaluation);
+              console.log(createBlocks(evaluation, tempBlock));
+            }
+            else if(!parseTree) {
+              alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
+            }
+          } else {
+            const codeToCopy = document.getElementById("textCodeBox").value;
+            navigator.clipboard.writeText(codeToCopy).then(function() {
+              alert("Code successfully copied to clipboard");
+            }, function() {
+              document.getElementById("textCodeBox").select();
+              alert("Code unable to be copied to clipboard.  Please do this manually.");
+            });
+          }
+        });
+        document.getElementById("load-save-xml").addEventListener("click", function() {
+          if(document.getElementById("load-save-xml").textContent === T2C.MSG.currentLanguage["BUTTON_LOAD_XML"]) {
+            generateBlocksFromXML();
+          } else {
+            const codeToCopy = document.getElementById("xmlData").value;
+            navigator.clipboard.writeText(codeToCopy).then(function() {
+              alert("XML successfully copied to clipboard");
+            }, function() {
+              document.getElementById("xmlData").select();
+              alert("XML unable to be copied to clipboard.  Please do this manually.");
+            });            
+          }
+        })
         document.getElementById("output-container").addEventListener("click", function(e) {
           // factor out repetition and class name should be something like "close"
           if(e.target.className === "table-cell") {
@@ -322,14 +422,15 @@ const shared = (function() {
   }
 
   function updateToolbox(langCode) {
+    //alert(langCode);
     shared.toolbox.querySelectorAll("category")
       .forEach(category => {
         category.setAttribute("name", 
           T2C.MSG[langCode.toUpperCase()][category.dataset.name]);
     });
 
-    shared.workspace.updateToolbox(shared.toolbox);
     T2C.MSG.currentLanguage = T2C.MSG[langCode.toUpperCase()];
+    shared.workspace.updateToolbox(shared.toolbox);
   }
 
   function updateWords() {

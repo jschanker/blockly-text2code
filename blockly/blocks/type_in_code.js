@@ -49,16 +49,18 @@ import {parseAndConvertToBlocks} from "../../core/index.js";
 
   Blockly.Blocks['code_statement'] = {
     init: function() {
-      var props = {editing: false};
-      this.appendDummyInput("STRING")
+      const candidateBlockArr = [{text: /di[^\s()]*/, type: "text_print"}, {text: /getIn[^\s()]*/, type: "text_input"}];
+      var props = {editing: false, candidateBlockArr};
+      this.appendDummyInput("FILLER")
           .appendField(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TITLE)
           //.appendField(new Blockly.FieldTextInput("", function(exp) {
+      this.appendDummyInput("STRING")
           .appendField(new Blockly.FieldMultilineInput("", function(exp) {
               if(exp) {
                   props.editing = true;
               }
           }), "EXP");
-      this.setInputsInline(true);
+      this.setInputsInline(false);
       this.setOutput(false);
       this.setPreviousStatement(true);
       this.setNextStatement(true);

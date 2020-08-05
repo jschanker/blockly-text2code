@@ -19,7 +19,7 @@
     <script src="dist/text2code_blocks.js"></script>
   </head>
   <body>
-    <header>
+    <header id = "top-header">
       <div class = "table-row">
         <div id = "run-code-button" style = "color: green;" class = "header-button table-cell">▶</div>
         <div id = "save-code-button" style = "color: green;" class = "header-button table-cell">💾</div>
@@ -47,6 +47,38 @@
       </form>-->
         <div id = "blockly-div">
           <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
+            <block type="text_print"></block>
+            <block type="text_input"></block>
+            <block type = "variables_set"></block>
+            <block type = "variables_get"></block>
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+            <block type="math_arithmetic_basic">
+              <field name="OP">ADD</field>
+              <value name="A">
+                <shadow type="math_number">
+                  <field name="NUM">1</field>
+                </shadow>
+              </value>
+              <value name="B">
+                <shadow type="math_number">
+                  <field name="NUM">1</field>
+                </shadow>
+              </value>
+            </block>
+            <block type="text"></block>
+            <block type="t2c_text_join"></block>
+            <!--<block type="before_substring"></block>
+            <block type="after_substring"></block>-->
+            <block type="t2c_text_length"></block>
+            <block type="t2c_text_indexof"></block>
+            <block type="t2c_text_charat"></block>
+            <block type="t2c_text_getsubstring"></block>
+            <block type = "code_expression"></block>
+            <block type = "code_statement"></block>
+          </xml>
+          <xml xmlns="http://www.w3.org/1999/xhtml" id="toolboxOriginal" style="display: none;">
               <category name="PseudoJS Input/Output" colour="160" data-name="TOOLBOX_CATEGORY_PSEUDO_JS_IO">
                 <block type="text_print"></block>
                 <block type="text_input"></block>
@@ -125,15 +157,17 @@
           <div class = "table-container">
             <div class = "table-row">
               <div class = "table-cell">
-                <form>
+                <!--<form>-->
                   <h3>Textual Code</h3>
                   <textarea id = "textCodeBox" name = "TEXTAREA_CODE_APPEARS_BELOW" placeholder = "Code to appear here."></textarea>
+                  <button id = "load-save-text-code">Load/Save Text Code</button>
                   <h3>XML</h3>
                   <div id = "xml-data-container">
                     <!--<span id = "xml-close" onclick="javascript:alert();">❌</span>-->
                     <textarea id = "xmlData" name = "TEXTAREA_COPY_TEXT_HERE" placeholder="Copy text here to save/load blocks."></textarea>
                   </div>
-                </form>
+                  <button id = "load-save-xml">Load/Save XML</button>
+                <!--</form>-->
               </div>
             </div>
           </div>

@@ -47,3 +47,7 @@ T2C.MSG.PY["TEXTAREA_CODE_APPEARS_BELOW"] = "Code to appear here.";
 T2C.MSG.PY["TEXTAREA_COPY_TEXT_HERE"] = "Copy text here to save/load blocks.";
 T2C.MSG.PY["HEADING_BOTTOM_TEXT"] = "If you can describe the solution, you can code it. (At least that's the goal.)";
 T2C.MSG.PY["CONFIRM_CONVERT_TEXT_TO_BLOCKS"] = "Clear workspace blocks and replace with blocks from below textual code?";
+T2C.MSG.PY["BUTTON_SAVE_TEXT_CODE"] = "Save Python Code";
+T2C.MSG.PY["BUTTON_SAVE_XML"] = "Save Block XML";
+T2C.MSG.PY["BUTTON_LOAD_TEXT_CODE"] = "Load PseudoJS Code";
+T2C.MSG.PY["BUTTON_LOAD_XML"] = "Load Block XML";

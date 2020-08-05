@@ -80,5 +80,50 @@
   "jsIndexOf": "js_text_indexof",
   "getTextFrom": "t2c_text_getsubstring",
   "getAfterText": "t2c_text_after",
-  "getBeforeText": "t2c_text_before"
+  "getBeforeText": "t2c_text_before",
+
+  "funcStringGetInputExp": {
+    "type": "text_input",
+    "inputs": {"TEXT": {"type": "code_expression"}}
+  },
+  "funcJS_stringGetInputExp": {
+    "type": "js_text_input",
+    "inputs": {"TEXT": {"type": "code_expression"}}
+  },
+  "func_stringCharAtFullExpression": {
+    "type": "%3",
+    "inputs": {"VALUE": "%1", "AT": {"type": "code_expression"}}
+  },
+  "funcJS_stringCharAtFullExpression": {
+    "type": "%3",
+    "inputs": {"VALUE": "%1", "AT": {"type": "code_expression"}}
+  },
+  "funcStringSubstringFullExpression": {
+    "type": "%3",
+    "inputs": {"STRING": "%1", "AT1": {"type": "code_expression"}, "AT2": {"type": "code_expression"}}
+  },
+  "funcBStringSubstringFullExpression": {
+    "type": "%3",
+    "inputs": {"STRING": "%1", "AT1": "%5", "AT2": {"type": "code_expression"}}
+  },
+  "funcJS_stringSubstringFullExpression": {
+    "type": "%3",
+    "inputs": {"STRING": "%1", "AT1": {"type": "code_expression"}, "AT2": {"type": "code_expression"}}
+  },
+  "funcStringFindFirstFullExpression": {
+    "type": "%3",
+    "inputs": {"VALUE": "%1", "FIND": {"type": "code_expression"}}
+  },
+  "funcJS_stringFindFirstFullExpression": {
+    "type": "%3",
+    "inputs": {"VALUE": "%1", "FIND": {"type": "code_expression"}}
+  },
+  "funcDisplayStatement": {
+    "type": "text_print",
+    "inputs": {"TEXT": {"type": "code_expression"}}
+  },
+  "funcJS_ConsoleLogStatement": {
+    "type": "js_text_print",
+    "inputs": {"TEXT": {"type": "code_expression"}}
+  }
 }
