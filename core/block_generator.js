@@ -61,16 +61,19 @@ function createBlocks_(blocksBlueprint, workspace) {
  * @param {BlockBlueprint} blocksBluePrint the blueprint of the block to use for 
  * creating the new blocks
  * @param {Blockly.Block} codeBlockToReplace the block in the workspace to replace
+ * @param {boolean} refresh true if workspace should be refreshed after creating block;
+ * if true, the returned block will not be in the workspace
+ * @returns {Blockly.Block} the replacing block 
  */
 
-function createBlocks(blocksBlueprint, codeBlockToReplace) {
+function createBlocks(blocksBlueprint, codeBlockToReplace, refresh=true) {
   const workspace = codeBlockToReplace.workspace;
   const block = createBlocks_(blocksBlueprint, workspace);
   
   replaceWithBlock(codeBlockToReplace, block, true);  
   
   // refresh workspace to render new blocks
-  refreshWorkspace(workspace);
+  if(refresh) refreshWorkspace(workspace);
 
   return block;
 };

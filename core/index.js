@@ -36,7 +36,7 @@ import {interpretations} from "./block_interpretations.js";
 import BlockEvaluator from "./block_evaluator.js";
 import createBlocks from "./block_generator.js";
 import {convertTextBlocksToJSBlocks, convertJSToTextBlocks} from "./block-converters/javascript/text_exact.js";
-import {newBlock, refreshWorkspace} from "./block_utility_functions.js";
+import {newBlock, refreshWorkspace, setNextBlock} from "./block_utility_functions.js";
 
 // for type-in-code blocks
 export const parseAndConvertToBlocks = function(props, e) {
@@ -45,10 +45,12 @@ export const parseAndConvertToBlocks = function(props, e) {
       //console.warn(Object.keys(x.__proto__.__proto__));
       //console.warn(x.offsetLeft)
       console.warn(x.left)
-      x.style.width = window.innerWidth + "px";
+      //x.style.width = window.innerWidth + "px";
     });
+
+//console.warn("A", props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n")))
   if(props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n"))) {
-    console.log("Attempting to parse", this.getFieldValue("EXP"));
+    console.warn("Attempting to parse", this.getFieldValue("EXP"));
 
     // quick fix to handle Python's non-use of semicolons
     const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
@@ -56,12 +58,57 @@ export const parseAndConvertToBlocks = function(props, e) {
     const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
       shared.parseTreeBlockConnector)[0];
     //if(parseTree) console.log(createBlocks(evaluation, thisBlock).toString());
+
     if(parseTree) {
       props.editing = false;
       const evaluation = shared.evaluator.evaluate(parseTree);
       console.log("Parse Tree:", parseTree);
       console.log("Evaluation: ", evaluation, this);
-      console.log(createBlocks(evaluation, this, shared.workspace));
+      const replacingBlock = createBlocks(evaluation, this, false);
+      console.log(replacingBlock);
+      //let currentBlock = replacingBlock;
+      //while(currentBlock = replacingBlock.getNextBlock());
+
+      let typeInCodeBlock = shared.workspace.getAllBlocks()
+        .find(block => block.type === "code_expression" 
+          || block.type === "code_statement");
+      if(typeInCodeBlock) {
+        refreshWorkspace(shared.workspace);
+        typeInCodeBlock = shared.workspace.getAllBlocks()
+          .find(block => block.type === "code_expression" 
+            || block.type === "code_statement");
+        const field = typeInCodeBlock.getField("EXP").showEditor_();
+      } else {
+        console.warn("Replacing block", replacingBlock)
+        //const lastBlock = replacingBlock.lastConnectionInStack() || 
+        //  (replacingBlock.getSurroundParent() && 
+        //    replacingBlock.getSurroundParent().lastConnectionInStack());
+        let lastBlock = replacingBlock;
+        while(!lastBlock.nextConnection && lastBlock.getParent()) {
+          lastBlock = lastBlock.getParent();
+        }
+        while(lastBlock.getNextBlock()) {
+           lastBlock = lastBlock.getNextBlock();
+        }
+        //alert(replacingBlock.getSurroundParent())
+        let newTypeInCodeBlock = newBlock(shared.workspace, "code_statement");
+        //refreshWorkspace(shared.workspace);
+        if(lastBlock.nextConnection) setNextBlock(lastBlock, newTypeInCodeBlock);
+        refreshWorkspace(shared.workspace);
+        newTypeInCodeBlock = shared.workspace.getAllBlocks()
+          .find(block => block.type === "code_expression" 
+            || block.type === "code_statement");
+        newTypeInCodeBlock.getField("EXP").showEditor_();
+      }
+      //const textFields = Array.from(document.querySelectorAll(".blocklyText"));
+      //const textFields = Array.from(document.querySelectorAll(".blocklyHtmlInput"));
+      //setTimeout(alert.bind(window, textFields.length),2000);
+      /*
+      const textField = textFields.find(x => {console.warn("CHALTE", x); return x.select});
+      if(textField) {
+        textField.select();
+      }
+      */
       // console.log(createBlocks(evaluation, this, shared.workspace).toString());
     }    
     //const fillBlock = props.candidateBlockArr.find(a => a.text.test(this.getFieldValue("EXP")));

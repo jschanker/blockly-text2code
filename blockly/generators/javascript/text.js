@@ -194,7 +194,7 @@ if(document.getElementById("consoleDisplay")) {
 
   // Blockly.Python['t2c_text_getsubstring'] = Blockly.Python['js_text_getsubstring'] = Blockly.Python['text_getSubstring'];
 
-  Blockly.Python['t2c_text_getsubstring'] = function(block) {
+  Blockly.Python['t2c_text_getsubstring'] = Blockly.Python['js_text_getsubstring'] = function(block) {
     // Get substring.
     var text = Blockly.Python.valueToCode(block, 'STRING',
         Blockly.Python.ORDER_MEMBER) || '""';

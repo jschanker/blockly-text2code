@@ -137,11 +137,11 @@ textarea {
 /*blocklyHtmlInput*/ 
 .blocklyHtmlTextAreaInput {
 	/*background-color: blue !important;*/
-	border: 1px solid black !important;
-	display: block !important;
-	min-width: 100px !important;
-	min-height: 100px !important;
+	/*border: 1px solid black !important;
+	display: block !important;*/
+	/*min-width: 100px !important;
+	min-height: 100px !important;*/
 	/*position: relative !important;
 	left: -40px !important;*/
-	transition: 1s !important;
+	/*transition: 1s !important;*/
 }
