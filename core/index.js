@@ -59,6 +59,8 @@ export const parseAndConvertToBlocks = function(props, e) {
       shared.parseTreeBlockConnector)[0];
     //if(parseTree) console.log(createBlocks(evaluation, thisBlock).toString());
 
+    //props.OPTIONS.push(this.getFieldValue("EXP"))
+
     if(parseTree) {
       props.editing = false;
       const evaluation = shared.evaluator.evaluate(parseTree);
