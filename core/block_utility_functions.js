@@ -183,6 +183,25 @@ export function getParentStatementBlock(block) {
 }
 
 /**
+ * Get last block in stack descended from supplied block
+ * @param {Blockly.Block} rootBlock the top of the stack
+ * @return {Blockly.Block} the bottom of the stack with top of rootBlock
+ */
+
+export function getLastBlock(rootBlock) {
+  let lastBlock = rootBlock;
+
+  while(!lastBlock.nextConnection && lastBlock.getParent()) {
+    lastBlock = lastBlock.getParent();
+  }
+  while(lastBlock.getNextBlock()) {
+     lastBlock = lastBlock.getNextBlock();
+  }
+  
+  return lastBlock;
+}
+
+/**
  * Transfers each child block (and its descendants) from input of given block 
  * to input with same name of replacement block and moves replacement block to
  * given block's location and copies values of fields with same names, 
@@ -197,6 +216,7 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
   let parentInput = null;
   let parentConnection = null;
   let blockConnectionType = -1;
+  let replaceBlockPreviousConnection = null;
 
   block.inputList.forEach(function(input) {
     input.fieldRow.forEach(function(field) {
@@ -214,7 +234,8 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
       parentConnection.connect(replaceBlock.outputConnection);
     }
     else if(blockConnectionType === Blockly.PREVIOUS_STATEMENT) {
-      parentConnection.connect(replaceBlock.previousConnection);
+      replaceBlockPreviousConnection = replaceBlock.previousConnection;
+      //parentConnection.connect(replaceBlock.previousConnection);
     }
   } else {
     replaceBlock.moveBy(block.getRelativeToSurfaceXY().x - replaceBlock.getRelativeToSurfaceXY().x,
@@ -232,9 +253,14 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
       }
     }
     else {
-      replaceBlock.nextConnection.connect(block.getNextBlock().previousConnection);
+      // replaceBlock.nextConnection.connect(block.getNextBlock().previousConnection);
+      // if should not be needed
+      if(getLastBlock(replaceBlock).nextConnection)
+      getLastBlock(replaceBlock).nextConnection.connect(childBlock.previousConnection);
     }
   });
+
+  if(replaceBlockPreviousConnection) parentConnection.connect(replaceBlockPreviousConnection);
 
   if(dispose) block.dispose();
   //if(!block.type) block.dispose();

@@ -49,7 +49,7 @@ import {parseAndConvertToBlocks} from "../../core/index.js";
     let match;
     if(!matchStr.length) return "";
     else if(!text.length) {
-      return matchStr.replace(/%\d+/g, "");
+      return matchStr.replace(/%\d+|\,|\)|;/g, "");
     }
     else if(match = matchStr.match(/^%\d+/)) {
       return text.charAt(0) + 
@@ -73,7 +73,7 @@ import {parseAndConvertToBlocks} from "../../core/index.js";
     init: function() {
       var props = {editing: false};
       this.appendDummyInput("STRING")
-          .appendField(T2C.MSG.currentLanguage.TYPEIN_EXPRESSION_TITLE)
+//          .appendField(T2C.MSG.currentLanguage.TYPEIN_EXPRESSION_TITLE)
           //.appendField(new Blockly.FieldTextInput("", function(exp) {
           .appendField(new Blockly.FieldMultilineInput("", function(exp) {
               if(exp) {
@@ -86,26 +86,43 @@ import {parseAndConvertToBlocks} from "../../core/index.js";
       this.setTooltip(T2C.MSG.currentLanguage.TYPEIN_EXPRESSION_TOOLTIP);
       //this.setHelpUrl(Blockly.Msg.TYPEIN_EXPRESSION_HELPURL);
       //var thisBlock = this;
-      this.onchange = parseAndConvertToBlocks.bind(this, props);
+//      this.onchange = parseAndConvertToBlocks.bind(this, props);
     }
   };
 
   Blockly.Blocks['code_statement'] = {
     init: function() {
       const candidateBlockArr = [{text: /di[^\s()]*/, type: "text_print"}, {text: /getIn[^\s()]*/, type: "text_input"}];
-      const OPTIONS = [["Autocomplete Options", "None"],
-                       [T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"], "text_print"],
-                       [T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"], "text_input"],
-                       /*["", "variables_set"],
-                       ["", "variables_get"],
-                       ["", "math_number"],
-                       ["", "math_arithmetic_basic"],
-                       ["", "text"],*/
-                       [T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TITLE, "t2c_text_length"],
-                       [T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TITLE, "t2c_text_indexof"],
-                       [T2C.MSG.currentLanguage.TEXT_T2C_CHARAT_TITLE, "t2c_text_charat"],
-                       [T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TITLE, "t2c_text_getsubstring"]];
-      const shownOPTIONS = OPTIONS.slice();
+      // const OPTIONS = [["Autocomplete Options", "None"],
+      //                  [T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"], "text_print"],
+      //                  [T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"], "text_input"],
+      //                  ["", "variables_set"],
+      //                  ["", "variables_get"],
+      //                  ["", "math_number"],
+      //                  ["", "math_arithmetic_basic"],
+      //                  ["", "text"],
+      //                  [T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TITLE, "t2c_text_length"],
+      //                  [T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TITLE, "t2c_text_indexof"],
+      //                  [T2C.MSG.currentLanguage.TEXT_T2C_CHARAT_TITLE, "t2c_text_charat"],
+      //                  [T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TITLE, "t2c_text_getsubstring"]];
+      const OPTIONS = [["Autocomplete Options", ""],
+                 [T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"], T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"]],
+                 [T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"], T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"]],
+                 ["let %1 =", "let %1 ="],
+                 //["%1", "%1"],
+                 /*["", "math_number"],
+                 ["", "math_arithmetic_basic"],
+                 ["", "text"],*/
+                 [T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TITLE],
+                 [T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TITLE],
+                 [T2C.MSG.currentLanguage.TEXT_T2C_CHARAT_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_CHARAT_TITLE],
+                 [T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TITLE]];
+
+      const shownOPTIONS = OPTIONS.map((opt, index) => {
+        if(index === 0) return opt;
+        const matchedOpt = matchPartial(opt[0], "");
+        return [matchedOpt, matchedOpt];
+      });
       var props = {editing: false, shownOPTIONS, candidateBlockArr};
       this.appendDummyInput("FILLER")
           .appendField(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TITLE)
@@ -137,8 +154,10 @@ import {parseAndConvertToBlocks} from "../../core/index.js";
                   .filter(optionText => optionText[0])
                  */
                  const newOptions = OPTIONS.slice(1)
-                   .map(opt => [matchPartial(opt[0], this.getFieldValue("EXP")), 
-                     opt[1]])
+                   //.map(opt => [matchPartial(opt[0], this.getFieldValue("EXP")), 
+                   //  opt[1]])
+                   .map(opt => matchPartial(opt[0], this.getFieldValue("EXP")))
+                   .map(opt => [opt, opt])
                    .filter(opt => opt[0])   
                   //.map((option, index) => option[0].split(/(%\d+)/)
                     //.split(/(%\d+)/))

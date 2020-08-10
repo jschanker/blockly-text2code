@@ -69,6 +69,28 @@ function generateGammarAndInterpretationVars(cb) {
     }
   });
 
+  // add partial rules/interpretations
+  // Issues: if %d is value of type, %d should not be replaced
+  //       : if %d is part of expression, this won't work
+
+  Object.keys(rules.rules).forEach(lhs => {
+    if(typeof rules.rules[lhs] !== "string") { // object
+      Object.keys(rules.rules[lhs]).forEach(subLHS => {
+        const rhs = rules.rules[lhs][subLHS];
+        if(Array.isArray(rhs)) {
+          for(let i = 2; i < rhs.length; i++) {
+            const key = "__" + i + "__" + subLHS;
+            rules.rules[lhs][key] = rhs.slice(0,i);
+            if(interpretations[subLHS]) {
+              interpretations[key] = JSON.parse(JSON.stringify(interpretations[subLHS]).replace(/\"%(\d)+\"/g, 
+                (match, num) => num <= i ? match : '{\"type\": \"code_expression\"}'));
+            }
+          }
+        }
+      });
+    }
+  });
+
   try {
     const escapeChars = s => s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
     let escapedRules = 

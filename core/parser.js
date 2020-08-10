@@ -252,7 +252,7 @@ class Parser {
     const tokenArr = this.lexer_.tokenize(s);
     const maxPath = this.maxPathLengthToTerminalOrSplit_("statement");
     const oppositeRules = this.getOppositeRules_();
-    console.warn("TOKEN ARRAY:", tokenArr);
+    console.warn("TOKEN ARRAY:", tokenArr, maxPath.length);
 
     const levels = [tokenArr.map(token => 
       Array.from(oppositeRules[token.value] || []).concat(token.tokenType)

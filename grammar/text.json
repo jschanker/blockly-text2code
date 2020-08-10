@@ -19,28 +19,17 @@
                                                             "getTextTo", "openParenthesis", "wholeNumberExp", "stringSubstringCloseParenthesisOptionalTail"],
       "py_stringSubstringFullExpression": ["stringExp", "openBracket", "wholeNumberExp", "colon", "wholeNumberExp", "closeBracket"],
       "js_stringSubstringFullExpression": ["stringExp", "dot", "getSubstringJS", "openParenthesis", "wholeNumberExp", "comma", "wholeNumberExp", "closeParenthesis"],
-      "stringLiteral": "token_",
-      "funcStringGetInputExp": ["stringGetInput"],
-      "funcJS_stringGetInputExp": ["stringPrompt"],
-      "func_stringCharAtFullExpression": ["stringExp", "dot", "getCharacterNumber"],
-      "funcJS_stringCharAtFullExpression": ["stringExp", "dot", "getCharacterNumberJS"],
-      "funcStringSubstringFullExpression": ["stringExp", "dot", "getTextFrom"],
-      "funcBStringSubstringFullExpression": ["stringExp", "dot", "getTextFrom", "openParenthesis", "wholeNumberExp", "closeParenthesis"],
-      "funcJS_stringSubstringFullExpression": ["stringExp", "dot", "getSubstringJS"]
+      "stringLiteral": "token_"
     },
     "stringExpWholeNumber": {
       "stringFindFirstFullExpression": ["stringExp", "dot", "findFirstOccurrenceOfText", "openParenthesis", "stringExp", "stringFindFirstCloseParenthesisOptionalTail"],
       "js_stringFindFirstFullExpression": ["stringExp", "dot", "jsIndexOf", "openParenthesis", "stringExp", "closeParenthesis"],
       "stringExpLength": ["stringExp", "dot", "length"],
-      "py_stringExpLength": ["len", "openParenthesis", "stringExp", "closeParenthesis"],
-      "funcStringFindFirstFullExpression": ["stringExp", "dot", "findFirstOccurrenceOfText"],
-      "funcJS_StringFindFirstFullExpression": ["stringExp", "dot", "jsIndexOf"]
+      "py_stringExpLength": ["len", "openParenthesis", "stringExp", "closeParenthesis"]
     },
     "stringDisplay": {
       "js_ConsoleLogStatement": ["console", "dot", "log", "openParenthesis", "expression", "closeParenthesis"],
-      "displayStatement": ["display", "openParenthesis", "expression", "closeParenthesis"],
-      "funcJS_ConsoleLogStatement": ["console", "dot", "log"],
-      "funcDisplayStatement": ["display"]
+      "displayStatement": ["display", "openParenthesis", "expression", "closeParenthesis"]
     },
     "stringSubstringCloseParenthesisOptionalTail": {
       "stringSubstringCloseParenthesisNoTail": ["closeParenthesis"],

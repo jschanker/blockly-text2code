@@ -36,10 +36,15 @@ import {interpretations} from "./block_interpretations.js";
 import BlockEvaluator from "./block_evaluator.js";
 import createBlocks from "./block_generator.js";
 import {convertTextBlocksToJSBlocks, convertJSToTextBlocks} from "./block-converters/javascript/text_exact.js";
-import {newBlock, refreshWorkspace, setNextBlock} from "./block_utility_functions.js";
+import {newBlock, refreshWorkspace, setNextBlock, getLastBlock, replaceWithBlock} from "./block_utility_functions.js";
+
+Blockly.COLLAPSE_CHARS = 200;
 
 // for type-in-code blocks
 export const parseAndConvertToBlocks = function(props, e) {
+  //console.warn("EVENT TYPE", e.type);
+  //console.warn(this.getFieldValue("AUTOCPLT"));
+  //this.getField("AUTOCPLT").showEditor_();
   document.querySelectorAll(".blocklyHtmlTextAreaInput")
     .forEach(x => {
       //console.warn(Object.keys(x.__proto__.__proto__));
@@ -49,6 +54,9 @@ export const parseAndConvertToBlocks = function(props, e) {
     });
 
 //console.warn("A", props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n")))
+  if(this.getFieldValue("AUTOCPLT")) {
+    this.setFieldValue(this.getFieldValue("AUTOCPLT") + "\n", "EXP");
+  }
   if(props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n"))) {
     console.warn("Attempting to parse", this.getFieldValue("EXP"));
 
@@ -71,9 +79,17 @@ export const parseAndConvertToBlocks = function(props, e) {
       //let currentBlock = replacingBlock;
       //while(currentBlock = replacingBlock.getNextBlock());
 
+      // remove all orphan type-in-code blocks from workspace
+      shared.workspace.getAllBlocks()
+        .filter(block => !block.getParent() && 
+          (block.type === "code_expression" 
+          || block.type === "code_statement"))
+        .forEach(block => block.dispose())
+
       let typeInCodeBlock = shared.workspace.getAllBlocks()
         .find(block => block.type === "code_expression" 
           || block.type === "code_statement");
+
       if(typeInCodeBlock) {
         refreshWorkspace(shared.workspace);
         typeInCodeBlock = shared.workspace.getAllBlocks()
@@ -85,7 +101,8 @@ export const parseAndConvertToBlocks = function(props, e) {
         //const lastBlock = replacingBlock.lastConnectionInStack() || 
         //  (replacingBlock.getSurroundParent() && 
         //    replacingBlock.getSurroundParent().lastConnectionInStack());
-        let lastBlock = replacingBlock;
+        let lastBlock = getLastBlock(replacingBlock);
+        /*
         while(!lastBlock.nextConnection && lastBlock.getParent()) {
           lastBlock = lastBlock.getParent();
         }
@@ -93,14 +110,48 @@ export const parseAndConvertToBlocks = function(props, e) {
            lastBlock = lastBlock.getNextBlock();
         }
         //alert(replacingBlock.getSurroundParent())
+        */
+
         let newTypeInCodeBlock = newBlock(shared.workspace, "code_statement");
+
+    const codeGen = T2C.MSG.currentLanguage === T2C.MSG.PY ?
+      "Python" : "JavaScript";
+    //const convertVarsToLets = (codeGen === "JavaScript");
+    // temporary fix to remove Python variable declarations
+    Blockly.Python.tempFinish = Blockly.Python.finish;
+    Blockly.Python.finish = code => code;
+    //newTypeInCodeBlock.setFieldValue(Blockly[codeGen].blockToCode(lastBlock), "EXP");
+  //console.warn(Blockly[codeGen].blockToCode(lastBlock));
+    //console.warn(lastBlock.getBoundingRectangle());
         //refreshWorkspace(shared.workspace);
         if(lastBlock.nextConnection) setNextBlock(lastBlock, newTypeInCodeBlock);
         refreshWorkspace(shared.workspace);
+        shared.workspace.getAllBlocks().slice().forEach(block => {
+      //console.warn("CODE: ", Blockly[codeGen].blockToCode(block));
+          if(block.isDisposed()) return;
+          console.warn(block, block.getParent() && block.getParent().nextConnection, !block.isCollapsed(), block.getBoundingRectangle().right > shared.workspace.getWidth())
+          if(block.getParent() && !block.nextConnection && 
+             !block.isCollapsed() &&
+             block.getBoundingRectangle().right > shared.workspace.getWidth()) {
+            const replaceBlock = newBlock(shared.workspace, "code_expression");
+            const codeText = Blockly[codeGen].blockToCode(block)[0] || Blockly[codeGen].blockToCode(block);
+            replaceBlock.setFieldValue(codeText, "EXP");
+            replaceBlock.setCollapsed(true);
+            const parentInput = block.getParent().getInputWithBlock(block);
+            parentInput.connection.connect(replaceBlock.outputConnection);
+            block.dispose(true);
+            //replaceWithBlock(block, replaceBlock);
+          }
+        });
+        refreshWorkspace(shared.workspace);
+        //shared.workspace.getAllBlocks().forEach(block => console.warn(block, block.getBoundingRectangle()));
+        //console.warn(shared.workspace.getWidth());
         newTypeInCodeBlock = shared.workspace.getAllBlocks()
-          .find(block => block.type === "code_expression" 
-            || block.type === "code_statement");
+          .find(block => block.type === "code_statement");
+        //shared.workspace.getAllBlocks().map(b => b.setCollapsed(true));
         newTypeInCodeBlock.getField("EXP").showEditor_();
+        //Blockly.getMainWorkspace()
+        shared.workspace.zoomToFit();
       }
       //const textFields = Array.from(document.querySelectorAll(".blocklyText"));
       //const textFields = Array.from(document.querySelectorAll(".blocklyHtmlInput"));
@@ -165,7 +216,7 @@ const shared = (function() {
                        Blockly.utils.userAgent.IPAD;
       const options = { 
         toolbox : toolbox, 
-        collapse : false, 
+        collapse : true, 
         comments : false, 
         disable : false, 
         maxBlocks : Infinity, 
@@ -184,7 +235,11 @@ const shared = (function() {
       shared.workspace = Blockly.inject("blockly-div", options);
       // hack to get textarea on mobile instead of prompt
       // https://github.com/google/blockly/blob/develop/core/field_textinput.js#L279
-
+      newBlock(shared.workspace, "code_statement");
+      refreshWorkspace(shared.workspace);
+      const startBlock = shared.workspace.getAllBlocks()
+          .find(block => block.type === "code_statement");
+      startBlock.getField("EXP").showEditor_();
 
       const setLanguage = function() {
         updateToolbox(document.getElementById("language").value);
