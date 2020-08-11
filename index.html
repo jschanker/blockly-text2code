@@ -16,7 +16,7 @@
     <script src = "core/msg/hi.js"></script>
     <script src = "core/msg/js.js"></script>
     <script src = "core/msg/py.js"></script>
-    <script src="dist/text2code_blocks.js"></script>
+    <script src="dist/text2code_blocks_mobile.js"></script>
   </head>
   <body>
     <header id = "top-header">
@@ -78,68 +78,7 @@
             <block type = "code_expression"></block>
             <block type = "code_statement"></block>
           </xml>
-          <xml xmlns="http://www.w3.org/1999/xhtml" id="toolboxOriginal" style="display: none;">
-              <category name="PseudoJS Input/Output" colour="160" data-name="TOOLBOX_CATEGORY_PSEUDO_JS_IO">
-                <block type="text_print"></block>
-                <block type="text_input"></block>
-              </category>
-              <category name="JavaScript Input/Output" colour="160" data-name="TOOLBOX_CATEGORY_JS_IO">
-                <block type="js_text_print"></block>
-                <block type="js_text_input"></block>
-              </category>
-              <category name="Variables" custom="VARIABLE" colour="330" data-name="TOOLBOX_CATEGORY_VARIABLES">
-              </category>
-              <category name="Math" colour="#5C68A6" data-name="TOOLBOX_CATEGORY_MATH">
-                <block type="math_number">
-                  <field name="NUM">0</field>
-                </block>
-                <block type="math_arithmetic_basic">
-                  <field name="OP">ADD</field>
-                  <value name="A">
-                    <shadow type="math_number">
-                      <field name="NUM">1</field>
-                    </shadow>
-                  </value>
-                  <value name="B">
-                    <shadow type="math_number">
-                      <field name="NUM">1</field>
-                    </shadow>
-                  </value>
-                </block>
-              </category>
-              <category name="PseudoJS Text" colour="160" data-name="TOOLBOX_CATEGORY_PSEUDO_JS_TEXT">
-                <block type="text"></block>
-                <block type="t2c_text_join"></block>
-                <!--<block type="before_substring"></block>
-                <block type="after_substring"></block>-->
-                <block type="t2c_text_length"></block>
-                <block type="t2c_text_indexof"></block>
-                <block type="t2c_text_charat"></block>
-                <block type="t2c_text_getsubstring"></block>
-              </category>
-              <category name="JavaScript Text" colour="160" data-name="TOOLBOX_CATEGORY_JS_TEXT">
-                <block type="text"></block>
-                <block type="t2c_text_join"></block>
-                <block type="text_length"></block>
-                <block type="js_text_indexof"></block>
-                <block type="js_text_charat"></block>
-                <block type="js_text_getsubstring"></block>
-              </category>
-              <category name = "Type in Code Blocks" colour="60" data-name="TOOLBOX_CATEGORY_TYPE_IN_CODE">
-                <block type = "code_expression"></block>
-                <block type = "code_statement"></block>
-              </category>
-            </xml>
         </div>
-
-<!-- Begin Remove -->
-        <div id = "changeButtons" style = "display:hidden;">
-          <button id = "convertToJSText2CodeButton" name = "BUTTON_RUN_CODE" >RUN BLOCK CODE!</button>
-          <button id = "convertTextToBlocksButton" name = "BUTTON_CONVERT_TEXT_TO_BLOCKS">Convert text to blocks</button>
-          <button id = "convertToJSButton" name = "BUTTON_CONVERT_TO_JS">Convert PseudoJS blocks to JavaScript blocks</button>
-          <button id = "convertXMLToBlocksButton" name = "BUTTON_CONVERT_XML_TO_BLOCKS">Convert XML to Blocks</button>
-        </div>
-<!-- End Remove -->
         <div id = "output-container" class = "hide-container">
           <div class = "table-container">
             <div class = "table-row">
@@ -183,6 +122,6 @@
     </footer>
     -->
     <script src = "dist/text2code_generators.js"></script>
-    <script src = "dist/text2code_core.js"></script>
+    <script src = "dist/text2code_core_mobile.js"></script>
   </body>
 </html>

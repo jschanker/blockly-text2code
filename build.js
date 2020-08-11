@@ -74,7 +74,7 @@ function generateGammarAndInterpretationVars(cb) {
   //       : if %d is part of expression, this won't work
 
   Object.keys(rules.rules).forEach(lhs => {
-    if(typeof rules.rules[lhs] !== "string") { // object
+    if(lhs !== "statement" && typeof rules.rules[lhs] !== "string") { // object
       Object.keys(rules.rules[lhs]).forEach(subLHS => {
         const rhs = rules.rules[lhs][subLHS];
         if(Array.isArray(rhs)) {
@@ -132,7 +132,9 @@ function minifyJS(filePath, outputPath, cb) {
 
 series(generateGammarAndInterpretationVars, convertImportsAndExports,
   parallel(minifyJS.bind(null, './dist/text2code_core.js', null),
-    minifyJS.bind(null, './dist/text2code_blocks.js', null), 
+    minifyJS.bind(null, './dist/text2code_core_mobile.js', null),
+    minifyJS.bind(null, './dist/text2code_blocks.js', null),
+    minifyJS.bind(null, './dist/text2code_blocks_mobile.js', null),  
     minifyJS.bind(null, './dist/text2code_generators.js', null),
     generateDocumentation),
   runTests)();
