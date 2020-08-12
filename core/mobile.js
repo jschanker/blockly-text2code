@@ -36,16 +36,29 @@ import {interpretations} from "./block_interpretations.js";
 import BlockEvaluator from "./block_evaluator.js";
 import createBlocks from "./block_generator.js";
 import {convertTextBlocksToJSBlocks, convertJSToTextBlocks} from "./block-converters/javascript/text_exact.js";
-import {newBlock, refreshWorkspace, setNextBlock, getLastBlock, replaceWithBlock} from "./block_utility_functions.js";
+import {newBlock, refreshWorkspace, setNextBlock, setFieldValue, getLastBlock, 
+  replaceWithBlock, getPartiallyVisibleBlocks} from "./block_utility_functions.js";
 
 Blockly.COLLAPSE_CHARS = 200;
 
 // for type-in-code blocks
 export const parseAndConvertToBlocks = function(props, e) {
-  if(this.isCollapsed()) return;
-  if(this.getFieldValue("AUTOCPLT")) {
-    this.setFieldValue(this.getFieldValue("AUTOCPLT") + "\n", "EXP");
+  console.warn(e.type, e);
+  if(this.isCollapsed()) {
+    return;
   }
+
+  if(props.updateAutocomplete) {
+    props.updateAutocomplete(this.getFieldValue("EXP"), props.OPTIONS, props.shownOPTIONS, s => {
+      console.warn("Parsing Partial", s);
+      return shared.parser.parseBottomUpCYK(s, shared.parseTreeBlockConnector).length > 0;
+    });
+  }
+
+  if(this.getFieldValue("AUTOCPLT")) {
+    setFieldValue(this, this.getFieldValue("AUTOCPLT") + "\n", "EXP");
+  }
+
   if(props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n"))) {
     console.warn("Attempting to parse", this.getFieldValue("EXP"));
 
@@ -98,30 +111,27 @@ export const parseAndConvertToBlocks = function(props, e) {
 
         if(lastBlock.nextConnection) setNextBlock(lastBlock, newTypeInCodeBlock);
         refreshWorkspace(shared.workspace);
-        shared.workspace.getAllBlocks().slice().forEach(block => {
-          if(block.isDisposed()) return;
-          console.warn(block, block.getParent() && block.getParent().nextConnection, !block.isCollapsed(), block.getBoundingRectangle().right > shared.workspace.getWidth())
-          if(block.getParent() && !block.nextConnection && 
-             !block.isCollapsed() &&
-             block.getBoundingRectangle().right > shared.workspace.getWidth()) {
+        getPartiallyVisibleBlocks(shared.workspace)
+          .filter(block => block.getParent() && !block.nextConnection && 
+            !block.isCollapsed())
+          .slice().forEach(block => {
+            if(block.isDisposed()) return;
             const replaceBlock = newBlock(shared.workspace, "code_expression");
             const codeText = Blockly[codeGen].blockToCode(block)[0] || Blockly[codeGen].blockToCode(block);
-            replaceBlock.setFieldValue(codeText, "EXP");
+            setFieldValue(replaceBlock, codeText, "EXP");
             replaceBlock.setCollapsed(true);
             const parentInput = block.getParent().getInputWithBlock(block);
             parentInput.connection.connect(replaceBlock.outputConnection);
             block.dispose(true);
-          }
         });
         refreshWorkspace(shared.workspace);
         newTypeInCodeBlock = shared.workspace.getAllBlocks()
           .find(block => block.type === "code_statement");
         newTypeInCodeBlock.getField("EXP").showEditor_();
       }
-      shared.workspace.zoomToFit();
     }
   }
-  if(props.editing && e.type !== Blockly.Events.CHANGE) {
+  if(props.editing && e.element === "workspaceClick") {
     props.editing = false;
     //const displayLog = console.log;
     //console.log = console.realLog; // temporarily reset for debugging
@@ -143,6 +153,10 @@ export const parseAndConvertToBlocks = function(props, e) {
     }
     else alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
     //console.log = displayLog; // restore
+  }
+
+  if(getPartiallyVisibleBlocks(shared.workspace).length > 0) {
+    shared.workspace.zoomToFit();
   }
 };
 

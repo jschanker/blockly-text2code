@@ -49,11 +49,11 @@ class ParseTreeRHSidesNode {
    * Merges right-hand sides of given node into this one if lefthand sides match
    * @param {ParseTreeRHSidesNode} node to merge righthand sides
    */
-  merge(node) {
+  merge(node,max=1) {
   	console.assert(this.lhs_ === node.lhs_, 
   		{msg: "This lhs of " + this.lhs_ + 
   		" does not match node's lhs of " + node.lhs_});
-  	this.rhsides_.push(...node.rhsides_);
+  	if(this.rhsides_.length < max) this.rhsides_.push(...node.rhsides_);
   }
 
   /**

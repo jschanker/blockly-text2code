@@ -82,7 +82,7 @@ function generateGammarAndInterpretationVars(cb) {
             const key = "__" + i + "__" + subLHS;
             rules.rules[lhs][key] = rhs.slice(0,i);
             if(interpretations[subLHS]) {
-              interpretations[key] = JSON.parse(JSON.stringify(interpretations[subLHS]).replace(/\"%(\d)+\"/g, 
+              interpretations[key] = JSON.parse(JSON.stringify(interpretations[subLHS]).replace(/\"%(\d+)\"/g, 
                 (match, num) => num <= i ? match : '{\"type\": \"code_expression\"}'));
             }
           }

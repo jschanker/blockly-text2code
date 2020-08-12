@@ -23,6 +23,15 @@
 import {parseAndConvertToBlocks} from "../../core/mobile.js";
 
 (function() {
+  function updateAutocomplete(val, optionsArr, fieldArr, filterFunc) {
+    filterFunc = filterFunc || (x => x);
+    const newOptions = optionsArr.slice(1)
+      .map(opt => matchPartial(opt[0], val))
+      .filter(opt => opt)
+      .filter(filterFunc)
+      .map(opt => [opt, opt]);   
+    substituteArr(fieldArr, [optionsArr[0]].concat(newOptions));
+  }
   function substituteArr(oldArr, newArr) {
     while(oldArr.length > 0) oldArr.pop();
     oldArr.push(...newArr);
@@ -32,20 +41,30 @@ import {parseAndConvertToBlocks} from "../../core/mobile.js";
     let match;
     if(!matchStr.length) return "";
     else if(!text.length) {
-      return matchStr.replace(/%\d+|\,|\)|;/g, "");
+//    return matchStr.replace(/%\d+|\,|\)|;/g, "");
+      const nextVar = matchStr.search(/%[a|s|d|v|o]/);
+      return matchStr.substring(0, nextVar !== -1 ? nextVar : matchStr.length);
     }
-    else if(match = matchStr.match(/^%\d+/)) {
-      return text.charAt(0) + 
-        (matchPartial(matchStr.substring(match[0].length), 
+    //else if(match = matchStr.match(/^%\d+/)) {
+    else if(match = matchStr.match(/^%[a|s|d|v]/)) {
+      const initialMatch = matchPartial(matchStr.substring(match[0].length), 
           text.substring(1)) || 
-         matchPartial(matchStr, text.substring(1)));
+         matchPartial(matchStr, text.substring(1));
+      return initialMatch && text.charAt(0) + initialMatch;
+    }
+    else if(match = matchStr.match(/^%o/)) {
+      const initialMatch = matchPartial(matchStr.substring(match[0].length), text);
+      if(initialMatch) return initialMatch;
+      const secondaryMatch = matchPartial(matchStr, text.substring(1));
+      return secondaryMatch && (text.charAt(0) + secondaryMatch);
     }
     else {
       if(text.charAt(0) === matchStr.charAt(0)) {
-        return text.charAt(0) + 
-          matchPartial(matchStr.substring(1), text.substring(1));
+        const initialMatch = matchPartial(matchStr.substring(1), text.substring(1));
+        return initialMatch && text.charAt(0) + initialMatch;
       } else {
-        return null;
+        //return null;
+        return "";
       }
     }
   }
@@ -73,6 +92,13 @@ import {parseAndConvertToBlocks} from "../../core/mobile.js";
 
   Blockly.Blocks['code_statement'] = {
     init: function() {
+      // %a: any type, %v: variable name, %s: string, %d: integer
+      /*
+      const autocompleteOptions = [
+        T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"],
+        Blockly.Msg["VARIABLES_SET"].replace("%1", "%v").replace("%2", "%a")
+      ];
+      */
       // const OPTIONS = [["Autocomplete Options", "None"],
       //                  [T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"], "text_print"],
       //                  [T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"], "text_input"],
@@ -85,57 +111,42 @@ import {parseAndConvertToBlocks} from "../../core/mobile.js";
       //                  [T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TITLE, "t2c_text_indexof"],
       //                  [T2C.MSG.currentLanguage.TEXT_T2C_CHARAT_TITLE, "t2c_text_charat"],
       //                  [T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TITLE, "t2c_text_getsubstring"]];
-      const OPTIONS = [["Autocomplete Options", ""],
-                 [T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"], T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"]],
-                 [T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"], T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"]],
-                 ["let %1 =", "let %1 ="],
-                 //["%1", "%1"],
-                 /*["", "math_number"],
-                 ["", "math_arithmetic_basic"],
-                 ["", "text"],*/
-                 [T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_LENGTH_TITLE],
-                 [T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_INDEXOF_TITLE],
-                 [T2C.MSG.currentLanguage.TEXT_T2C_CHARAT_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_CHARAT_TITLE],
-                 [T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TITLE, T2C.MSG.currentLanguage.TEXT_T2C_GET_SUBSTRING_TITLE]];
+      const OPTIONS = [
+          ["Autocomplete Options", ""],
+          T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "%a"),
+          Blockly.Msg["VARIABLES_SET"].replace("%1", "%v").replace("%2", "%a"),
+          T2C.MSG.currentLanguage["TEXT_INPUT_TITLE"].replace("%1", "%s"),
+          T2C.MSG.currentLanguage["TEXT_T2C_LENGTH_TITLE"].replace("%1", "%s"),
+          T2C.MSG.currentLanguage["TEXT_T2C_INDEXOF_TITLE"].replace("%1", "%s").replace("%2", "%s"),
+          T2C.MSG.currentLanguage["TEXT_T2C_CHARAT_TITLE"].replace("%1", "%s").replace("%2", "%d"),
+          T2C.MSG.currentLanguage["TEXT_T2C_GET_SUBSTRING_TITLE"].replace("%1", "%s").replace("%2", "%d").replace("%3", "%d")
+        ].map((opt, index) => {
+          if(index === 0) {
+            return opt;
+          }
+          else if(index === 1 || index === 2 || /^%[a|s|d|v]/.test(opt)) {
+            return [opt, opt];
+          }
+          else {
+            return ["%o" + opt, opt];
+          }
+        });
+        console.warn(OPTIONS);
 
       const shownOPTIONS = OPTIONS.map((opt, index) => {
         if(index === 0) return opt;
         const matchedOpt = matchPartial(opt[0], "");
         return [matchedOpt, matchedOpt];
-      });
-      var props = {editing: false, shownOPTIONS};
+      }).filter(opt => opt[0]);
+      console.warn("SHOWN", shownOPTIONS);
+      const props = {editing: false, OPTIONS, shownOPTIONS, updateAutocomplete};
+      console.warn("PROPS", props);
       this.appendDummyInput("FILLER")
           .appendField(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TITLE)
           .appendField(new Blockly.FieldDropdown(shownOPTIONS), 'AUTOCPLT')
       this.appendDummyInput("STRING")
           .appendField(new Blockly.FieldMultilineInput("", (exp) => {
               if(exp) {
-                /*
-                const newOptions = OPTIONS.slice(1)
-                  .map(option => option[0].split(/(%\d+|.)/)
-                    .filter(x => x)
-                    .map(x => x.length > 1 ? "(.)*" : "(?:" + 
-                      ((x !== "(" && x !== ")" && x !== ".") ? x : "\\" + x) 
-                      + "|$)")
-                    .join(""))
-                  //.map((opt, index) => [opt, OPTIONS[index+1][1]])
-                  .map(regExpOpt => this.getFieldValue("EXP").match(new RegExp(regExpOpt)))
-                  .map((option, index) => [option && option[0], OPTIONS[index+1][1]])
-                  .map(x =>)
-                  .filter(optionText => optionText[0])
-                 */
-                 const newOptions = OPTIONS.slice(1)
-                   //.map(opt => [matchPartial(opt[0], this.getFieldValue("EXP")), 
-                   //  opt[1]])
-                   .map(opt => matchPartial(opt[0], this.getFieldValue("EXP")))
-                   .map(opt => [opt, opt])
-                   .filter(opt => opt[0])   
-                  //.map((option, index) => option[0].split(/(%\d+)/)
-                    //.split(/(%\d+)/))
-                  //.filter((option, index) => 
-                  //  index === 0 || option[0].startsWith(this.getFieldValue("EXP")));
-                substituteArr(shownOPTIONS, [OPTIONS[0]].concat(newOptions));
-                console.warn(this.getFieldValue("EXP"), shownOPTIONS);
                 props.editing = true;
               }
           }), "EXP");

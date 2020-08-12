@@ -28,15 +28,15 @@
     "inputs": {"VALUE": "%3"}
   },
   "stringFindFirstFullExpression": {
-    "type": "%3",
+    "type": "t2c_text_indexof",
     "inputs": {"VALUE": "%1", "FIND": "%5"}
   },
   "js_stringFindFirstFullExpression": {
-    "type": "%3",
+    "type": "js_text_indexof",
     "inputs": {"VALUE": "%1", "FIND": "%5"}
   },
   "stringSubstringFullExpression": {
-    "type": "%3",
+    "type": "t2c_text_getsubstring",
     "inputs": {"STRING": "%1", "AT1": "%5", "AT2": "%10"}
   },
   "stringCharAtFullExpression": {
@@ -48,7 +48,7 @@
     "inputs": {"VALUE": "%1", "AT": "%3"}
   },
   "js_stringCharAtFullExpression": {
-    "type": "%3",
+    "type": "js_text_charat",
     "inputs": {"VALUE": "%1", "AT": "%5"}
   },
   "py_stringSubstringFullExpression": {
@@ -56,19 +56,19 @@
     "inputs": {"STRING": "%1", "AT1": "%3", "AT2": "%5"}
   },
   "js_stringSubstringFullExpression": {
-    "type": "%3",
+    "type": "js_text_getsubstring",
     "inputs": {"STRING": "%1", "AT1": "%5", "AT2": "%7"}
   },
   "stringAfterTextFullExpression": {
-    "type": "%3",
+    "type": "t2c_text_after",
     "inputs": {"TEXT": "%1", "SUB": "%5"}
   },
   "stringBeforeTextFullExpression": {
-    "type": "%3",
+    "type": "t2c_text_before",
     "inputs": {"TEXT": "%1", "SUB": "%5"}
   },
   "stringConcatenationFullExpression": {
-    "type": "%2",
+    "type": "t2c_text_join",
     "inputs": {"A": "%1", "B": "%3"}
   },
   "stringGroupedExp": "%2",

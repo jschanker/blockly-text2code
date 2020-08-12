@@ -67,6 +67,8 @@ export function setNextBlock(sourceBlock, nextBlock) {
 export function newBlock(workspace, type) {
   const block = workspace.newBlock(type);
   block.initSvg();
+  block.moveTo(new Blockly.utils.Coordinate(workspace.getMetrics().viewLeft, 
+    workspace.getMetrics().viewTop));
   return block;
 }
 
@@ -98,6 +100,22 @@ export function moveToSameLocation(sourceBlock, targetBlock) {
 }
 
 /**
+ * Returns all blocks that are not fully visible in the workspace
+ * @param {Blockly.Workspace} workspace the workspace from which to get the blocks
+ * @return {Array.<Blockly.Block>} the workspace of blocks not fully visible   
+ */
+export function getPartiallyVisibleBlocks(workspace) {
+  const workspaceMetrics = workspace.getMetrics();
+  return workspace.getAllBlocks().filter(block => {
+    const blockRect = block.getBoundingRectangle();
+    return blockRect.left < workspaceMetrics.viewLeft || 
+      blockRect.right > workspaceMetrics.viewLeft + workspaceMetrics.viewWidth || 
+      blockRect.top < workspaceMetrics.viewTop || 
+      blockRect.bottom > workspaceMetrics.viewTop + workspaceMetrics.viewHeight
+  });
+}
+
+/**
  * Copies the block with all of its current field values;
  * recursively does this for all descendants if deep is true
  * @param {!Blockly.Block} block the block to copy
@@ -111,7 +129,7 @@ export function copyBlock(block, deep) {
   const blockCp = newBlock(workspace, block.type);
   block.inputList.forEach(function(input) {
     input.fieldRow.forEach(function(field) {
-        blockCp.setFieldValue(field.getValue(), field.name);
+        setFieldValue(blockCp, field.getValue(), field.name);
     });
   });
   
@@ -221,7 +239,7 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
   block.inputList.forEach(function(input) {
     input.fieldRow.forEach(function(field) {
       if(replaceBlock.getField(field.name)) {
-        replaceBlock.setFieldValue(field.getValue(), field.name);
+        setFieldValue(replaceBlock, field.getValue(), field.name);
       }
     });
   });
