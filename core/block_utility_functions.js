@@ -116,6 +116,34 @@ export function getPartiallyVisibleBlocks(workspace) {
 }
 
 /**
+ * Collapse blocks that don't fit and zoom as necessary
+ * @param {Blockly.Workspace} workspace the workspace from which to get the blocks   
+ */
+export function fitBlocksInWorkspace(workspace) {
+  const codeGen = T2C.MSG.currentLanguage === T2C.MSG.PY ?
+    "Python" : "JavaScript";
+  getPartiallyVisibleBlocks(workspace)
+    .filter(block => block.getParent() && !block.nextConnection && 
+      !block.isCollapsed())
+    .slice().forEach(block => {
+      if(block.isDisposed()) return;
+      const replaceBlock = newBlock(workspace, "code_expression");
+      const codeText = Blockly[codeGen].blockToCode(block)[0] || Blockly[codeGen].blockToCode(block);
+      setFieldValue(replaceBlock, codeText, "EXP");
+      replaceBlock.setCollapsed(true);
+      const parentInput = block.getParent().getInputWithBlock(block);
+      parentInput.connection.connect(replaceBlock.outputConnection);
+      block.dispose(true);
+  });
+
+  refreshWorkspace(workspace);
+
+  if(getPartiallyVisibleBlocks(workspace).length > 0) {
+    workspace.zoomToFit();
+  }
+}
+
+/**
  * Copies the block with all of its current field values;
  * recursively does this for all descendants if deep is true
  * @param {!Blockly.Block} block the block to copy

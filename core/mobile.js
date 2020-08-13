@@ -37,9 +37,29 @@ import BlockEvaluator from "./block_evaluator.js";
 import createBlocks from "./block_generator.js";
 import {convertTextBlocksToJSBlocks, convertJSToTextBlocks} from "./block-converters/javascript/text_exact.js";
 import {newBlock, refreshWorkspace, setNextBlock, setFieldValue, getLastBlock, 
-  replaceWithBlock, getPartiallyVisibleBlocks} from "./block_utility_functions.js";
+  replaceWithBlock, fitBlocksInWorkspace} from "./block_utility_functions.js";
 
 Blockly.COLLAPSE_CHARS = 200;
+
+function getParseTree(text) {
+  console.warn("Attempting to parse", text);
+  // quick fix to handle Python's non-use of semicolons
+  const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
+    text.replace(/[\r\n]+/g, ";") : text; 
+  const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
+    shared.parseTreeBlockConnector)[0];
+  if(parseTree) console.log("Parse Tree:", parseTree);
+  return parseTree;
+}
+
+function handleParseTreeToBlocks(parseTree, blockToReplace, refreshWorkspace=true) {
+  const evaluation = shared.evaluator.evaluate(parseTree);
+  console.log("Evaluation: ", evaluation, blockToReplace);
+  blockToReplace = blockToReplace || newBlock(shared.workspace); // pass e.g., "math_number" if not replaced
+  const replacingBlock = createBlocks(evaluation, blockToReplace, refreshWorkspace);
+  console.log(replacingBlock);
+  return replacingBlock;
+}
 
 // for type-in-code blocks
 export const parseAndConvertToBlocks = function(props, e) {
@@ -60,21 +80,11 @@ export const parseAndConvertToBlocks = function(props, e) {
   }
 
   if(props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n"))) {
-    console.warn("Attempting to parse", this.getFieldValue("EXP"));
-
-    // quick fix to handle Python's non-use of semicolons
-    const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
-      this.getFieldValue("EXP").replace(/[\r\n]+/g, ";") : this.getFieldValue("EXP"); 
-    const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
-      shared.parseTreeBlockConnector)[0];
+    const parseTree = getParseTree(this.getFieldValue("EXP"));
 
     if(parseTree) {
       props.editing = false;
-      const evaluation = shared.evaluator.evaluate(parseTree);
-      console.log("Parse Tree:", parseTree);
-      console.log("Evaluation: ", evaluation, this);
-      const replacingBlock = createBlocks(evaluation, this, false);
-      console.log(replacingBlock);
+      const replacingBlock = handleParseTreeToBlocks(parseTree, this, false);
 
       // remove all orphan type-in-code blocks from workspace
       shared.workspace.getAllBlocks()
@@ -88,7 +98,7 @@ export const parseAndConvertToBlocks = function(props, e) {
           || block.type === "code_statement");
 
       if(typeInCodeBlock) {
-        refreshWorkspace(shared.workspace);
+        fitBlocksInWorkspace(shared.workspace);
         typeInCodeBlock = shared.workspace.getAllBlocks()
           .find(block => block.type === "code_expression" 
             || block.type === "code_statement");
@@ -102,29 +112,9 @@ export const parseAndConvertToBlocks = function(props, e) {
 
         let newTypeInCodeBlock = newBlock(shared.workspace, "code_statement");
 
-        const codeGen = T2C.MSG.currentLanguage === T2C.MSG.PY ?
-          "Python" : "JavaScript";
-
-        // temporary fix to remove Python variable declarations
-        Blockly.Python.tempFinish = Blockly.Python.finish;
-        Blockly.Python.finish = code => code;
-
         if(lastBlock.nextConnection) setNextBlock(lastBlock, newTypeInCodeBlock);
         refreshWorkspace(shared.workspace);
-        getPartiallyVisibleBlocks(shared.workspace)
-          .filter(block => block.getParent() && !block.nextConnection && 
-            !block.isCollapsed())
-          .slice().forEach(block => {
-            if(block.isDisposed()) return;
-            const replaceBlock = newBlock(shared.workspace, "code_expression");
-            const codeText = Blockly[codeGen].blockToCode(block)[0] || Blockly[codeGen].blockToCode(block);
-            setFieldValue(replaceBlock, codeText, "EXP");
-            replaceBlock.setCollapsed(true);
-            const parentInput = block.getParent().getInputWithBlock(block);
-            parentInput.connection.connect(replaceBlock.outputConnection);
-            block.dispose(true);
-        });
-        refreshWorkspace(shared.workspace);
+        fitBlocksInWorkspace(shared.workspace);
         newTypeInCodeBlock = shared.workspace.getAllBlocks()
           .find(block => block.type === "code_statement");
         newTypeInCodeBlock.getField("EXP").showEditor_();
@@ -133,30 +123,14 @@ export const parseAndConvertToBlocks = function(props, e) {
   }
   if(props.editing && e.element === "workspaceClick") {
     props.editing = false;
-    //const displayLog = console.log;
-    //console.log = console.realLog; // temporarily reset for debugging
-    console.log("Parsing", this.getFieldValue("EXP"));
-    //let parseTree = parseTopDown(this.getFieldValue("EXP"))[0];
-
-    // quick fix to handle Python's non-use of semicolons
-    const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
-      this.getFieldValue("EXP").replace(/[\r\n]+/g, ";") : this.getFieldValue("EXP"); 
-    const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
-      shared.parseTreeBlockConnector)[0];
+    const parseTree = getParseTree(this.getFieldValue("EXP"));
     if(parseTree) {
-      const evaluation = shared.evaluator.evaluate(parseTree);
-      console.log("Parse Tree:", parseTree);
-      console.log("Evaluation: ", evaluation, this);
-      console.log(createBlocks(evaluation, this, shared.workspace));
-      shared.workspace.zoomToFit();
+      handleParseTreeToBlocks(parseTree, this);
+      fitBlocksInWorkspace(shared.workspace);
       // console.log(createBlocks(evaluation, this, shared.workspace).toString());
     }
     else alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
     //console.log = displayLog; // restore
-  }
-
-  if(getPartiallyVisibleBlocks(shared.workspace).length > 0) {
-    shared.workspace.zoomToFit();
   }
 };
 
@@ -288,23 +262,13 @@ const shared = (function() {
         });
         document.getElementById("load-save-text-code").addEventListener("click", function() {
           if(document.getElementById("load-save-text-code").textContent === T2C.MSG.currentLanguage["BUTTON_LOAD_TEXT_CODE"]) {
-            console.log("Parsing", document.getElementById("textCodeBox").value);
             const confirmConvertTextToBlocks = T2C.MSG.currentLanguage.CONFIRM_CONVERT_TEXT_TO_BLOCKS;
-            const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
-              document.getElementById("textCodeBox").value.replace(/[\r\n]+/g, ";") 
-              : document.getElementById("textCodeBox").value; 
-            const parseTree = shared.parser.parseBottomUpCYK(strToParse, 
-              shared.parseTreeBlockConnector)[0];
+            const parseTree = getParseTree(document.getElementById("textCodeBox").value);
 
             if(parseTree && confirm(confirmConvertTextToBlocks)) {
               shared.workspace.clear();
-              const evaluation = shared.evaluator.evaluate(parseTree);
-              const tempBlock = newBlock(shared.workspace); // pass e.g., "math_number" if not replaced
-              tempBlock.moveBy(50, 50); // shared.workspace.getWidth()/2
-              console.log("Parse Tree:", parseTree);
-              console.log("Evaluation: ", evaluation);
-              console.log(createBlocks(evaluation, tempBlock));
-              shared.workspace.zoomToFit();
+              handleParseTreeToBlocks(parseTree);
+              //shared.workspace.zoomToFit();
             }
             else if(!parseTree) {
               alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
@@ -322,7 +286,7 @@ const shared = (function() {
         document.getElementById("load-save-xml").addEventListener("click", function() {
           if(document.getElementById("load-save-xml").textContent === T2C.MSG.currentLanguage["BUTTON_LOAD_XML"]) {
             generateBlocksFromXML();
-            shared.workspace.zoomToFit();
+            //shared.workspace.zoomToFit();
           } else {
             const codeToCopy = document.getElementById("xmlData").value;
             navigator.clipboard.writeText(codeToCopy).then(function() {
