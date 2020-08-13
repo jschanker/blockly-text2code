@@ -40,6 +40,9 @@ import {newBlock, refreshWorkspace, setNextBlock, setFieldValue, getLastBlock,
   replaceWithBlock, fitBlocksInWorkspace} from "./block_utility_functions.js";
 
 Blockly.COLLAPSE_CHARS = 200;
+const isMobile = Blockly.utils.userAgent.MOBILE ||
+                 Blockly.utils.userAgent.ANDROID ||
+                 Blockly.utils.userAgent.IPAD;
 
 function getParseTree(text) {
   console.warn("Attempting to parse", text);
@@ -79,7 +82,8 @@ export const parseAndConvertToBlocks = function(props, e) {
     setFieldValue(this, this.getFieldValue("AUTOCPLT") + "\n", "EXP");
   }
 
-  if(props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n"))) {
+  if(props.editing && (this.getFieldValue("EXP").endsWith("\r") || this.getFieldValue("EXP").endsWith("\n"))
+     || props.editing && e.element === "workspaceClick") {
     const parseTree = getParseTree(this.getFieldValue("EXP"));
 
     if(parseTree) {
@@ -102,7 +106,7 @@ export const parseAndConvertToBlocks = function(props, e) {
         typeInCodeBlock = shared.workspace.getAllBlocks()
           .find(block => block.type === "code_expression" 
             || block.type === "code_statement");
-        const field = typeInCodeBlock.getField("EXP").showEditor_();
+        if(!isMobile) typeInCodeBlock.getField("EXP").showEditor_();
       } else {
         console.warn("Replacing block", replacingBlock)
         //const lastBlock = replacingBlock.lastConnectionInStack() || 
@@ -117,10 +121,14 @@ export const parseAndConvertToBlocks = function(props, e) {
         fitBlocksInWorkspace(shared.workspace);
         newTypeInCodeBlock = shared.workspace.getAllBlocks()
           .find(block => block.type === "code_statement");
-        newTypeInCodeBlock.getField("EXP").showEditor_();
+        if(!isMobile) newTypeInCodeBlock.getField("EXP").showEditor_();
       }
     }
+    else if(props.editing && e.element === "workspaceClick") {
+      alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
+    }
   }
+  /*
   if(props.editing && e.element === "workspaceClick") {
     props.editing = false;
     const parseTree = getParseTree(this.getFieldValue("EXP"));
@@ -131,7 +139,7 @@ export const parseAndConvertToBlocks = function(props, e) {
     }
     else alert("There seems to be a problem with the code you entered.  Check that your spelling is correct, that you use lowercase and capital letters as required, that every open parenthesis ( has a matching closed one ), that you use quotation marks as needed, and other potential issues with syntax.");
     //console.log = displayLog; // restore
-  }
+  }*/
 };
 
 const shared = (function() {
@@ -139,13 +147,17 @@ const shared = (function() {
   // https://github.com/google/blockly/blob/develop/core/field_textinput.js#L279
   // Blockly.Blocks['code_statement'].getField("EXP").showEditor_ 
   //  = Blockly.FieldTextInput.prototype.showInlineEditor_;
-  Blockly.FieldTextInput.prototype.showEditor_ = function(_opt_e,
-    opt_quietInput) {
-    this.workspace_ =
-      (/** @type {!Blockly.BlockSvg} */ (this.sourceBlock_)).workspace;
-    var quietInput = opt_quietInput || false;
-    this.showInlineEditor_(quietInput);
-  };
+  
+// Inline editor not working on mobile; deselects immediately when keyboard pops up as per comment from
+// https://github.com/google/blockly/blob/4ac4332f5e78d9894a831ecd1288517798cc659d/core/field_textinput.js#L303
+//  Blockly.FieldTextInput.prototype.showEditor_ = function(_opt_e,
+//    opt_quietInput) {
+//    this.workspace_ =
+//      (/** @type {!Blockly.BlockSvg} */ (this.sourceBlock_)).workspace;
+//    var quietInput = opt_quietInput || false;
+//    this.showInlineEditor_(quietInput);
+//  };
+
   const init = () => {
     window.addEventListener('DOMContentLoaded', (event) => {
       // hack to deal with incorrect module import conversion done by having multiple
@@ -153,9 +165,9 @@ const shared = (function() {
       if(document.getElementById("blockly-div").getAttribute("hasWorkspace")) return;
       document.getElementById("blockly-div").setAttribute("hasWorkspace", true);
       shared.toolbox = document.getElementById("toolbox");
-      const isMobile = Blockly.utils.userAgent.MOBILE ||
-                       Blockly.utils.userAgent.ANDROID ||
-                       Blockly.utils.userAgent.IPAD;
+//      const isMobile = Blockly.utils.userAgent.MOBILE ||
+//                       Blockly.utils.userAgent.ANDROID ||
+//                       Blockly.utils.userAgent.IPAD;
       const options = { 
         toolbox : toolbox, 
         collapse : true, 
@@ -183,7 +195,7 @@ const shared = (function() {
       refreshWorkspace(shared.workspace);
       const startBlock = shared.workspace.getAllBlocks()
           .find(block => block.type === "code_statement");
-      startBlock.getField("EXP").showEditor_();
+      if(!isMobile) startBlock.getField("EXP").showEditor_();
 
       const setLanguage = function() {
         const langCode = document.getElementById("language").value;
