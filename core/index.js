@@ -103,9 +103,7 @@ const shared = (function() {
 /*
       window.addEventListener("resize", function() {
         if(window.innerHeight > window.innerWidth) {
-
         } else {
-
         }
       });
 */

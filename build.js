@@ -69,11 +69,33 @@ function generateGammarAndInterpretationVars(cb) {
     }
   });
 
+  // add partial rules/interpretations
+  // Issues: if %d is value of type, %d should not be replaced
+  //       : if %d is part of expression, this won't work
+
+  Object.keys(rules.rules).forEach(lhs => {
+    if(lhs !== "statement" && typeof rules.rules[lhs] !== "string") { // object
+      Object.keys(rules.rules[lhs]).forEach(subLHS => {
+        const rhs = rules.rules[lhs][subLHS];
+        if(Array.isArray(rhs)) {
+          for(let i = 2; i < rhs.length; i++) {
+            const key = "__" + i + "__" + subLHS;
+            rules.rules[lhs][key] = rhs.slice(0,i);
+            if(interpretations[subLHS]) {
+              interpretations[key] = JSON.parse(JSON.stringify(interpretations[subLHS]).replace(/\"%(\d+)\"/g, 
+                (match, num) => num <= i ? match : '{\"type\": \"code_expression\"}'));
+            }
+          }
+        }
+      });
+    }
+  });
+
   try {
     const escapeChars = s => s.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
     let escapedRules = 
     writeFileSync("./core/grammar.js", grammarHeader + "\n" + "export const rules = JSON.parse('" + escapeChars(JSON.stringify(rules)) + "');\nexport const tokens = JSON.parse('" + escapeChars(JSON.stringify(tokens)) + "');");
-    writeFileSync("./core/block-interpretations.js", blockInterpretationHeader + "\n" + "export const interpretations = JSON.parse('" + escapeChars(JSON.stringify(interpretations)) + "');");
+    writeFileSync("./core/block_interpretations.js", blockInterpretationHeader + "\n" + "export const interpretations = JSON.parse('" + escapeChars(JSON.stringify(interpretations)) + "');");
   } catch(err) {
     console.log(err);
   }
@@ -110,7 +132,9 @@ function minifyJS(filePath, outputPath, cb) {
 
 series(generateGammarAndInterpretationVars, convertImportsAndExports,
   parallel(minifyJS.bind(null, './dist/text2code_core.js', null),
-    minifyJS.bind(null, './dist/text2code_blocks.js', null), 
+    minifyJS.bind(null, './dist/text2code_core_mobile.js', null),
+    minifyJS.bind(null, './dist/text2code_blocks.js', null),
+    minifyJS.bind(null, './dist/text2code_blocks_mobile.js', null),  
     minifyJS.bind(null, './dist/text2code_generators.js', null),
     generateDocumentation),
   runTests)();

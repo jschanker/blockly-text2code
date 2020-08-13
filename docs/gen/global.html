@@ -40,7 +40,7 @@
 			<li class="dropdown">
 				<a href="global.html" class="dropdown-toggle" data-toggle="dropdown">Global<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="global.html#cartesianProductArray">cartesianProductArray</a></li><li><a href="global.html#cartesianProductPairArray">cartesianProductPairArray</a></li><li><a href="global.html#copyBlock">copyBlock</a></li><li><a href="global.html#createBlocks">createBlocks</a></li><li><a href="global.html#createNewTempVariable">createNewTempVariable</a></li><li><a href="global.html#getParentStatementBlock">getParentStatementBlock</a></li><li><a href="global.html#moveInputBlock">moveInputBlock</a></li><li><a href="global.html#moveToSameLocation">moveToSameLocation</a></li><li><a href="global.html#newBlock">newBlock</a></li><li><a href="global.html#refreshWorkspace">refreshWorkspace</a></li><li><a href="global.html#replaceWithBlock">replaceWithBlock</a></li><li><a href="global.html#setFieldValue">setFieldValue</a></li><li><a href="global.html#setNextBlock">setNextBlock</a></li><li><a href="global.html#setValueInput">setValueInput</a></li>
+					<li><a href="global.html#cartesianProductArray">cartesianProductArray</a></li><li><a href="global.html#cartesianProductPairArray">cartesianProductPairArray</a></li><li><a href="global.html#copyBlock">copyBlock</a></li><li><a href="global.html#createBlocks">createBlocks</a></li><li><a href="global.html#createNewTempVariable">createNewTempVariable</a></li><li><a href="global.html#fitBlocksInWorkspace">fitBlocksInWorkspace</a></li><li><a href="global.html#getLastBlock">getLastBlock</a></li><li><a href="global.html#getParentStatementBlock">getParentStatementBlock</a></li><li><a href="global.html#getPartiallyVisibleBlocks">getPartiallyVisibleBlocks</a></li><li><a href="global.html#moveInputBlock">moveInputBlock</a></li><li><a href="global.html#moveToSameLocation">moveToSameLocation</a></li><li><a href="global.html#newBlock">newBlock</a></li><li><a href="global.html#refreshWorkspace">refreshWorkspace</a></li><li><a href="global.html#replaceWithBlock">replaceWithBlock</a></li><li><a href="global.html#setFieldValue">setFieldValue</a></li><li><a href="global.html#setNextBlock">setNextBlock</a></li><li><a href="global.html#setValueInput">setValueInput</a></li>
 				</ul>
 			</li>
 			
@@ -687,7 +687,7 @@ recursively does this for all descendants if deep is true</p>
             
 <hr>
 <dt>
-    <h4 class="name" id="createBlocks"><span class="type-signature"></span>createBlocks(blocksBluePrint, codeBlockToReplace)</h4>
+    <h4 class="name" id="createBlocks"><span class="type-signature"></span>createBlocks(blocksBluePrint, codeBlockToReplace, refresh)</h4>
     
     
 </dt>
@@ -776,6 +776,31 @@ creating the new blocks</p></td>
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>refresh</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>true if workspace should be refreshed after creating block;
+if true, the returned block will not be in the workspace</p></td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -832,6 +857,30 @@ creating the new blocks</p></td>
     
 
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>the replacing block</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Blockly.Block</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>
@@ -1036,6 +1085,286 @@ creating the new blocks</p></td>
             
 <hr>
 <dt>
+    <h4 class="name" id="fitBlocksInWorkspace"><span class="type-signature"></span>fitBlocksInWorkspace(workspace)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Collapse blocks that don't fit and zoom as necessary</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>workspace</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Workspace</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the workspace from which to get the blocks</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getLastBlock"><span class="type-signature"></span>getLastBlock(rootBlock)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Get last block in stack descended from supplied block</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>rootBlock</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Block</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the top of the stack</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>the bottom of the stack with top of rootBlock</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Blockly.Block</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
     <h4 class="name" id="getParentStatementBlock"><span class="type-signature"></span>getParentStatementBlock(block)</h4>
     
     
@@ -1172,6 +1501,158 @@ creating the new blocks</p></td>
     <dd>
         
 <span class="param-type">Blockly.Block</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getPartiallyVisibleBlocks"><span class="type-signature"></span>getPartiallyVisibleBlocks(workspace)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Returns all blocks that are not fully visible in the workspace</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>workspace</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Workspace</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the workspace from which to get the blocks</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>the workspace of blocks not fully visible</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;Blockly.Block></span>
 
 
 
@@ -2610,7 +3091,7 @@ disposing of the old block if dispose is true</p>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.5</a>
 	
-		on July 28th 2020, 2:02:54 am
+		on August 12th 2020, 9:17:41 pm
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

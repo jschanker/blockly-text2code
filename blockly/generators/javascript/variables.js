@@ -39,6 +39,13 @@ Blockly.JavaScript['variables_get'] = function(block) {
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
+Blockly.Python['variables_get'] = function(block) {
+  // NOTE: May be potential duplication of different variable names after transformation (e.g., a_b and a@b)
+  // Variable getter.
+  var code = getValidVariableName(block.getField('VAR').getText());
+  return [code, Blockly.Python.ORDER_ATOMIC];
+};
+
 Blockly.JavaScript['variables_set'] = function(block) {
   // Variable setter.
   var argument0 = Blockly.JavaScript.valueToCode(block, 'VALUE',
@@ -46,5 +53,14 @@ Blockly.JavaScript['variables_set'] = function(block) {
   //var varName = Blockly.JavaScript.variableDB_.getName(
   //    block.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
   var varName = getValidVariableName(block.getField('VAR').getText());
+  // return Blockly.Msg["VARIABLES_SET"].replace("%1", varName).replace("%2", argument0) + '\n';
   return 'let ' + varName + ' = ' + argument0 + ';\n';
+};
+
+Blockly.Python['variables_set'] = function(block) {
+  // Variable setter.
+  var argument0 = Blockly.Python.valueToCode(block, 'VALUE',
+      Blockly.Python.ORDER_NONE) || '0';
+  var varName = getValidVariableName(block.getField('VAR').getText());
+  return varName + ' = ' + argument0 + '\n';
 };

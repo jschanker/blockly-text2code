@@ -7,5 +7,10 @@
     "type": "variables_set",
     "fields": {"VAR": "%2"},
     "inputs": {"VALUE": "%4"}
+  },
+  "variableAssignmentNoLet": {
+    "type": "variables_set",
+    "fields": {"VAR": "%1"},
+    "inputs": {"VALUE": "%3"}
   }
 }

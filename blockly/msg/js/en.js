@@ -2,6 +2,7 @@
 // Some strings were modified from the original automatically generated file.
 //   length of => .length
 //   Blockly.Msg["VARIABLES_SET"] => set ___ to ___ => let ___ = ___
+//   Blockly.Msg["MATH_MULTIPLICATION_SYMBOL"] : "×" => "*";
 //   Added Blockly.Msg.TYPEIN_EXPRESSION_TOOLTIP/Added Blockly.Msg.TYPEIN_STATEMENT_TOOLTIP
 
 'use strict';
@@ -230,7 +231,7 @@ Blockly.Msg["MATH_IS_WHOLE"] = "is whole";
 Blockly.Msg["MATH_MODULO_HELPURL"] = "https://en.wikipedia.org/wiki/Modulo_operation";
 Blockly.Msg["MATH_MODULO_TITLE"] = "remainder of %1 ÷ %2";
 Blockly.Msg["MATH_MODULO_TOOLTIP"] = "Return the remainder from dividing the two numbers.";
-Blockly.Msg["MATH_MULTIPLICATION_SYMBOL"] = "×";
+Blockly.Msg["MATH_MULTIPLICATION_SYMBOL"] = "*";
 Blockly.Msg["MATH_NUMBER_HELPURL"] = "https://en.wikipedia.org/wiki/Number";
 Blockly.Msg["MATH_NUMBER_TOOLTIP"] = "A number.";
 Blockly.Msg["MATH_ONLIST_HELPURL"] = "";

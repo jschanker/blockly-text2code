@@ -67,6 +67,8 @@ export function setNextBlock(sourceBlock, nextBlock) {
 export function newBlock(workspace, type) {
   const block = workspace.newBlock(type);
   block.initSvg();
+  block.moveTo(new Blockly.utils.Coordinate(workspace.getMetrics().viewLeft, 
+    workspace.getMetrics().viewTop));
   return block;
 }
 
@@ -98,6 +100,50 @@ export function moveToSameLocation(sourceBlock, targetBlock) {
 }
 
 /**
+ * Returns all blocks that are not fully visible in the workspace
+ * @param {Blockly.Workspace} workspace the workspace from which to get the blocks
+ * @return {Array.<Blockly.Block>} the workspace of blocks not fully visible   
+ */
+export function getPartiallyVisibleBlocks(workspace) {
+  const workspaceMetrics = workspace.getMetrics();
+  return workspace.getAllBlocks().filter(block => {
+    const blockRect = block.getBoundingRectangle();
+    return blockRect.left < workspaceMetrics.viewLeft || 
+      blockRect.right > workspaceMetrics.viewLeft + workspaceMetrics.viewWidth || 
+      blockRect.top < workspaceMetrics.viewTop || 
+      blockRect.bottom > workspaceMetrics.viewTop + workspaceMetrics.viewHeight
+  });
+}
+
+/**
+ * Collapse blocks that don't fit and zoom as necessary
+ * @param {Blockly.Workspace} workspace the workspace from which to get the blocks   
+ */
+export function fitBlocksInWorkspace(workspace) {
+  const codeGen = T2C.MSG.currentLanguage === T2C.MSG.PY ?
+    "Python" : "JavaScript";
+  getPartiallyVisibleBlocks(workspace)
+    .filter(block => block.getParent() && !block.nextConnection && 
+      !block.isCollapsed())
+    .slice().forEach(block => {
+      if(block.isDisposed()) return;
+      const replaceBlock = newBlock(workspace, "code_expression");
+      const codeText = Blockly[codeGen].blockToCode(block)[0] || Blockly[codeGen].blockToCode(block);
+      setFieldValue(replaceBlock, codeText, "EXP");
+      replaceBlock.setCollapsed(true);
+      const parentInput = block.getParent().getInputWithBlock(block);
+      parentInput.connection.connect(replaceBlock.outputConnection);
+      block.dispose(true);
+  });
+
+  refreshWorkspace(workspace);
+
+  if(getPartiallyVisibleBlocks(workspace).length > 0) {
+    workspace.zoomToFit();
+  }
+}
+
+/**
  * Copies the block with all of its current field values;
  * recursively does this for all descendants if deep is true
  * @param {!Blockly.Block} block the block to copy
@@ -111,7 +157,7 @@ export function copyBlock(block, deep) {
   const blockCp = newBlock(workspace, block.type);
   block.inputList.forEach(function(input) {
     input.fieldRow.forEach(function(field) {
-        blockCp.setFieldValue(field.getValue(), field.name);
+        setFieldValue(blockCp, field.getValue(), field.name);
     });
   });
   
@@ -183,6 +229,25 @@ export function getParentStatementBlock(block) {
 }
 
 /**
+ * Get last block in stack descended from supplied block
+ * @param {Blockly.Block} rootBlock the top of the stack
+ * @return {Blockly.Block} the bottom of the stack with top of rootBlock
+ */
+
+export function getLastBlock(rootBlock) {
+  let lastBlock = rootBlock;
+
+  while(!lastBlock.nextConnection && lastBlock.getParent()) {
+    lastBlock = lastBlock.getParent();
+  }
+  while(lastBlock.getNextBlock()) {
+     lastBlock = lastBlock.getNextBlock();
+  }
+  
+  return lastBlock;
+}
+
+/**
  * Transfers each child block (and its descendants) from input of given block 
  * to input with same name of replacement block and moves replacement block to
  * given block's location and copies values of fields with same names, 
@@ -197,11 +262,12 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
   let parentInput = null;
   let parentConnection = null;
   let blockConnectionType = -1;
+  let replaceBlockPreviousConnection = null;
 
   block.inputList.forEach(function(input) {
     input.fieldRow.forEach(function(field) {
       if(replaceBlock.getField(field.name)) {
-        replaceBlock.setFieldValue(field.getValue(), field.name);
+        setFieldValue(replaceBlock, field.getValue(), field.name);
       }
     });
   });
@@ -214,7 +280,8 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
       parentConnection.connect(replaceBlock.outputConnection);
     }
     else if(blockConnectionType === Blockly.PREVIOUS_STATEMENT) {
-      parentConnection.connect(replaceBlock.previousConnection);
+      replaceBlockPreviousConnection = replaceBlock.previousConnection;
+      //parentConnection.connect(replaceBlock.previousConnection);
     }
   } else {
     replaceBlock.moveBy(block.getRelativeToSurfaceXY().x - replaceBlock.getRelativeToSurfaceXY().x,
@@ -232,9 +299,14 @@ export function replaceWithBlock(block, replaceBlock, dispose) {
       }
     }
     else {
-      replaceBlock.nextConnection.connect(block.getNextBlock().previousConnection);
+      // replaceBlock.nextConnection.connect(block.getNextBlock().previousConnection);
+      // if should not be needed
+      if(getLastBlock(replaceBlock).nextConnection)
+      getLastBlock(replaceBlock).nextConnection.connect(childBlock.previousConnection);
     }
   });
+
+  if(replaceBlockPreviousConnection) parentConnection.connect(replaceBlockPreviousConnection);
 
   if(dispose) block.dispose();
   //if(!block.type) block.dispose();
