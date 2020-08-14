@@ -145,3 +145,7 @@ textarea {
 	left: -40px !important;*/
 	/*transition: 1s !important;*/
 }
+
+.blocklyFlyoutScrollbar {
+	z-index: 20;
+}
