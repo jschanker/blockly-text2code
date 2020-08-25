@@ -1,0 +1,207 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Text 2 Code</title>
+    <base href = "../">
+    <link rel = "stylesheet" href = "styles.css">
+    <link rel = "stylesheet" href = "mobile.css">
+    <script src="blockly/blockly_compressed.js"></script>
+    <script src="blockly/blocks_compressed.js"></script>
+    <script src="blockly/javascript_compressed.js"></script>
+    <script src="blockly/python_compressed.js"></script>
+    <script src="blockly/msg/js/en.js"></script>
+    <script src = "core/msg/en.js"></script>
+    <script src = "core/msg/hi.js"></script>
+    <script src = "core/msg/js.js"></script>
+    <script src = "core/msg/py.js"></script>
+    <script src="dist/text2code_blocks_mobile.js"></script>
+  </head>
+  <body>
+    <header id = "top-header">
+      <div class = "table-row">
+        <div id = "run-code-button" style = "color: green;" class = "header-button table-cell">▶</div>
+        <div id = "save-code-button" style = "color: green;" class = "header-button table-cell">💾</div>
+        <div id = "load-code-button" style = "color: green;" class = "header-button table-cell">📁</div>
+        <form style = "font-size: x-large;" class = "table-cell">
+          <select id = "language" style = "font-size: normal; width:95px;">
+            <option value = "en">English Pseudocode</option>
+            <option value = "js">JavaScript</option>
+            <option value = "py">Python</option>
+            <option value = "hi">हिंदी स्यूडोकोड</option>
+            <option value = "hi">Hindee Syoodokod</option>
+          </select>
+        </form>
+        <h1><span id = "textHeader">T</span><span id = "twoHeader">2</span><span id = "codeTextHeader">C</span></h1>
+      </div>
+      <!--<h1><span id = "textHeader">Text</span> <span id = "twoHeader">2</span> <span id = "codeTextHeader">Code</span></h1>-->
+    </header>
+    <div id = "all-content">
+      <!--<form style = "text-align:right; font-size: x-large;">
+        Language:
+        <select id = "language" style = "text-align:right; font-size: x-large;">
+          <option value = "en">English</option>
+          <option value = "hi">हिंदी</option>
+        </select>
+      </form>-->
+        <div id = "blockly-div">
+          <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
+            <block type="text_print"></block>
+            <block type="text"></block>
+          </xml>
+        </div>
+        <div id = "output-container" class = "hide-container">
+          <div class = "table-container">
+            <div class = "table-row">
+              <div class = "table-cell">
+                <h3 id = "outputAppearsBelow" name = "HEADING_OUTPUT_APPEARS_BELOW">Output will appear below</h3>
+                <pre>
+                  <div id = "consoleDisplay">
+                  </div>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id = "text-code-container" class = "hide-container">
+          <div class = "table-container">
+            <div class = "table-row">
+              <div class = "table-cell">
+                <!--<form>-->
+                  <h3>Textual Code</h3>
+                  <textarea id = "textCodeBox" name = "TEXTAREA_CODE_APPEARS_BELOW" placeholder = "Code to appear here."></textarea>
+                  <button id = "load-save-text-code">Load/Save Text Code</button>
+                  <h3>XML</h3>
+                  <div id = "xml-data-container">
+                    <!--<span id = "xml-close" onclick="javascript:alert();">❌</span>-->
+                    <textarea id = "xmlData" name = "TEXTAREA_COPY_TEXT_HERE" placeholder="Copy text here to save/load blocks."></textarea>
+                  </div>
+                  <button id = "load-save-xml">Load/Save XML</button>
+                <!--</form>-->
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <!--<div>
+      <iframe height="400px" width="100%" src="https://repl.it/@jschanker/Text2Code-Strings-Exact?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals"></iframe>
+    </div>-->
+    <!--
+    <footer>
+        <h3 id = "bottomText" name = "HEADING_BOTTOM_TEXT"><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
+    </footer>
+    -->
+    <script src = "dist/text2code_generators.js"></script>
+    <script src = "dist/text2code_core_mobile.js"></script>
+    <script type = "module">
+      import {refreshWorkspace} from "../core/block_utility_functions.js";
+      import CourseInstructionTask from "../core/course_instruction_task.js";
+      import GlideAnimation from "../core/glide_animation.js";
+      import BlinkAnimation from "../core/blink_animation.js";
+      import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
+      window.addEventListener('DOMContentLoaded', () => {
+        const workspace = Blockly.getMainWorkspace(); 
+        workspace.clear();
+        //workspace.options.horizontalLayout = true;
+        workspace.options.maxInstances = {text_print: 1, text: 1};
+        //workspace.options.maxBlocks = 2;
+        //workspace.updateToolbox(document.getElementById("toolbox"));
+        workspace.setScale(1);
+        refreshWorkspace(workspace);
+
+        let lastTime = 0
+        let numOfMoves = 0;
+        const toolboxBlocks = Array.from(document.querySelectorAll("rect"))
+          .filter(x => x.getAttribute("fill-opacity"))  
+        const displayBlock = toolboxBlocks[0];
+        const textBlock = toolboxBlocks[1];
+        console.warn("TEXT", textBlock);
+        const d = document.createElement("div");
+        const pointerVectorSpeed = {x: 0, y: 2};
+        let blinks = 0;
+        d.innerText = "👆";
+        //d.id = "ptr";
+        d.style.fontSize = "x-large";
+        d.style.position = "absolute";
+        d.style.left = displayBlock.x.baseVal.value + displayBlock.width.baseVal.value/2 + "px";
+        d.style.top = document.getElementById("top-header").offsetHeight + displayBlock.height.baseVal.value/2 + "px";
+        d.style.zIndex = "40";
+        document.getElementById("blockly-div").appendChild(d);
+
+        const citf = new CourseInstructionTaskFlow();
+        citf.addTask(
+          new CourseInstructionTask(
+            () => workspace.getAllBlocks().find(x => x.type === "text_print" && Blockly.selected !== x),
+            new GlideAnimation(d, {
+              totalSteps: 50,
+              startPosition: {
+                x: displayBlock.x.baseVal.value + displayBlock.width.baseVal.value/2, 
+                y: document.getElementById("top-header").offsetHeight + 
+                  displayBlock.y.baseVal.value + displayBlock.height.baseVal.value/2
+              },
+              velocity: {x: 0, y: 2}
+            })
+          )
+        );
+        citf.addTask(
+          new CourseInstructionTask(
+            () => workspace.getAllBlocks().find(x => x.type === "text" && x.getParent() && x.getParent().type === "text_print"),
+            new GlideAnimation(d, {
+              totalSteps: 50,
+              startPosition: {
+                x: textBlock.x.baseVal.value + textBlock.width.baseVal.value/2,
+                y: document.getElementById("top-header").offsetHeight + 
+                  textBlock.y.baseVal.value + displayBlock.height.baseVal.value/2 
+              },
+              endPosition: () => {
+                const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
+                const coords = textBlockWs.getBoundingRectangle();
+                return {       
+                  x: coords.left + textBlockWs.width/2 + d.offsetWidth/4,
+                  y: document.getElementById("top-header").offsetHeight + 
+                    coords.top + 
+                    Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2 - d.offsetHeight/4
+                }
+              }
+            })
+          )
+        );
+        citf.addTask(
+          new CourseInstructionTask(
+            () => workspace.getAllBlocks().find(x => x.type === "text" && x.getFieldValue("TEXT")),
+            new BlinkAnimation(d, {
+              totalSteps: 100,
+              toggleSteps: 25,
+              startPosition: () => {
+                const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
+                const coords = textBlockWs.getBoundingRectangle();
+                return {       
+                  x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 - d.offsetWidth/4,
+                  y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2
+                }
+              }
+            })
+          )
+        );
+        citf.addTask(
+          new CourseInstructionTask(
+            () => document.getElementById("output-container").classList.contains("show-container"),
+            new BlinkAnimation(d, {
+              totalSteps: 100,
+              toggleSteps: 25,
+              startPosition: {
+                x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth/2,
+                y: document.getElementById("run-code-button").offsetTop + document.getElementById("run-code-button").offsetHeight/2
+              }
+            })
+          )
+        );
+
+        citf.runTasks();
+      });
+    </script>
+  </body>
+</html>
