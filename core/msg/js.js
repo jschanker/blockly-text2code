@@ -51,3 +51,5 @@ T2C.MSG.JS["BUTTON_SAVE_TEXT_CODE"] = "Save JavaScript Code";
 T2C.MSG.JS["BUTTON_SAVE_XML"] = "Save Block XML";
 T2C.MSG.JS["BUTTON_LOAD_TEXT_CODE"] = "Load JavaScript Code";
 T2C.MSG.JS["BUTTON_LOAD_XML"] = "Load Block XML";
+
+T2C.MSG.JS["TYPE_SOMETHING"] = "Type something";

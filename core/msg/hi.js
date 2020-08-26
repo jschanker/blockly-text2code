@@ -52,3 +52,5 @@ T2C.MSG.HI["BUTTON_SAVE_XML"] = "ब्लॉक को एक्सएमएल
 T2C.MSG.HI["BUTTON_LOAD_TEXT_CODE"] = "स्यूडो जे.एस. कोड लोड करें";
 T2C.MSG.HI["BUTTON_LOAD_XML"] = "ब्लॉक को एक्सएमएल लोड करें";
 
+T2C.MSG.HI["TYPE_SOMETHING"] = "Kuch type karen";
+

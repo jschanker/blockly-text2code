@@ -44,6 +44,7 @@ class CourseInstructionTaskFlow {
   		    this.tasks_[currentStage].showDirectionStep(1);
   		  }
   		  else if(this.tasks_[currentStage].isTaskCompleted()) {
+  		  	this.tasks_[currentStage].finish();
   		  	++currentStage;
   		  	if(currentStage < this.tasks_.length) {
   		  		this.tasks_[currentStage].startDirections();

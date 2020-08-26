@@ -54,3 +54,5 @@ T2C.MSG.EN["BUTTON_SAVE_XML"] = "Save Block XML";
 T2C.MSG.EN["BUTTON_LOAD_TEXT_CODE"] = "Load PseudoJS Code";
 T2C.MSG.EN["BUTTON_LOAD_XML"] = "Load Block XML";
 
+T2C.MSG.EN["TYPE_SOMETHING"] = "Type something";
+

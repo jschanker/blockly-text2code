@@ -36,6 +36,12 @@ class CourseInstructionTask {
   	this.directions_.start();
   }
 
+  finish() {
+  	if(this.directions_.finish instanceof Function) {
+  		this.directions_.finish();
+  	}
+  }
+
   showDirectionStep(steps=1) {
   	this.directions_.animate(steps);
   }

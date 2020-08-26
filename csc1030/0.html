@@ -101,6 +101,8 @@
       import CourseInstructionTask from "../core/course_instruction_task.js";
       import GlideAnimation from "../core/glide_animation.js";
       import BlinkAnimation from "../core/blink_animation.js";
+      import HelpMessageDirection from "../core/help_message_direction.js";
+      import SeriesAnimations from "../core/series_animations.js";
       import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
       window.addEventListener('DOMContentLoaded', () => {
         const workspace = Blockly.getMainWorkspace(); 
@@ -112,22 +114,17 @@
         workspace.setScale(1);
         refreshWorkspace(workspace);
 
-        let lastTime = 0
-        let numOfMoves = 0;
         const toolboxBlocks = Array.from(document.querySelectorAll("rect"))
           .filter(x => x.getAttribute("fill-opacity"))  
         const displayBlock = toolboxBlocks[0];
         const textBlock = toolboxBlocks[1];
         console.warn("TEXT", textBlock);
         const d = document.createElement("div");
-        const pointerVectorSpeed = {x: 0, y: 2};
-        let blinks = 0;
+
         d.innerText = "👆";
         //d.id = "ptr";
         d.style.fontSize = "x-large";
         d.style.position = "absolute";
-        d.style.left = displayBlock.x.baseVal.value + displayBlock.width.baseVal.value/2 + "px";
-        d.style.top = document.getElementById("top-header").offsetHeight + displayBlock.height.baseVal.value/2 + "px";
         d.style.zIndex = "40";
         document.getElementById("blockly-div").appendChild(d);
 
@@ -172,7 +169,18 @@
         citf.addTask(
           new CourseInstructionTask(
             () => workspace.getAllBlocks().find(x => x.type === "text" && x.getFieldValue("TEXT")),
-            new BlinkAnimation(d, {
+            new SeriesAnimations([
+              new HelpMessageDirection(() => T2C.MSG.currentLanguage.TYPE_SOMETHING, {
+                startPosition: () => {
+                  const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
+                  const coords = textBlockWs.getBoundingRectangle();
+                  return {       
+                    x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
+                    y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2 + d.offsetHeight
+                  }
+                }
+              }),
+              new BlinkAnimation(d, {
               totalSteps: 100,
               toggleSteps: 25,
               startPosition: () => {
@@ -183,20 +191,45 @@
                   y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2
                 }
               }
-            })
+            })])
           )
         );
         citf.addTask(
           new CourseInstructionTask(
             () => document.getElementById("output-container").classList.contains("show-container"),
-            new BlinkAnimation(d, {
-              totalSteps: 100,
-              toggleSteps: 25,
-              startPosition: {
-                x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth/2,
-                y: document.getElementById("run-code-button").offsetTop + document.getElementById("run-code-button").offsetHeight/2
+            new SeriesAnimations([
+              new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_RUN_CODE, {
+                startPosition: {
+                  x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth,
+                  y: document.getElementById("run-code-button").offsetTop + document.getElementById("run-code-button").offsetHeight
+                }
+              }),
+              new BlinkAnimation(d, {
+                totalSteps: 100,
+                toggleSteps: 25,
+                startPosition: {
+                  x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth/2,
+                  y: document.getElementById("run-code-button").offsetTop + document.getElementById("run-code-button").offsetHeight/2
+                }
+              })
+            ])
+          )
+        );
+        citf.addTask(
+          new CourseInstructionTask(
+            () => true,
+            {
+              start: () => true,
+              isComplete: () => true,
+              animate: () => true,
+              finish: () => {
+                alert("✔ Congratulations! You just wrote and ran your first program!");
+                const typeBlock = document.createElement("block");
+                typeBlock.setAttribute("type", "code_statement");
+                document.getElementById("toolbox").appendChild(typeBlock);
+                workspace.updateToolbox(document.getElementById("toolbox"));
               }
-            })
+            }
           )
         );
 
