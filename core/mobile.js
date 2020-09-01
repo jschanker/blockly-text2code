@@ -44,7 +44,7 @@ const isMobile = Blockly.utils.userAgent.MOBILE ||
                  Blockly.utils.userAgent.ANDROID ||
                  Blockly.utils.userAgent.IPAD;
 
-function getParseTree(text) {
+export const getParseTree = function(text) {
   console.warn("Attempting to parse", text);
   // quick fix to handle Python's non-use of semicolons
   const strToParse = (T2C.MSG && T2C.MSG.currentLanguage === T2C.MSG.PY) ?
@@ -53,16 +53,16 @@ function getParseTree(text) {
     shared.parseTreeBlockConnector)[0];
   if(parseTree) console.log("Parse Tree:", parseTree);
   return parseTree;
-}
+};
 
-function handleParseTreeToBlocks(parseTree, blockToReplace, refreshWorkspace=true) {
+export const handleParseTreeToBlocks = function(parseTree, blockToReplace, refreshWorkspace=true) {
   const evaluation = shared.evaluator.evaluate(parseTree);
   console.log("Evaluation: ", evaluation, blockToReplace);
   blockToReplace = blockToReplace || newBlock(shared.workspace); // pass e.g., "math_number" if not replaced
   const replacingBlock = createBlocks(evaluation, blockToReplace, refreshWorkspace);
   console.log(replacingBlock);
   return replacingBlock;
-}
+};
 
 // for type-in-code blocks
 export const parseAndConvertToBlocks = function(props, e) {
@@ -175,7 +175,8 @@ const shared = (function() {
         disable : false, 
         maxBlocks : Infinity, 
         trashcan : true, 
-        horizontalLayout : isMobile || window.innerHeight > window.innerWidth, 
+        //horizontalLayout : isMobile || window.innerHeight > window.innerWidth, 
+        horizontalLayout: true,
         toolboxPosition : 'start', 
         css : true, 
         media : 'https://blockly-demo.appspot.com/static/media/', 

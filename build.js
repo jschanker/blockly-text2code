@@ -136,5 +136,7 @@ series(generateGammarAndInterpretationVars, convertImportsAndExports,
     minifyJS.bind(null, './dist/text2code_blocks.js', null),
     minifyJS.bind(null, './dist/text2code_blocks_mobile.js', null),  
     minifyJS.bind(null, './dist/text2code_generators.js', null),
+    minifyJS.bind(null, './dist/text2code_generators.js', null),
+    minifyJS.bind(null, './dist/csc1030_0.js', null),
     generateDocumentation),
   runTests)();
