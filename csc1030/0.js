@@ -783,9 +783,12 @@ window.addEventListener('DOMContentLoaded', () => {
           const coords = workspace.trashcan.getClientRect();
           return {
             x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
+            y: (coords.top + coords.bottom)/2
+            /*
             y: document.getElementById("top-header").offsetHeight + 
               (coords.top + coords.bottom)/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            */
           }
         }
       })
@@ -848,9 +851,12 @@ window.addEventListener('DOMContentLoaded', () => {
           const coords = workspace.trashcan.getClientRect();
           return {
             x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
+            y: (coords.top + coords.bottom)/2
+            /*
             y: document.getElementById("top-header").offsetHeight + 
               (coords.top + coords.bottom)/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            */
           }
         },
         finish: () => {
@@ -973,6 +979,8 @@ window.addEventListener('DOMContentLoaded', () => {
             // may want to read clipboard instead to check for click (DONE)
             navigator.clipboard.readText().then(clipText => {
               clipboardText = clipText;
+              //console.warn(clipboardText);
+              //console.warn(clipboardText === document.getElementById("textCodeBox").value);
             });
             //clickedSaveTextCodeButton = true;
           });
@@ -1017,7 +1025,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText === document.getElementById("textCodeBox").value,
+      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("textCodeBox").value.replace(/\n|\r/g, ""),
       new SeriesAnimations([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_TEXT_CODE, {
           startPosition: () => {
@@ -1085,9 +1093,12 @@ window.addEventListener('DOMContentLoaded', () => {
             const coords = workspace.trashcan.getClientRect();
             return {
               x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
+              y: (coords.top + coords.bottom)/2
+              /*
               y: document.getElementById("top-header").offsetHeight + 
                 (coords.top + coords.bottom)/2 + 
                 Blockly.getMainWorkspace().getMetrics().flyoutHeight
+              */
             };
           }
         })
@@ -1122,7 +1133,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText === document.getElementById("textCodeBox").value,
+      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("textCodeBox").value.replace(/\n|\r/g, ""),
       new SeriesAnimations([
         new HelpMessageDirection(() => "Paste the code you copied in this text box.", {
           startPosition: () => {
@@ -1222,7 +1233,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText === document.getElementById("xmlData").value,
+      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
       new SeriesAnimations([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
           startPosition: () => {
@@ -1290,9 +1301,12 @@ window.addEventListener('DOMContentLoaded', () => {
             const coords = workspace.trashcan.getClientRect();
             return {
               x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
+              y: (coords.top + coords.bottom)/2
+              /*
               y: document.getElementById("top-header").offsetHeight + 
                 (coords.top + coords.bottom)/2 + 
                 Blockly.getMainWorkspace().getMetrics().flyoutHeight
+              */
             };
           }
         })
@@ -1327,7 +1341,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText === document.getElementById("textCodeBox").value,
+      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
       new SeriesAnimations([
         new HelpMessageDirection(() => "Paste the XML you copied in this text box.", {
           startPosition: () => {
