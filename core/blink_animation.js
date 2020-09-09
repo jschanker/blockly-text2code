@@ -48,6 +48,12 @@ class BlinkAnimation {
   	  this.numOfSteps_ % (2*this.toggleSteps_) < this.toggleSteps_ ? "none" : "block";
   	this.numOfSteps_ += runSteps;
   }
+  finish() {
+  	this.obj_.style.display = "block";
+  	if(this.options_.finish instanceof Function) {
+    	this.options_.finish();
+    }
+  }
   value_(g) {
   	return g instanceof Function ? g() : g;
   }

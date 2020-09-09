@@ -62,6 +62,9 @@ class HelpMessageDirection {
   finish() {
     document.body.removeChild(this.helpButton_);
     //this.helpButton_.style.display = "none";
+    if(this.options_.finish instanceof Function) {
+    	this.options_.finish();
+    }
   }
   animate(steps=1) {
   	// NO OP for now

@@ -50,6 +50,11 @@ class GlideAnimation {
 	isComplete() {
     return this.numOfMoves_ >= this.totalSteps_; 
   }
+  finish() {
+  	if(this.options_.finish instanceof Function) {
+    	this.options_.finish();
+    }
+  }
   animate(steps=1) {
   	const runSteps = Math.min(steps, this.totalSteps_ - this.numOfMoves_);
   	this.obj_.style.left = parseFloat(this.obj_.style.left) 
