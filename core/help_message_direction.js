@@ -38,7 +38,7 @@ class HelpMessageDirection {
 		this.helpButton_.style.borderColor = "#000";
 		this.helpButton_.style.backgroundColor = "#ccc";
 		this.helpButton_.style.position = "absolute";
-		this.helpButton_.style.zIndex = "50";
+		this.helpButton_.style.zIndex = "1050";
 		this.helpButton_.style.minWidth = "50px";
 		this.helpButton_.style.minHeight = "50px";
 		this.helpButton_.style.textAlign = "center";

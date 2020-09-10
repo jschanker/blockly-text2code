@@ -51,7 +51,9 @@ Blockly.Blocks['type_in_display_string_literal'] = {
     this.onchange = e => {
       if(this.getFieldValue("EXP").endsWith("\r") || 
         this.getFieldValue("EXP").endsWith("\n") || (this.getFieldValue("EXP").length > 0 && e.element === "workspaceClick")) {
-        if(!this.validate(this.getFieldValue("EXP"))) return;
+        if(!this.validate(this.getFieldValue("EXP")) || 
+          (!this.getFieldValue("EXP").endsWith(")") && 
+            !this.getFieldValue("EXP").endsWith(";"))) return;
         else {
           const parseTree = getParseTree(this.getFieldValue("EXP"));
           if(parseTree) {
@@ -143,6 +145,46 @@ function getToolboxBlock(index) {
     .filter(x => x.getAttribute("fill-opacity"))[index]
 }
 
+function getPositionOnScreen(obj, p) {
+  return {
+    x: Math.min(p.x, window.innerWidth - obj.innerWidth),
+    y: Math.min(p.y, window.innerHeight - obj.innerHeight)
+  };
+}
+
+/*
+function moveAndFlashText(div) {
+  const steps = 100;
+  let currentStep = 0;
+  div.style.verticalAlign = "top";
+  alert(div.style);
+  function flashText() {
+    if(currentStep % 50 < 25) {
+      div.style.textColor = "#a00";
+    } else {
+      div.style.textColor = "#000";
+    }
+    currentStep++;
+    if(currentStep < steps) {
+      requestAnimationFrame(flashText);
+    }
+  }
+  requestAnimationFrame(flashText);
+}
+*/
+
+function restoreAfterMoveAndFlashText(div) {
+  div.style.verticalAlign = "middle";
+  div.style.color = "#000";
+}
+
+function hideOutputAndCodeContainers() {
+  document.getElementById("output-container").classList.remove("show-container");
+  document.getElementById("output-container").classList.add("hide-container");
+  document.getElementById("text-code-container").classList.remove("show-container");
+  document.getElementById("text-code-container").classList.add("hide-container");   
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   const workspace = Blockly.getMainWorkspace(); 
   workspace.clear();
@@ -164,7 +206,7 @@ window.addEventListener('DOMContentLoaded', () => {
   d.id = "ptr";
   d.style.fontSize = "x-large";
   d.style.position = "absolute";
-  d.style.zIndex = "40";
+  d.style.zIndex = "1001";
   document.getElementById("blockly-div").appendChild(d);
 
 /*
@@ -197,6 +239,35 @@ window.addEventListener('DOMContentLoaded', () => {
             }
           })
         ])
+      )
+    );
+  }
+
+  function addMoveAndFlashTask(courseInstructionTaskFlow, div) {
+    const steps = 200;
+    let currentStep = 0;
+    function flashText() {
+      if(currentStep % 50 < 25) {
+        div.style.color = "#a00";
+      } else {
+        div.style.color = "#000";
+      }
+      currentStep++;
+      if(currentStep < steps) {
+        requestAnimationFrame(flashText);
+      }
+    }  
+    courseInstructionTaskFlow.addTask(
+      new CourseInstructionTask(
+        () => currentStep >= steps,
+        {
+          start: () => {
+            div.style.verticalAlign = "top";
+            requestAnimationFrame(flashText)
+          },
+          isComplete: () => true,
+          animate: () => true
+        }
       )
     );
   }
@@ -249,7 +320,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const coords = textBlockWs.getBoundingRectangle();
             return {       
               x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
-              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2 + d.offsetHeight
+              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height + d.offsetHeight // textBlockWs.height/2 covers field
             }
           }
         }),
@@ -268,6 +339,7 @@ window.addEventListener('DOMContentLoaded', () => {
     )
   );
   addRunTask(citf);
+  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
   citf.addTask(
     new CourseInstructionTask(
       () => true,
@@ -276,10 +348,10 @@ window.addEventListener('DOMContentLoaded', () => {
         isComplete: () => true,
         animate: () => true,
         finish: () => {
+          // moveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
           alert("✔ Congratulations! You just created and ran your first program!");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+          hideOutputAndCodeContainers();
           const typeBlock = document.createElement("block");
           typeBlock.setAttribute("type", "type_in_display_string_literal");
           document.getElementById("toolbox").prepend(typeBlock);
@@ -331,7 +403,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const coords = textBlockWs.getBoundingRectangle();
             return {
               x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
-              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2 + d.offsetHeight
+              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height + d.offsetHeight // use textBlockWs.height/2 covers text field
             }
           }
         }),
@@ -381,6 +453,8 @@ window.addEventListener('DOMContentLoaded', () => {
     )
   );
 
+  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+
   citf.addTask(
     new CourseInstructionTask(
       () => true,
@@ -390,9 +464,8 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("✔ Awesome! You just typed code for and ran your first program!");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+          hideOutputAndCodeContainers();
           ["variables_get", "variables_set"].forEach(blockType => {
             const typeBlock = document.createElement("block");
             typeBlock.setAttribute("type", blockType);
@@ -495,6 +568,7 @@ window.addEventListener('DOMContentLoaded', () => {
   );
 
   addRunTask(citf);
+  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   citf.addTask(
     new CourseInstructionTask(
@@ -505,9 +579,8 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("👍 Great!  Notice how the output is the same as before, but in this program, we store one of the lines of text to display in a variable first.  Variables are useful for storing stuff we'll want to use later.");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+          hideOutputAndCodeContainers();
           const inputBlock = document.createElement("block");
           inputBlock.setAttribute("type", "text_input");
           document.getElementById("toolbox").prepend(inputBlock);
@@ -570,7 +643,7 @@ window.addEventListener('DOMContentLoaded', () => {
               //y: document.getElementById("top-header").offsetHeight + 
               //coords.top + 7*variablesSetBlockWs.height/8 + 
               //Blockly.getMainWorkspace().getMetrics().flyoutHeight
-              x: variablesSetBlockWs.getBoundingRectangle().left + variablesSetBlockWs.width,// + variablesSetBlockWs.width/8,
+              x: variablesSetBlockWs.getBoundingRectangle().left + d.offsetWidth,//+ variablesSetBlockWs.width,// + variablesSetBlockWs.width/8,
               y: document.getElementById("top-header").offsetHeight + variablesSetBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + variablesSetBlockWs.height
             }
           }
@@ -627,6 +700,7 @@ window.addEventListener('DOMContentLoaded', () => {
   );
 
   addRunTask(citf);
+  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   citf.addTask(
     new CourseInstructionTask(
@@ -637,9 +711,8 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("👍 Cool!  Notice how the output includes what you typed in for your first name.  If you run it again and type in something different, you'll see this different name.");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+          hideOutputAndCodeContainers();
           const textJoinBlock = document.createElement("block");
           textJoinBlock.setAttribute("type", "t2c_text_join");
           document.getElementById("toolbox").prepend(textJoinBlock);
@@ -796,6 +869,7 @@ window.addEventListener('DOMContentLoaded', () => {
   );
 
   addRunTask(citf);
+  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   citf.addTask(
     new CourseInstructionTask(
@@ -806,9 +880,8 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("👍 Great!  Notice how the + was used to concatenate or join together the literal message (in quotes) and the name the user enters (*NOT* in quotes).");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+          hideOutputAndCodeContainers();
           const typeInWelcomeNameBlock = document.createElement("block");
           typeInWelcomeNameBlock.setAttribute("type", "type_in_welcome_message");
           document.getElementById("toolbox").prepend(typeInWelcomeNameBlock);
@@ -961,6 +1034,7 @@ window.addEventListener('DOMContentLoaded', () => {
   );
 
   addRunTask(citf);
+  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   citf.addTask(
     new CourseInstructionTask(
@@ -971,9 +1045,8 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("✔✔ Excellent!  You just wrote a program to welcome the user and along the way you learned some things about variables, getting input from the user, and joining together string literals and variables to produce output.  Mission 0 is just about complete; let's just make sure you can save your work and load it up later!  For extra credit, we'll show you what your code looks in pure JavaScript.");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+          hideOutputAndCodeContainers();
           
           document.getElementById("load-save-text-code").addEventListener("click", () => {
             // may want to read clipboard instead to check for click (DONE)
@@ -1059,8 +1132,9 @@ window.addEventListener('DOMContentLoaded', () => {
         finish: () => {
           alert("OK, now that you've copied the code, let's clear the workspace of the blocks and then load it (without reloading the page!) to confirm that everything works.  BE SURE NOT TO overwrite the clipboard until you load the code again or you'll lose your work!");
           // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          //document.getElementById("output-container").classList.remove("show-container");
+          //document.getElementById("output-container").classList.add("hide-container");
+          hideOutputAndCodeContainers();
           /*document.getElementById("load-save-text-code").addEventListener("click", () => {
             // may want to read clipboard instead to check for click
             clickedSaveTextCodeButton = true;
@@ -1162,17 +1236,21 @@ window.addEventListener('DOMContentLoaded', () => {
       () => workspace.getAllBlocks().length === 9,
       new SeriesAnimations([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_TEXT_CODE, {
-          startPosition: {
-            x: document.getElementById("load-save-text-code").offsetLeft + document.getElementById("load-save-text-code").offsetWidth,
-            y: document.getElementById("load-save-text-code").offsetTop + document.getElementById("load-save-text-code").offsetHeight
+          startPosition: () => {
+            return {
+              x: document.getElementById("load-save-text-code").offsetLeft + document.getElementById("load-save-text-code").offsetWidth,
+              y: document.getElementById("load-save-text-code").offsetTop + document.getElementById("load-save-text-code").offsetHeight
+            };
           }
         }),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
-          startPosition: {
-            x: document.getElementById("load-save-text-code").offsetLeft + document.getElementById("load-save-text-code").offsetWidth/2,
-            y: document.getElementById("load-save-text-code").offsetTop + document.getElementById("load-save-text-code").offsetHeight/2
+          startPosition: () => {
+            return {
+              x: document.getElementById("load-save-text-code").offsetLeft + document.getElementById("load-save-text-code").offsetWidth/2,
+              y: document.getElementById("load-save-text-code").offsetTop + document.getElementById("load-save-text-code").offsetHeight/2
+            };
           }
         })
       ])
@@ -1190,10 +1268,8 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("👍 Great! You can also save/load the information about the blocks (XML) from/to the second box.  This will lay out the blocks exactly as you had them in the workspace.  So let's try that now.");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
-          
+          hideOutputAndCodeContainers();
+
           document.getElementById("load-save-xml").addEventListener("click", () => {
             // may want to read clipboard instead to check for click (DONE)
             navigator.clipboard.readText().then(clipText => {
@@ -1266,9 +1342,7 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("OK, now that you've copied the XML for the blocks, let's clear the workspace of the blocks and then load it (without reloading the page!) to confirm that everything works.  BE SURE NOT TO overwrite the clipboard until you load the code again or you'll lose your work!");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          hideOutputAndCodeContainers();
           /*document.getElementById("load-save-text-code").addEventListener("click", () => {
             // may want to read clipboard instead to check for click
             clickedSaveTextCodeButton = true;
@@ -1370,17 +1444,21 @@ window.addEventListener('DOMContentLoaded', () => {
       () => workspace.getAllBlocks().length === 9,
       new SeriesAnimations([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
-          startPosition: {
-            x: document.getElementById("load-save-xml").offsetLeft + document.getElementById("load-save-xml").offsetWidth,
-            y: document.getElementById("load-save-xml").offsetTop + document.getElementById("load-save-xml").offsetHeight
+          startPosition: () => {
+            return {
+              x: document.getElementById("load-save-xml").offsetLeft + document.getElementById("load-save-xml").offsetWidth,
+              y: document.getElementById("load-save-xml").offsetTop + document.getElementById("load-save-xml").offsetHeight
+            };
           }
         }),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
-          startPosition: {
-            x: document.getElementById("load-save-xml").offsetLeft + document.getElementById("load-save-xml").offsetWidth/2,
-            y: document.getElementById("load-save-xml").offsetTop + document.getElementById("load-save-xml").offsetHeight/2
+          startPosition: () => {
+            return {
+              x: document.getElementById("load-save-xml").offsetLeft + document.getElementById("load-save-xml").offsetWidth/2,
+              y: document.getElementById("load-save-xml").offsetTop + document.getElementById("load-save-xml").offsetHeight/2
+            }
           }
         })
       ])
@@ -1398,9 +1476,7 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           alert("👍 Excellent! As the last part of this initial exercise, let's see how the blocks look in pure JavaScript.");
-          // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
-          document.getElementById("output-container").classList.remove("show-container");
-          document.getElementById("output-container").classList.add("hide-container");
+          hideOutputAndCodeContainers();
         }
       }
     )
