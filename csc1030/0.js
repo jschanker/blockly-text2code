@@ -152,6 +152,40 @@ function getPositionOnScreen(obj, p) {
   };
 }
 
+function getAbsolutePosition(workspace, block, options, offsetX = 0, offsetY = 0) {
+  const blockCoords = block.getBoundingRectangle();
+  const workspaceCoords = workspace.getMetrics();
+  const workspaceScale = workspace.getScale();
+  let adjustedOffsetX = offsetX;
+  let adjustedOffsetY = offsetY;
+  const blockOffsetScaleX = options.blockOffsetScaleX || 0;
+  const blockOffsetScaleY = options.blockOffsetScaleY || 0;
+
+
+  // workaround: need to understand coordinate systems better
+  /*
+  if(workspaceScale !== 1 && block.svgGroup_ instanceof SVGElement) { 
+    //!block.svgGroup_.classList.constains("blocklyDragging")) {
+    // console.warn("BSG:", block.svgGroup_);
+    // console.warn(workspace.getSvgXY(block.svgGroup_));
+    return {
+      x: workspace.getSvgXY(block.svgGroup_).x + blockOffsetScaleX*block.width + offsetX,
+      y: workspace.getSvgXY(block.svgGroup_).y + blockOffsetScaleY*block.height + offsetY,
+    }
+  }
+  */
+
+  // document.getElementById("ptr").style.left = Blockly.getMainWorkspace().getSvgXY(Blockly.getMainWorkspace().getAllBlocks()[0].svgGroup_).x + "px";
+  // document.getElementById("ptr").style.top = Blockly.getMainWorkspace().getSvgXY(Blockly.getMainWorkspace().getAllBlocks()[0].svgGroup_).y + document.getElementById("top-header").offsetHeight + "px";
+
+  return {
+    x: (blockCoords.left - workspaceCoords.viewLeft + blockOffsetScaleX*block.width)
+      * workspaceScale  + adjustedOffsetX,
+    y: (blockCoords.top - workspaceCoords.viewTop + workspaceCoords.flyoutHeight 
+      + blockOffsetScaleY*block.height) * workspaceScale  + adjustedOffsetY
+  }
+}
+
 /*
 function moveAndFlashText(div) {
   const steps = 100;
@@ -299,13 +333,17 @@ window.addEventListener('DOMContentLoaded', () => {
         },
         endPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
-          const coords = textBlockWs.getBoundingRectangle();
+          // const coords = textBlockWs.getBoundingRectangle();
+          /*
           return {       
-            x: coords.left + textBlockWs.width/2 + d.offsetWidth/4,
+            x: (coords.left + textBlockWs.width/2)*Blockly.getMainWorkspace().getScale() + d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
-              coords.top + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2 - d.offsetHeight/4
+              (coords.top + 
+              Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2)*Blockly.getMainWorkspace().getScale() - d.offsetHeight/4
           }
+          */
+          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight-d.offsetHeight/4);
+          //getAbsolutePosition(Blockly.getMainWorkspace(), textBlockWs, textBlockWs.width/2 + d.offsetWidth/4, document.getElementById("top-header").offsetHeight + textBlockWs.height/2 - d.offsetHeight/4)
         }
       })
     )
@@ -317,11 +355,12 @@ window.addEventListener('DOMContentLoaded', () => {
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.TYPE_SOMETHING, {
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
-            const coords = textBlockWs.getBoundingRectangle();
-            return {       
+            // const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight + d.offsetHeight);
+            /*return {       
               x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
               y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height + d.offsetHeight // textBlockWs.height/2 covers field
-            }
+            }*/
           }
         }),
         new BlinkAnimation(d, {
@@ -329,11 +368,13 @@ window.addEventListener('DOMContentLoaded', () => {
         toggleSteps: 25,
         startPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
-          const coords = textBlockWs.getBoundingRectangle();
-          return {       
+          // const coords = textBlockWs.getBoundingRectangle();
+          // 0.5 for scale on y covers field
+          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, -d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
+          /*return {       
             x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 - d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2
-          }
+          }*/
         }
       })])
     )
@@ -364,7 +405,8 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text_print" && 
-        x.getNextBlock() && x.getNextBlock().type === "type_in_display_string_literal"),
+        x.getNextBlock() && x.getNextBlock().type === "type_in_display_string_literal" && 
+        !workspace.isDragging()),
       new GlideAnimation(d, {
         totalSteps: 150,
         startPosition: () => {
@@ -379,13 +421,16 @@ window.addEventListener('DOMContentLoaded', () => {
         },
         endPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
-          const coords = textBlockWs.getBoundingRectangle();
+          //const coords = textBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
+          /*
           return {       
             x: coords.left + d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height
           }
+          */
         }
       })
     )
@@ -400,11 +445,14 @@ window.addEventListener('DOMContentLoaded', () => {
           T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "\"your new message\"") + "\nreplacing your new message with whatever you want to display.  Be exact with parentheses, quotation marks, etc.  Tap off the block when you're done.", {
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");
-            const coords = textBlockWs.getBoundingRectangle();
+            // const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight + d.offsetHeight);
+            /*
             return {
               x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
               y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height + d.offsetHeight // use textBlockWs.height/2 covers text field
             }
+            */
           }
         }),
       new BlinkAnimation(d, {
@@ -412,12 +460,15 @@ window.addEventListener('DOMContentLoaded', () => {
         toggleSteps: 50,
         startPosition: () => {
           const typeInBlock1 = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");
-          const coords = typeInBlock1.getBoundingRectangle();
+          // const coords = typeInBlock1.getBoundingRectangle();
+          return getAbsolutePosition(workspace, typeInBlock1, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {       
             x: typeInBlock1.getBoundingRectangle().left,
             y: document.getElementById("top-header").offsetHeight + typeInBlock1.getBoundingRectangle().bottom + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })])
     )
@@ -495,13 +546,16 @@ window.addEventListener('DOMContentLoaded', () => {
         },
         endPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
-          const coords = textBlockWs.getBoundingRectangle();
+          // const coords = textBlockWs.getBoundingRectangle();
+          /*
           return {       
             x: coords.left + d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
+          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 0}, d.offsetWidth/4, document.getElementById("top-header").offsetHeight);
         }
       })
     )
@@ -516,22 +570,28 @@ window.addEventListener('DOMContentLoaded', () => {
         startPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
           const coords = textBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + textBlockWs.width/2, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + textBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         },
         endPosition: () => {
           const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
           const coords = variablesSetBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + 3*variablesSetBlockWs.width/4, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + variablesSetBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })
     )
@@ -555,13 +615,16 @@ window.addEventListener('DOMContentLoaded', () => {
         endPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print"
             && !x.getInputTargetBlock("TEXT"));
-          const coords = textBlockWs.getBoundingRectangle();
+          //const coords = textBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);          
+          /*
           return {       
             x: coords.left + textBlockWs.width/2 + d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + textBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })
     )
@@ -617,13 +680,16 @@ window.addEventListener('DOMContentLoaded', () => {
         },
         endPosition: () => {
           const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
-          const coords = variablesSetBlockWs.getBoundingRectangle();
+          //const coords = variablesSetBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + 3*variablesSetBlockWs.width/4, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + variablesSetBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })
     )
@@ -637,7 +703,9 @@ window.addEventListener('DOMContentLoaded', () => {
         new HelpMessageDirection(() => "You will be asking the user for his/her first name, and this variable will store it.  Rename the variable:\nfirstName\nThis variable is in camel case, which is a convention in Python and JavaScript.  This means that the first letter of each word after the first is capitalized.", {
           startPosition: () => {
             const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
-            const coords = variablesSetBlockWs.getBoundingRectangle();
+            //const coords = variablesSetBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight);
+            /*
             return {       
               //x: coords.left + variablesSetBlockWs.width/8,
               //y: document.getElementById("top-header").offsetHeight + 
@@ -646,6 +714,7 @@ window.addEventListener('DOMContentLoaded', () => {
               x: variablesSetBlockWs.getBoundingRectangle().left + d.offsetWidth,//+ variablesSetBlockWs.width,// + variablesSetBlockWs.width/8,
               y: document.getElementById("top-header").offsetHeight + variablesSetBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + variablesSetBlockWs.height
             }
+            */
           }
         }),
         new BlinkAnimation(d, {
@@ -653,11 +722,14 @@ window.addEventListener('DOMContentLoaded', () => {
           toggleSteps: 25,
           startPosition: () => {
             const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
-            const coords = variablesSetBlockWs.getBoundingRectangle();
+            // const coords = variablesSetBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 0.5}, d.offsetWidth,  document.getElementById("top-header").offsetHeight);
+            /*
             return {       
               x: variablesSetBlockWs.getBoundingRectangle().left + d.offsetWidth,
               y: document.getElementById("top-header").offsetHeight + variablesSetBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + variablesSetBlockWs.height/2
             }
+            */
           }
         })
       ])
@@ -675,11 +747,14 @@ window.addEventListener('DOMContentLoaded', () => {
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
               x.getParent() && x.getParent().type === "text_input");
-            const coords = textBlockWs.getBoundingRectangle();
+            // const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight);
+            /*
             return {       
               x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
               y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height
             }
+            */
           }
         }),
         new BlinkAnimation(d, {
@@ -689,10 +764,13 @@ window.addEventListener('DOMContentLoaded', () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
               x.getParent() && x.getParent().type === "text_input");
             const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, -d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
+            /*
             return {       
               x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 - d.offsetWidth/4,
               y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2
             }
+            */
           }
         })
       ])
@@ -755,13 +833,16 @@ window.addEventListener('DOMContentLoaded', () => {
         endPosition: () => {
           const displayBlockVarWs = workspace.getAllBlocks().find(x => x.type === "text_print" && 
             x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
-          const coords = displayBlockVarWs.getBoundingRectangle();
+          // const coords = displayBlockVarWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);          
+          /*
           return {
             x: coords.left + displayBlockVarWs.width/2, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + displayBlockVarWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })
     )
@@ -780,23 +861,29 @@ window.addEventListener('DOMContentLoaded', () => {
         startPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
             x.getParent() && x.getParent().type === "text_print");
-          const coords = textBlockWs.getBoundingRectangle();
+          // const coords = textBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + textBlockWs.width/2, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + textBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         },
         endPosition: () => {
           const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
-          const coords = textJoinBlockWs.getBoundingRectangle();
+          // const coords = textJoinBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.25, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + textJoinBlockWs.width/4, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + textJoinBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })
     )
@@ -814,23 +901,29 @@ window.addEventListener('DOMContentLoaded', () => {
         totalSteps: 150,
         startPosition: () => {
           const variableBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_get");
-          const coords = variableBlockWs.getBoundingRectangle();
+          // const coords = variableBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, variableBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + variableBlockWs.width/2, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + variableBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         },
         endPosition: () => {
           const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
-          const coords = textJoinBlockWs.getBoundingRectangle();
+          // const coords = textJoinBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + 3*textJoinBlockWs.width/4, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + textJoinBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })
     )
@@ -844,13 +937,16 @@ window.addEventListener('DOMContentLoaded', () => {
         startPosition: () => {
           const displayBlockVarWs = workspace.getAllBlocks().find(x => x.type === "text_print" && 
             !x.getInputTargetBlock("TEXT"));
-          const coords = displayBlockVarWs.getBoundingRectangle();
+          // const coords = displayBlockVarWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + displayBlockVarWs.width/2, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + displayBlockVarWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         },
         endPosition: () => {
           const coords = workspace.trashcan.getClientRect();
@@ -912,13 +1008,16 @@ window.addEventListener('DOMContentLoaded', () => {
         totalSteps: 150,
         startPosition: () => {
           const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
-          const coords = textJoinBlockWs.getBoundingRectangle();
+          // const coords = textJoinBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + textJoinBlockWs.width/2, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + textJoinBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         },
         endPosition: () => {
           const coords = workspace.trashcan.getClientRect();
@@ -959,13 +1058,16 @@ window.addEventListener('DOMContentLoaded', () => {
         },
         endPosition: () => {
           const textPrintBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
-          const coords = textPrintBlockWs.getBoundingRectangle();
+          // const coords = textPrintBlockWs.getBoundingRectangle();
+          return getAbsolutePosition(workspace, textPrintBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+          /*
           return {
             x: coords.left + textPrintBlockWs.width/2, //+ d.offsetWidth/4,
             y: document.getElementById("top-header").offsetHeight + 
               coords.top + textPrintBlockWs.height/2 + 
               Blockly.getMainWorkspace().getMetrics().flyoutHeight
           }
+          */
         }
       })
     )
@@ -1003,13 +1105,16 @@ window.addEventListener('DOMContentLoaded', () => {
         new HelpMessageDirection(() => "Write a message to welcome the user with his/her name with punctuation at the end.  To do this type:\n(1) Something like welcome *in quotes* because you want it to be displayed as is.\n(2) + firstName (+ to join text and firstName without the quotes to get the name the user typed in and not literally the text firstName)\n(3) + and a punctuation mark in quotes to tack on a punctuation symbol at the end.", {
           startPosition: () => {
             const textPrintBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
-            const coords = textPrintBlockWs.getBoundingRectangle();
+            // const coords = textPrintBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textPrintBlockWs, {blockOffsetScaleX: 1, blockOffsetScaleY: 1}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
             return {
               x: coords.left + textPrintBlockWs.width, //+ d.offsetWidth/4,
               y: document.getElementById("top-header").offsetHeight + 
                 coords.top + textPrintBlockWs.height + 
                 Blockly.getMainWorkspace().getMetrics().flyoutHeight
             };
+            */
           }
         }),
         new BlinkAnimation(d, {
@@ -1018,11 +1123,14 @@ window.addEventListener('DOMContentLoaded', () => {
           startPosition: () => {
             const typeInBlockWs = workspace.getAllBlocks().find(x => 
               x.type === "type_in_welcome_message");
-            const coords = typeInBlockWs.getBoundingRectangle();
+            // const coords = typeInBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, typeInBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0, document.getElementById("top-header").offsetHeight);
+            /*
             return {       
               x: typeInBlockWs.getBoundingRectangle().left + typeInBlockWs.width/2,
               y: document.getElementById("top-header").offsetHeight + typeInBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + typeInBlockWs.height/2
             }
+            */
           },
           finish: () => {
             workspace.options.maxInstances["type_in_welcome_message"] = 0;
@@ -1155,7 +1263,7 @@ window.addEventListener('DOMContentLoaded', () => {
               x: 50, //(coords.left + coords.right)/2, //+ d.offsetWidth/4,
               y: document.getElementById("top-header").offsetHeight + 
                 //(coords.top + coords.bottom)/2 + 
-                Blockly.getMainWorkspace().getMetrics().flyoutHeight + 
+                workspace.getMetrics().flyoutHeight + 
                 100
             };
           }
@@ -1363,7 +1471,7 @@ window.addEventListener('DOMContentLoaded', () => {
               x: 50, //(coords.left + coords.right)/2, //+ d.offsetWidth/4,
               y: document.getElementById("top-header").offsetHeight + 
                 //(coords.top + coords.bottom)/2 + 
-                Blockly.getMainWorkspace().getMetrics().flyoutHeight + 
+                workspace.getMetrics().flyoutHeight + 
                 100
             };
           }
