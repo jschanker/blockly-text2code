@@ -1,0 +1,327 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Text 2 Code</title>
+    <link rel = "stylesheet" href = "styles.css">
+    <link rel = "stylesheet" href = "mobile.css">
+    <script src="blockly/blockly_compressed.js"></script>
+    <script src="blockly/blocks_compressed.js"></script>
+    <script src="blockly/javascript_compressed.js"></script>
+    <script src="blockly/python_compressed.js"></script>
+    <script src="blockly/msg/js/en.js"></script>
+    <script src = "core/msg/en.js"></script>
+    <script src = "core/msg/hi.js"></script>
+    <script src = "core/msg/js.js"></script>
+    <script src = "core/msg/py.js"></script>
+    <script src="dist/text2code_blocks_mobile.js"></script>
+  </head>
+  <body>
+    <header id = "top-header">
+      <div class = "table-row">
+        <div id = "run-code-button" style = "color: green;" class = "header-button table-cell">▶</div>
+        <div id = "save-code-button" style = "color: green;" class = "header-button table-cell">💾</div>
+        <div id = "load-code-button" style = "color: green;" class = "header-button table-cell">📁</div>
+        <form style = "font-size: x-large;" class = "table-cell">
+          <select id = "language" style = "font-size: normal; width:95px;">
+            <option value = "en">English Pseudocode</option>
+            <option value = "js">JavaScript</option>
+            <option value = "py">Python</option>
+            <option value = "hi">हिंदी स्यूडोकोड</option>
+            <option value = "hi">Hindee Syoodokod</option>
+          </select>
+        </form>
+        <h1><span id = "textHeader">T</span><span id = "twoHeader">2</span><span id = "codeTextHeader">C</span></h1>
+      </div>
+      <!--<h1><span id = "textHeader">Text</span> <span id = "twoHeader">2</span> <span id = "codeTextHeader">Code</span></h1>-->
+    </header>
+    <div id = "all-content">
+      <!--<form style = "text-align:right; font-size: x-large;">
+        Language:
+        <select id = "language" style = "text-align:right; font-size: x-large;">
+          <option value = "en">English</option>
+          <option value = "hi">हिंदी</option>
+        </select>
+      </form>-->
+        <div id = "blockly-div">
+          <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
+            <block type="text_print"></block>
+            <block type="text_input"></block>
+            <block type = "variables_set"></block>
+            <block type = "variables_get"></block>
+            <block type="math_number">
+              <field name="NUM">0</field>
+            </block>
+            <block type="math_arithmetic_basic">
+              <field name="OP">ADD</field>
+              <value name="A">
+                <shadow type="math_number">
+                  <field name="NUM">1</field>
+                </shadow>
+              </value>
+              <value name="B">
+                <shadow type="math_number">
+                  <field name="NUM">1</field>
+                </shadow>
+              </value>
+            </block>
+            <block type="text"></block>
+            <block type="t2c_text_join"></block>
+            <!--<block type="before_substring"></block>
+            <block type="after_substring"></block>-->
+            <block type="t2c_text_length"></block>
+            <block type="t2c_text_indexof"></block>
+            <block type="t2c_text_charat"></block>
+            <block type="t2c_text_getsubstring"></block>
+            <block type = "code_expression"></block>
+            <block type = "code_statement"></block>
+          </xml>
+        </div>
+        <div id = "output-container" class = "hide-container">
+          <div class = "table-container">
+            <div class = "table-row">
+              <div class = "table-cell">
+                <h3 id = "outputAppearsBelow" name = "HEADING_OUTPUT_APPEARS_BELOW">Output will appear below</h3>
+                <pre>
+                  <div id = "consoleDisplay">
+                  </div>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id = "text-code-container" class = "hide-container">
+          <div class = "table-container">
+            <div class = "table-row">
+              <div class = "table-cell">
+                <!--<form>-->
+                  <h3>Textual Code</h3>
+                  <textarea id = "textCodeBox" name = "TEXTAREA_CODE_APPEARS_BELOW" placeholder = "Code to appear here."></textarea>
+                  <button id = "load-save-text-code">Load/Save Text Code</button>
+                  <h3>XML</h3>
+                  <div id = "xml-data-container">
+                    <!--<span id = "xml-close" onclick="javascript:alert();">❌</span>-->
+                    <textarea id = "xmlData" name = "TEXTAREA_COPY_TEXT_HERE" placeholder="Copy text here to save/load blocks."></textarea>
+                  </div>
+                  <button id = "load-save-xml">Load/Save XML</button>
+                <!--</form>-->
+              </div>
+            </div>
+          </div>
+        </div>
+        <!--<div id = "level-builder" style = "position:absolute;height:100%;width:40%;top:200px;right:10px; background-color:rgba(127,127,127,0.5);">-->
+        <div id = "level-builder" style = "position:absolute;height:30%;width:90%;bottom:0px;left:10px; background-color:rgba(127,127,127,0.5);">
+          <textarea id = "level-code-container">
+
+          </textarea>
+          <script>
+            /*
+            const descendsFrom = (blockA, blockB, blockBlueprintArr) => {
+              return blockA.parent && (blockA.parent === blockB.name || descendsFrom(blockBlueprintArr.find(block => block.name === blockA.parent), blockB, blockBlueprintArr));
+            };
+            */
+            const getBlockWithName = (blockName, blockArr) => blockArr.find(block => block.name === blockName); 
+            const getAncestors = (block, blockArr) => {
+              if(!block.parent || block.isStatement) return [];
+              else {
+                const parentBlueprint = getBlockWithName(block.parent, blockArr);
+                return [parentBlueprint.name].concat(getAncestors(parentBlueprint, blockArr));
+              }
+            };
+            const getCodeFromBlocks = (blockBlueprintArr, includeNext) => {
+              includeNext = includeNext || ((block) => true);
+              const code = 
+                blockBlueprintArr.map(blockBlueprint => {
+                  return `const ${blockBlueprint.name} = workspace.getAllBlocks.find(block => block.type === "${blockBlueprint.type}"` +
+
+                  /*(blockBlueprint.isStatement ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +*/
+                  (blockBlueprint.isStatement && includeNext(blockBlueprint) ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +
+
+                  /*(blockBlueprint.nextStatement !== null ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +*/
+
+                  /*((blockBlueprint.nextStatement !== null && includeNext(blockBlueprint)) ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +*/  
+
+                  (blockBlueprint.inputs.length > 0 ? ` && ` : "") +  
+
+                  blockBlueprint.inputs.map(input => {
+                    return Object.keys(input).map(key => `block.getInputTargetBlock("${key}") === ${input[key]}`)
+                      .join(" && ")
+                  }).join(" && ") + 
+
+                  (blockBlueprint.fields.length > 0 ? ` && ` : "") +
+
+                  blockBlueprint.fields.map(field => {
+                    return Object.keys(field).map(key => key === "VAR" ? `block.getField("VAR").getText() === "${field[key]}"` : `block.getFieldValue("${key}") === "${field[key]}"`)
+                      .join(" && ")
+                  }).join(" && ");
+
+                  /*(blockBlueprint.parent !== null ? `block.getParent() === ${blockBlueprint.parent}` : "");*/
+
+                }).join(");\n      ");
+              return code;
+            }
+            const toCondition = (blockBlueprintArr) => {
+              //const sortedBlockBlueprintArr = blockBlueprintArr.slice();
+              /*
+              sortedBlockBlueprintArr.sort((a, b) => {
+                console.warn("A", a, "B", b, "-1", descendsFrom(a,b, blockBlueprintArr), "1", descendsFrom(b, a, blockBlueprintArr));
+                if(descendsFrom(a, b, blockBlueprintArr)) return -1;
+                else if(descendsFrom(b, a, blockBlueprintArr)) return 1;
+                else return 0;
+              })
+              */
+              console.warn("UNSORTED", blockBlueprintArr);
+              //console.warn("SORTED", sortedBlockBlueprintArr);
+              // factor out into JSON in future
+              const prefixCode = 
+              `citf.addTask(\n  new CourseInstructionTask(\n    () => {\n      `;
+              const code = getCodeFromBlocks(blockBlueprintArr);
+              return prefixCode + code + ");\n    },\n    ";
+            };
+            const toDirections = (blockBlueprintArr) => {
+              const prefixCode = "new HelpMessageDirection(() => {\n      ";
+              const collapsedBlocks = blockBlueprintArr.filter(block => block.collapsed);
+              const newBlocks = blockBlueprintArr.filter(block => !block.collapsed);
+              const collapsedCode = collapsedBlocks.length ? getCodeFromBlocks(collapsedBlocks, (block) => block.nextStatement === null || getBlockWithName(block.nextStatement, collapsedBlocks)) + ");\n      " : "";
+              const newBlockCode = newBlocks
+                .map(blockBlueprint => {
+                  const collapsedBlocksSameType = collapsedBlocks.filter(b => blockBlueprint !== b && blockBlueprint.type === b.type)
+                  return `const ${blockBlueprint.name} = workspace.getAllBlocks.find(block => block.type === "${blockBlueprint.type}"` + collapsedBlocksSameType.map(b => " && block !== " + b.name).join("") + ");\n      "
+                }).join("");
+              const newBlockFeedback = newBlocks
+                .map(blockBlueprint => {
+                  const ancestors = getAncestors(blockBlueprint, blockBlueprintArr);
+                  //console.error(blockBlueprint, ancestors);
+                  //(blockBlueprint.inputs.length > 0 ? ` && ` : "") +  
+
+                  const inputFeedback = blockBlueprint.inputs.map(input => {
+                    return Object.keys(input).map(key => '        if(' + blockBlueprint.name + '.getInputTargetBlock("' + key + '") !== ' + input[key] + ') {\n          return "Make sure to place the "\n        }'
+                    ).join("\n");
+                  }).join("");
+
+                  const fieldFeedback = blockBlueprint.fields.map(field => {
+                    return Object.keys(field).map(key => {
+                      if(key === "VAR") {
+                        return '        if(' + blockBlueprint.name + '.getField("' + key + '").getText() !== ' + field[key] + ') {\n          return "Incorrect field value for "\n        }'
+                      } else {
+                        return '        if(' + blockBlueprint.name + '.getFieldValue("' + key + '") !== ' + field[key] + ') {\n          return "Incorrect field value for "\n        }'
+                      }
+                    }).join("\n")
+                  }).join("");
+
+                  const nextStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.nextStatement ? " && " + blockBlueprint.nextStatement : "") + " && " + blockBlueprint.name + ".getNextBlock() !== " + blockBlueprint.nextStatement + ') {\n        return "The next statement is incorrect.";\n      }\n' : "";
+
+                  const previousStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.parent ? " && " + blockBlueprint.parent : "") + " && " + blockBlueprint.name + ".getPreviousBlock() !== " + blockBlueprint.parent + ') {\n        return "The previous statement is incorrect.";\n      }\n' : "";
+
+                  return previousStatementFeedback + nextStatementFeedback + "\n      if(" + [blockBlueprint.name].concat(ancestors).join(" && ") + ") {\n" + inputFeedback + "\n" + fieldFeedback + '\n      }\n';
+                }).join("");
+
+              /*
+              const collapsedFirstBlockBlueprintArr = blockBlueprintArr.slice();
+              for(let i = 0; i < blockBlueprintArr.length; i++) {
+                let j = i + 1;
+                if(!blockBlueprintArr[i].collapsed) {
+                  // swap with non-collapsed blocks of the same type
+                  while(j < blockBlueprintArr.length) {
+                    j++;
+                  }
+                }
+              }
+              */
+              /*
+              const code = 
+                blockBlueprintArr.map(blockBlueprint => {
+                  return `const ${blockBlueprint.name} = workspace.getAllBlocks.find(block => block.type === "${blockBlueprint.type}"` +
+
+                  (blockBlueprint.nextStatement !== null && blockBlueprint.collapsed ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") + 
+
+                  (blockBlueprint.inputs.length > 0 && blockBlueprint.collapsed ? ` && ` : "") +  
+
+                  (!blockBlueprint.collapsed ? "" : blockBlueprint.inputs.map(input => {
+                    return Object.keys(input).map(key => `block.getInputTargetBlock("${key}") === ${input[key]}`)
+                      .join(" && ")
+                  }).join(" && ")) + 
+
+                  (blockBlueprint.fields.length > 0 && blockBlueprint.collapsed ? ` && ` : "") +
+
+                  (!blockBlueprint.collapsed ? "" : blockBlueprint.fields.map(field => {
+                    return Object.keys(field).map(key => key === "VAR" ? `block.getField("VAR").getText() === "${field[key]}"` : `block.getFieldValue("${key}") === "${field[key]}"`)
+                      .join(" && ")
+                  }).join(" && "));
+
+                }).join(");\n      ");*/
+              return prefixCode + collapsedCode + newBlockCode + newBlockFeedback + '\n      return "Do something with the blocks.";\n' + "\n    }, {\n      startPosition:getAbsolutePosition(workspace, null, {}, 50, document.getElementById(\"top-header\").offsetHeight + 50)\n    })\n  )\n);"
+            }
+            const toCamelCase = str => str.split("_").map((word, index) => index > 0 ? word[0].toUpperCase() + word.substring(1) : word).join("");
+            const isEnclosingBlockCollapsed = block => block.getParent() && block.getParent() !== block.getPreviousBlock() && (block.getParent().isCollapsed() || isEnclosingBlockCollapsed(block.getParent())); 
+            window.addEventListener('DOMContentLoaded', (event) => {
+              const ws = Blockly.getMainWorkspace();
+              const levelCodeContainer = document.getElementById("level-code-container"); 
+              ws.addChangeListener((event) => {
+                const blocks = ws.getAllBlocks(true).slice().reverse();
+                const blockVariableNames = blocks.map((block, index) => toCamelCase(block.type) + index);
+                const blockParents = blocks.map((block, index) => block.getParent() ? blockVariableNames[blocks.indexOf(block.getParent())] : null);
+                const blockNexts = blocks.map((block, index) => block.getNextBlock() && blockVariableNames[blocks.indexOf(block.getNextBlock())]);
+                const blockInputs = blocks.map((block, index) => 
+                  block.inputList.map(input => {
+                    if(input.name && block.getInputTargetBlock(input.name)) {
+                      const obj = {};
+                      obj[input.name] = blockVariableNames[blocks.indexOf(block.getInputTargetBlock(input.name))];
+                      return obj;
+                    }
+                  }).filter(obj => obj)
+                )
+                const blockFields = blocks.map((block, index) => 
+                  block.inputList.map(input => 
+                    input.fieldRow.map(field => {
+                    if(field.name && block.getFieldValue(field.name) && !field.name.startsWith("_TEMP_COLLAPSED_FIELD")) {
+                      const obj = {};
+                      if(field.name !== "VAR") {
+                        obj[field.name] = block.getFieldValue(field.name);
+                      } else {
+                        obj["VAR"] = block.getField("VAR").getText()
+                      }
+                      return obj;
+                    }
+                  }).filter(obj => obj)
+                    .reduce((acc, x) => acc.concat(x), []))
+                    .reduce((acc, x) => acc.concat(x), [])
+                    .filter(obj => obj)
+                )
+
+                const blockBlueprint = blocks.map((block, index) => {
+                  return {
+                    name: toCamelCase(block.type) + index,
+                    type: block.type,
+                    inputs: blockInputs[index],
+                    fields: blockFields[index],
+                    parent: blockParents[index],
+                    nextStatement: blockNexts[index],
+                    //isStatement: block.getParent() === block.getPreviousBlock(),
+                    isStatement: !!(block.nextConnection || block.previousConnection),
+                    collapsed: block.isCollapsed() || isEnclosingBlockCollapsed(block)//,
+                    //block: block
+                  };
+                });
+                levelCodeContainer.value = toCondition(blockBlueprint) + toDirections(blockBlueprint);
+                levelCodeContainer.value += "\n\n" + JSON.stringify(blockBlueprint);
+              });
+            });
+          </script>
+        </div>
+    </div>
+
+    <!--<div>
+      <iframe height="400px" width="100%" src="https://repl.it/@jschanker/Text2Code-Strings-Exact?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals"></iframe>
+    </div>-->
+    <!--
+    <footer>
+        <h3 id = "bottomText" name = "HEADING_BOTTOM_TEXT"><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
+    </footer>
+    -->
+    <script src = "dist/text2code_generators.js"></script>
+    <script src = "dist/text2code_core_mobile.js"></script>
+  </body>
+</html>
