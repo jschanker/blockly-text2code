@@ -122,6 +122,21 @@
               return blockA.parent && (blockA.parent === blockB.name || descendsFrom(blockBlueprintArr.find(block => block.name === blockA.parent), blockB, blockBlueprintArr));
             };
             */
+
+            const typesToTerminalConstants = {
+              text_print: "DISPLAY",
+              text_input: "GETINPUTBYASKING",
+              t2c_text_charat: "GETCHARACTERNUMBER",
+              t2c_text_length: "LENGTH",
+              t2c_text_getsubstring: "GETTEXTFROMPOSITIONNUMBER",
+              t2c_text_indexof: "POSITIONNUMBEROFTEXT",
+              t2c_text_join: "+",
+              text: "text",
+              math_number: "number",
+              math_arithmetic_basic: "arithmetic",
+              variables_get: "variable get",
+              variables_set: "let variable"
+            };
             const getBlockWithName = (blockName, blockArr) => blockArr.find(block => block.name === blockName); 
             const getAncestors = (block, blockArr) => {
               if(!block.parent || block.isStatement) return [];
@@ -134,7 +149,7 @@
               includeNext = includeNext || ((block) => true);
               const code = 
                 blockBlueprintArr.map(blockBlueprint => {
-                  return `const ${blockBlueprint.name} = workspace.getAllBlocks.find(block => block.type === "${blockBlueprint.type}"` +
+                  return `const ${blockBlueprint.name} = workspace.getAllBlocks().find(block => block.type === "${blockBlueprint.type}"` +
 
                   /*(blockBlueprint.isStatement ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +*/
                   (blockBlueprint.isStatement && includeNext(blockBlueprint) ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +
@@ -178,7 +193,8 @@
               const prefixCode = 
               `citf.addTask(\n  new CourseInstructionTask(\n    () => {\n      `;
               const code = getCodeFromBlocks(blockBlueprintArr);
-              return prefixCode + code + ");\n    },\n    ";
+              const retVal = blockBlueprintArr.map(block => block.name).join(" && ")
+              return prefixCode + code + ");\n" + "      return " + retVal + ";\n    },\n    ";
             };
             const toDirections = (blockBlueprintArr) => {
               const prefixCode = "new HelpMessageDirection(() => {\n      ";
@@ -188,32 +204,36 @@
               const newBlockCode = newBlocks
                 .map(blockBlueprint => {
                   const collapsedBlocksSameType = collapsedBlocks.filter(b => blockBlueprint !== b && blockBlueprint.type === b.type)
-                  return `const ${blockBlueprint.name} = workspace.getAllBlocks.find(block => block.type === "${blockBlueprint.type}"` + collapsedBlocksSameType.map(b => " && block !== " + b.name).join("") + ");\n      "
+                  return `const ${blockBlueprint.name} = workspace.getAllBlocks().find(block => block.type === "${blockBlueprint.type}"` + collapsedBlocksSameType.map(b => " && block !== " + b.name).join("") + ");\n      "
                 }).join("");
               const newBlockFeedback = newBlocks
                 .map(blockBlueprint => {
                   const ancestors = getAncestors(blockBlueprint, blockBlueprintArr);
+                  const blockNameKey = "TERMINAL_" + typesToTerminalConstants[blockBlueprint.type];
+                  const blockName = T2C.MSG.currentLanguage[blockNameKey] ?
+                    '" + T2C.MSG.currentLanguage["' + blockNameKey + '"] + "' : typesToTerminalConstants[blockBlueprint.type]; 
+//                  (T2C.MSG.currentLanguage["TERMINAL_" + typesToTerminalConstants[blockBlueprint.type]] ? T2C.MSG.currentLanguage["TERMINAL_" + typesToTerminalConstants[blockBlueprint.type]] : typesToTerminalConstants[blockBlueprint.type]);
                   //console.error(blockBlueprint, ancestors);
                   //(blockBlueprint.inputs.length > 0 ? ` && ` : "") +  
 
                   const inputFeedback = blockBlueprint.inputs.map(input => {
-                    return Object.keys(input).map(key => '        if(' + blockBlueprint.name + '.getInputTargetBlock("' + key + '") !== ' + input[key] + ') {\n          return "Make sure to place the "\n        }'
+                    return Object.keys(input).map(key => '        if(' + blockBlueprint.name + '.getInputTargetBlock("' + key + '") !== ' + input[key] + ') {\n          return "One of the blocks in the ' + blockName + ' block is incorrect."' + '\n        }'
                     ).join("\n");
-                  }).join("");
+                  }).join("\n");
 
                   const fieldFeedback = blockBlueprint.fields.map(field => {
                     return Object.keys(field).map(key => {
                       if(key === "VAR") {
-                        return '        if(' + blockBlueprint.name + '.getField("' + key + '").getText() !== ' + field[key] + ') {\n          return "Incorrect field value for "\n        }'
+                        return '        if(' + blockBlueprint.name + '.getField("' + key + '").getText() !== ' + field[key] + ') {\n          return "Make sure you use the correct variable name for the ' + blockName + ' block; it should be ' + field[key] + '.";' + '\n        }'
                       } else {
-                        return '        if(' + blockBlueprint.name + '.getFieldValue("' + key + '") !== ' + field[key] + ') {\n          return "Incorrect field value for "\n        }'
+                        return '        if(' + blockBlueprint.name + '.getFieldValue("' + key + '") != "' + field[key] + '") {\n          return "Incorrect field value for ' + blockName + ' block.";\n        }'
                       }
                     }).join("\n")
                   }).join("");
 
-                  const nextStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.nextStatement ? " && " + blockBlueprint.nextStatement : "") + " && " + blockBlueprint.name + ".getNextBlock() !== " + blockBlueprint.nextStatement + ') {\n        return "The next statement is incorrect.";\n      }\n' : "";
+                  const nextStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.nextStatement ? " && " + blockBlueprint.nextStatement : "") + " && " + blockBlueprint.name + ".getNextBlock() !== " + blockBlueprint.nextStatement + ') {\n        return "The next statement above the ' + blockName + ' block is incorrect.";\n      }\n' : "";
 
-                  const previousStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.parent ? " && " + blockBlueprint.parent : "") + " && " + blockBlueprint.name + ".getPreviousBlock() !== " + blockBlueprint.parent + ') {\n        return "The previous statement is incorrect.";\n      }\n' : "";
+                  const previousStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.parent ? " && " + blockBlueprint.parent : "") + " && " + blockBlueprint.name + ".getPreviousBlock() !== " + blockBlueprint.parent + ') {\n        return "The previous statement above the ' + blockName + ' block is incorrect.";\n      }\n' : "";
 
                   return previousStatementFeedback + nextStatementFeedback + "\n      if(" + [blockBlueprint.name].concat(ancestors).join(" && ") + ") {\n" + inputFeedback + "\n" + fieldFeedback + '\n      }\n';
                 }).join("");

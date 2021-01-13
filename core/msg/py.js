@@ -7,6 +7,7 @@ T2C.MSG.PY["TOOLBOX_CATEGORY_MATH"] = "Math";
 T2C.MSG.PY["TOOLBOX_CATEGORY_PSEUDO_JS_TEXT"] = "PseudoJS Text";
 T2C.MSG.PY["TOOLBOX_CATEGORY_JS_TEXT"] = "JavaScript Text";
 T2C.MSG.PY["TOOLBOX_CATEGORY_TYPE_IN_CODE"] = "Type in Code Blocks";
+T2C.MSG.PY["TERMINAL_LET"] = "";
 T2C.MSG.PY["TERMINAL_DISPLAY"] = "print";
 T2C.MSG.PY["TEXT_PRINT_TITLE"] = "print(%1)";
 T2C.MSG.PY["TEXT_PRINT_TOOLTIP"] = "Display the specified text, number or other value.";

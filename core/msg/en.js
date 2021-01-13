@@ -9,6 +9,7 @@ T2C.MSG.EN["TOOLBOX_CATEGORY_MATH"] = "Math";
 T2C.MSG.EN["TOOLBOX_CATEGORY_PSEUDO_JS_TEXT"] = "PseudoJS Text";
 T2C.MSG.EN["TOOLBOX_CATEGORY_JS_TEXT"] = "JavaScript Text";
 T2C.MSG.EN["TOOLBOX_CATEGORY_TYPE_IN_CODE"] = "Type in Code Blocks";
+T2C.MSG.EN["TERMINAL_LET"] = "let ";
 T2C.MSG.EN["TERMINAL_DISPLAY"] = "display";
 T2C.MSG.EN["TEXT_PRINT_TITLE"] = "display(%1);";
 T2C.MSG.EN["TEXT_PRINT_TOOLTIP"] = "Display the specified text, number or other value.";
