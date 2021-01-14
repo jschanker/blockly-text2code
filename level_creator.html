@@ -168,7 +168,7 @@
                   (blockBlueprint.fields.length > 0 ? ` && ` : "") +
 
                   blockBlueprint.fields.map(field => {
-                    return Object.keys(field).map(key => key === "VAR" ? `block.getField("VAR").getText() === "${field[key]}"` : `block.getFieldValue("${key}") === "${field[key]}"`)
+                    return Object.keys(field).map(key => key === "VAR" ? `block.getField("VAR").getText() === "${field[key]}"` : `block.getFieldValue("${key}") == "${field[key]}"`)
                       .join(" && ")
                   }).join(" && ");
 
