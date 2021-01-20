@@ -315,7 +315,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   // const citf = new CourseInstructionTaskFlow();
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && Blockly.selected !== x),
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && Blockly.selected !== x),
       new GlideAnimation(d, {
         totalSteps: 50,
         startPosition: {
@@ -338,7 +338,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
             textBlock.y.baseVal.value + displayBlock.height.baseVal.value/2 
         },
         endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
+          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
           // const coords = textBlockWs.getBoundingRectangle();
           /*
           return {       
@@ -410,7 +410,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   );
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && 
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getNextBlock() && x.getNextBlock().type === "type_in_display_string_literal" && 
         !workspace.isDragging()),
       new GlideAnimation(d, {
@@ -426,7 +426,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           }
         },
         endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
+          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
           //const coords = textBlockWs.getBoundingRectangle();
           return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
           /*
@@ -443,8 +443,8 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   );
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && x.getNextBlock() && 
-        x.getNextBlock().type === "text_print" && x.getNextBlock().getInputTargetBlock("TEXT")
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && x.getNextBlock() && 
+        (x.getNextBlock().type === "text_print" || x.getNextBlock().type === "js_text_print") && x.getNextBlock().getInputTargetBlock("TEXT")
         && x.getNextBlock().getInputTargetBlock("TEXT").type === "text"),
       new ParallelAnimation([
         new HelpMessageDirection(() => "Type in code matching above block but with different text to display.  I.e., Type\n" + 
@@ -538,7 +538,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
-        x.getNextBlock() && x.getNextBlock().type === "text_print"),
+        x.getNextBlock() && (x.getNextBlock().type === "text_print" || x.getNextBlock().type === "js_text_print")),
       new GlideAnimation(d, {
         totalSteps: 150,
         startPosition: () => {
@@ -551,7 +551,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           }
         },
         endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
+          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
           // const coords = textBlockWs.getBoundingRectangle();
           /*
           return {       
@@ -605,7 +605,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && 
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get"),
       new GlideAnimation(d, {
         totalSteps: 150,
@@ -619,7 +619,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           }
         },
         endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print"
+          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print")
             && !x.getInputTargetBlock("TEXT"));
           //const coords = textBlockWs.getBoundingRectangle();
           return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);          
@@ -672,7 +672,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
-        x.getInputTargetBlock("VALUE") && x.getInputTargetBlock("VALUE").type === "text_input"),
+        x.getInputTargetBlock("VALUE") && (x.getInputTargetBlock("VALUE").type === "text_input" || x.getInputTargetBlock("VALUE").type === "js_text_input")),
       new GlideAnimation(d, {
         totalSteps: 150,
         startPosition: () => {
@@ -745,14 +745,14 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text" &&  
-            x.getParent() && x.getParent().type === "text_input" && 
+            x.getParent() && (x.getParent().type === "text_input" || x.getParent().type === "js_text_input") && 
             (x.getFieldValue("TEXT").toLowerCase().includes("name ") ||
              x.getFieldValue("TEXT").toLowerCase().includes(" name"))),
       new ParallelAnimation([
         new HelpMessageDirection(() => "This text is the message the user will receive asking for his/her name.  Write a message asking the user for his/her name.  Unlike the variable name which cannot have spaces in most programming languages, the message will be seen by the user and should have spaces.  The variable will store the name your user enters.", {
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
-              x.getParent() && x.getParent().type === "text_input");
+              x.getParent() && (x.getParent().type === "text_input" || x.getParent().type === "js_text_input"));
             // const coords = textBlockWs.getBoundingRectangle();
             return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight);
             /*
@@ -768,7 +768,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           toggleSteps: 25,
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
-              x.getParent() && x.getParent().type === "text_input");
+              x.getParent() && (x.getParent().type === "text_input" || x.getParent().type === "js_text_input"));
             const coords = textBlockWs.getBoundingRectangle();
             return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, -d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
             /*
@@ -819,7 +819,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && 
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "t2c_text_join"),
         /*&& x.getInputTargetBlock("TEXT").getInputTargetBlock("A") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("A").type === "variables_get"
@@ -837,7 +837,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           }
         },
         endPosition: () => {
-          const displayBlockVarWs = workspace.getAllBlocks().find(x => x.type === "text_print" && 
+          const displayBlockVarWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
             x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
           // const coords = displayBlockVarWs.getBoundingRectangle();
           return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);          
@@ -856,7 +856,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && 
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "t2c_text_join"
         && x.getInputTargetBlock("TEXT").getInputTargetBlock("A") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("A").type === "text"),
@@ -866,7 +866,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         totalSteps: 150,
         startPosition: () => {
           const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
-            x.getParent() && x.getParent().type === "text_print");
+            x.getParent() && (x.getParent().type === "text_print" || x.getParent().type === "text_print"));
           // const coords = textBlockWs.getBoundingRectangle();
           return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
           /*
@@ -897,7 +897,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && 
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "t2c_text_join"
         && x.getInputTargetBlock("TEXT").getInputTargetBlock("A") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("A").type === "text"
@@ -937,11 +937,11 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().filter(x => x.type === "text_print").length === 1,
+      () => workspace.getAllBlocks().filter(x => (x.type === "text_print" || x.type === "js_text_print")).length === 1,
       new GlideAnimation(d, {
         totalSteps: 150,
         startPosition: () => {
-          const displayBlockVarWs = workspace.getAllBlocks().find(x => x.type === "text_print" && 
+          const displayBlockVarWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
             !x.getInputTargetBlock("TEXT"));
           // const coords = displayBlockVarWs.getBoundingRectangle();
           return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
@@ -1006,7 +1006,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().filter(x => x.type === "text_print").length === 1 && 
+      () => workspace.getAllBlocks().filter(x => (x.type === "text_print" || x.type === "js_text_print")).length === 1 && 
         workspace.getAllBlocks().filter(x => x.type === "t2c_text_join").length === 0 && 
         workspace.getAllBlocks().filter(x => x.type === "variables_get").length === 0 && 
         workspace.getAllBlocks().filter(x => x.type === "text").length === 1,
@@ -1048,7 +1048,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => x.type === "text_print" && 
+      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && 
           x.getInputTargetBlock("TEXT").type === "type_in_welcome_message"),
       new GlideAnimation(d, {
@@ -1063,7 +1063,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           }
         },
         endPosition: () => {
-          const textPrintBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
+          const textPrintBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
           // const coords = textPrintBlockWs.getBoundingRectangle();
           return getAbsolutePosition(workspace, textPrintBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
           /*
@@ -1082,7 +1082,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => {
-        const displayBlock = workspace.getAllBlocks().find(x => x.type === "text_print");
+        const displayBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
         const outerJoinBlock = displayBlock.getInputTargetBlock("TEXT") && 
           displayBlock.getInputTargetBlock("TEXT").type === "t2c_text_join" && 
           displayBlock.getInputTargetBlock("TEXT");
@@ -1110,7 +1110,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       new ParallelAnimation([
         new HelpMessageDirection(() => "Write a message to welcome the user with his/her name with punctuation at the end.  To do this type:\n(1) Something like welcome *in quotes* because you want it to be displayed as is.\n(2) + firstName (+ to join text and firstName without the quotes to get the name the user typed in and not literally the text firstName)\n(3) + and a punctuation mark in quotes to tack on a punctuation symbol at the end.", {
           startPosition: () => {
-            const textPrintBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
+            const textPrintBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
             // const coords = textPrintBlockWs.getBoundingRectangle();
             return getAbsolutePosition(workspace, textPrintBlockWs, {blockOffsetScaleX: 1, blockOffsetScaleY: 1}, 0,  document.getElementById("top-header").offsetHeight);
             /*

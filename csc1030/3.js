@@ -981,7 +981,8 @@ function displayMessage(msg, erasePrevious=true) {
 
 export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   const citf = courseInstructionTaskFlow || new CourseInstructionTaskFlow();
-  alert("THIS MISSION IS IN DEVELOPMENT!  THE MESSAGE WILL BE REMOVED WHEN IT CAN BE COMPLETED.\nIn this mission, you'll be prompting the user for a string with an even number of characters (at least 2) and then displaying a single 4-character string as first character, last character, first middle character, and second middle character in that order.  For example, for SCRABBLE, you'd display SEAB.");
+  // THIS MISSION IS IN DEVELOPMENT!  THE MESSAGE WILL BE REMOVED WHEN IT CAN BE COMPLETED.\n
+  alert("In this mission, you'll be prompting the user for a string with an even number of characters (at least 2) and then displaying a single 4-character string as first character, last character, first middle character, and second middle character in that order.  For example, for SCRABBLE, you'd display SEAB.");
   const workspace = ws || Blockly.getMainWorkspace();
   const initialBlocks = ["type_in_get_input"];
   // set up level
@@ -1099,7 +1100,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => {
         const text0 = workspace.getAllBlocks().find(block => block.type === "text" && block.getFieldValue("TEXT").toLowerCase().indexOf(" even ") !== -1);
-        const textInput1 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text0);
+        const textInput1 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text0);
         const variablesSet2 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === null && block.getInputTargetBlock("VALUE") === textInput1 && block.getField("VAR").getText() === "s");
       	return text0 && textInput1 && variablesSet2;
       },
@@ -1155,10 +1156,10 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       () => {
         const mathNumber0 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 0);
         const variablesGet1 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat2 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") === variablesGet1 && block.getInputTargetBlock("AT") === mathNumber0);
+        const t2cTextCharat2 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") === variablesGet1 && block.getInputTargetBlock("AT") === mathNumber0);
         const variablesSet3 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === null && block.getInputTargetBlock("VALUE") === t2cTextCharat2 && block.getField("VAR").getText() === "firstChar");
         const text4 = workspace.getAllBlocks().find(block => block.type === "text" && block.getFieldValue("TEXT").toLowerCase().indexOf(" even ") !== -1);
-        const textInput5 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text4);
+        const textInput5 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text4);
         const variablesSet6 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet3 && block.getInputTargetBlock("VALUE") === textInput5 && block.getField("VAR").getText() === "s");
         return mathNumber0 && variablesGet1 && t2cTextCharat2 && variablesSet3 && text4 && textInput5 && variablesSet6;
       },
@@ -1237,16 +1238,16 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s");
         const mathArithmeticBasic3 = workspace.getAllBlocks().find(block => block.type === "math_arithmetic_basic" && block.getInputTargetBlock("A") === t2cTextLength2 && block.getInputTargetBlock("B") === mathNumber0 && block.getFieldValue("OP") === "MINUS");
         // const variablesGet4 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat5 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat5 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathArithmeticBasic3);
         const variablesSet6 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === null && block.getInputTargetBlock("VALUE") === t2cTextCharat5 && block.getField("VAR").getText() === "lastChar");
         const mathNumber7 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 0);
         // const variablesGet8 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat9 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat9 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathNumber7);
         const variablesSet10 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet6 && block.getInputTargetBlock("VALUE") === t2cTextCharat9 && block.getField("VAR").getText() === "firstChar");
         const text11 = workspace.getAllBlocks().find(block => block.type === "text");
-        const textInput12 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text11);
+        const textInput12 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text11);
         const variablesSet13 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet10 && block.getInputTargetBlock("VALUE") === textInput12 && block.getField("VAR").getText() === "s");
         // return mathNumber0 && variablesGet1 && t2cTextLength2 && mathArithmeticBasic3 && variablesGet4 && t2cTextCharat5 && variablesSet6 && mathNumber7 && variablesGet8 && t2cTextCharat9 && variablesSet10 && text11 && textInput12 && variablesSet13;
         return mathNumber0 && t2cTextLength2 && mathArithmeticBasic3 && t2cTextCharat5 && variablesSet6 && mathNumber7 && t2cTextCharat9 && variablesSet10 && text11 && textInput12 && variablesSet13;
@@ -1314,16 +1315,16 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").getField("VAR").getText() === "s" 
           && block.getInputTargetBlock("B") === mathNumber5 && block.getFieldValue("OP") === "MINUS");
         // const variablesGet9 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat10 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat10 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathArithmeticBasic8);
         const variablesSet11 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet4 && block.getInputTargetBlock("VALUE") === t2cTextCharat10 && block.getField("VAR").getText() === "lastChar");
         const mathNumber12 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 0);
         // const variablesGet13 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat14 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat14 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathNumber12);
         const variablesSet15 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet11 && block.getInputTargetBlock("VALUE") === t2cTextCharat14 && block.getField("VAR").getText() === "firstChar");
         const text16 = workspace.getAllBlocks().find(block => block.type === "text");
-        const textInput17 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text16);
+        const textInput17 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text16);
         const variablesSet18 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet15 && block.getInputTargetBlock("VALUE") === textInput17 && block.getField("VAR").getText() === "s");
         return mathNumber0 && mathArithmeticBasic3 && variablesSet4 && mathNumber5 && mathArithmeticBasic8 && t2cTextCharat10 && variablesSet11 && mathNumber12 && t2cTextCharat14 && variablesSet15 && text16 && textInput17 && variablesSet18;
       },
@@ -1397,16 +1398,16 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
         // const variablesGet13 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat14 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat"  && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat14 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat")  && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathArithmeticBasic12);
         const variablesSet15 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet8 && block.getInputTargetBlock("VALUE") === t2cTextCharat14 && block.getField("VAR").getText() === "lastChar");
         const mathNumber16 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 0);
         // const variablesGet17 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat18 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat18 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathNumber16);
         const variablesSet19 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet15 && block.getInputTargetBlock("VALUE") === t2cTextCharat18 && block.getField("VAR").getText() === "firstChar");
         const text20 = workspace.getAllBlocks().find(block => block.type === "text");
-        const textInput21 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text20);
+        const textInput21 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text20);
         const variablesSet22 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet19 && block.getInputTargetBlock("VALUE") === textInput21 && block.getField("VAR").getText() === "s");
         return variablesGet1 && mathArithmeticBasic2 && variablesSet3 && mathNumber4 && mathArithmeticBasic7 && variablesSet8 && mathArithmeticBasic12 && t2cTextCharat14 && variablesSet15 && mathNumber16 && t2cTextCharat18 && variablesSet19 && text20 && textInput21 && variablesSet22;
       },
@@ -1461,7 +1462,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       () => {
         const variablesGet0 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfFirstMiddleChar");
         // const variablesGet1 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat2 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat2 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === variablesGet0);
         const variablesSet3 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === null && block.getInputTargetBlock("VALUE") === t2cTextCharat2 && block.getField("VAR").getText() === "firstMiddleChar");
         //const mathNumber4 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 1);
@@ -1484,16 +1485,16 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
         // const variablesGet17 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat18 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat18 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathArithmeticBasic16);
         const variablesSet19 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet12 && block.getInputTargetBlock("VALUE") === t2cTextCharat18 && block.getField("VAR").getText() === "lastChar");
         const mathNumber20 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") == 0);
         // const variablesGet21 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat22 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat22 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathNumber20);
         const variablesSet23 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet19 && block.getInputTargetBlock("VALUE") === t2cTextCharat22 && block.getField("VAR").getText() === "firstChar");
         const text24 = workspace.getAllBlocks().find(block => block.type === "text");
-        const textInput25 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text24);
+        const textInput25 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text24);
         const variablesSet26 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet23 && block.getInputTargetBlock("VALUE") === textInput25 && block.getField("VAR").getText() === "s");
         return variablesGet0 && t2cTextCharat2 && variablesSet3 && variablesGet5 && mathArithmeticBasic6 && variablesSet7 && mathNumber8 && mathArithmeticBasic11 && variablesSet12 && mathArithmeticBasic16 && t2cTextCharat18 && variablesSet19 && mathNumber20 && t2cTextCharat22 && variablesSet23 && text24 && textInput25 && variablesSet26;
       },
@@ -1551,14 +1552,15 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => document.getElementById("language").value === "js" || document.getElementById("language").value === "py",
       {
-        start: () => true,
-        isComplete: () => true,
-        animate: () => true,
-        finish: () => {
+        start: () => {
           const currentLanguage = document.getElementById("language").value;
           const switchLanguageMsg = (currentLanguage === "js" || currentLanguage === "py") ?
             "" : "But let's type this using pure JavaScript or Python.  Select JavaScript or Python and watch how the declaration for the firstMiddleChar translates for reference.";// + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"]
           alert("✔ Excellent x 2!  So now it's time to store the 2nd middle character.  " + switchLanguageMsg);
+        },
+        isComplete: () => true,
+        animate: () => true,
+        finish: () => {
           restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
           hideOutputAndCodeContainers();
           clearToolbox(workspace);
@@ -1573,19 +1575,19 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => {
-        const variablesGet0 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
+        // const variablesGet0 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
         // const variablesGet1 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat2 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
-          && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === variablesGet0);
+        const t2cTextCharat2 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
+          && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") && block.getInputTargetBlock("AT").type === "variables_get" && block.getInputTargetBlock("AT").getField("VAR").getText() === "positionOfSecondMiddleChar");
         const variablesSet3 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === null && block.getInputTargetBlock("VALUE") === t2cTextCharat2 && block.getField("VAR").getText() === "secondMiddleChar");
         const variablesGet4 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfFirstMiddleChar");
         // const variablesGet5 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat6 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat6 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === variablesGet4);
         const variablesSet7 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet3 && block.getInputTargetBlock("VALUE") === t2cTextCharat6 && block.getField("VAR").getText() === "firstMiddleChar");
         // const mathNumber8 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 1);
-        const variablesGet9 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
-        const mathArithmeticBasic10 = workspace.getAllBlocks().find(block => block.type === "math_arithmetic_basic" && block.getInputTargetBlock("A") === variablesGet9 && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
+        // const variablesGet9 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
+        const mathArithmeticBasic10 = workspace.getAllBlocks().find(block => block.type === "math_arithmetic_basic" && block.getInputTargetBlock("A") && block.getInputTargetBlock("A").type === "variables_get" && block.getInputTargetBlock("A").getField("VAR").getText() === "positionOfSecondMiddleChar" && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
         const variablesSet11 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet7 && block.getInputTargetBlock("VALUE") === mathArithmeticBasic10 && block.getField("VAR").getText() === "positionOfFirstMiddleChar");
         const mathNumber12 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 2);
         // const variablesGet13 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
@@ -1603,18 +1605,18 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
         // const variablesGet21 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat22 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat22 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathArithmeticBasic20);
         const variablesSet23 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet16 && block.getInputTargetBlock("VALUE") === t2cTextCharat22 && block.getField("VAR").getText() === "lastChar");
         const mathNumber24 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 0);
         // const variablesGet25 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat26 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat26 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathNumber24);
         const variablesSet27 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet23 && block.getInputTargetBlock("VALUE") === t2cTextCharat26 && block.getField("VAR").getText() === "firstChar");
         const text28 = workspace.getAllBlocks().find(block => block.type === "text");
-        const textInput29 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text28);
+        const textInput29 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text28);
         const variablesSet30 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet27 && block.getInputTargetBlock("VALUE") === textInput29 && block.getField("VAR").getText() === "s");
-        return variablesGet0 && t2cTextCharat2 && variablesSet3 && variablesGet4 && t2cTextCharat6 && variablesSet7 && variablesGet9 && mathArithmeticBasic10 && variablesSet11 && mathNumber12 && mathArithmeticBasic15 && variablesSet16 && mathArithmeticBasic20 && t2cTextCharat22 && variablesSet23 && mathNumber24 && t2cTextCharat26 && variablesSet27 && text28 && textInput29 && variablesSet30;
+        return t2cTextCharat2 && variablesSet3 && variablesGet4 && t2cTextCharat6 && variablesSet7 && mathArithmeticBasic10 && variablesSet11 && mathNumber12 && mathArithmeticBasic15 && variablesSet16 && mathArithmeticBasic20 && t2cTextCharat22 && variablesSet23 && mathNumber24 && t2cTextCharat26 && variablesSet27 && text28 && textInput29 && variablesSet30;
       },
       new HelpMessageDirection(() => {
         const variablesSet3 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getField("VAR").getText() === "secondMiddleChar");
@@ -1672,22 +1674,22 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         const text7 = workspace.getAllBlocks().find(block => block.type === "text" && block.getFieldValue("TEXT") === ": ");
         const t2cTextJoin8 = workspace.getAllBlocks().find(block => block.type === "t2c_text_join" && block.getInputTargetBlock("A") === text7 && block.getInputTargetBlock("B") === t2cTextJoin6);
         // const variablesGet9 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextJoin10 = workspace.getAllBlocks().find(block => block.type === "t2c_text_join" && block.getInputTargetBlock("VALUE") 
-          && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("B") === t2cTextJoin8);
-        const textPrint11 = workspace.getAllBlocks().find(block => block.type === "text_print" && block.getNextBlock() === null && block.getInputTargetBlock("TEXT") === t2cTextJoin10);
-        const variablesGet12 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
+        const t2cTextJoin10 = workspace.getAllBlocks().find(block => block.type === "t2c_text_join" && block.getInputTargetBlock("A") 
+          && block.getInputTargetBlock("A").type === "variables_get" && block.getInputTargetBlock("A").getField("VAR").getText() === "s" && block.getInputTargetBlock("B") === t2cTextJoin8);
+        const textPrint11 = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print") && block.getNextBlock() === null && block.getInputTargetBlock("TEXT") === t2cTextJoin10);
+        // const variablesGet12 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
         // const variablesGet13 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat14 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
-          && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === variablesGet12);
+        const t2cTextCharat14 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
+          && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") && block.getInputTargetBlock("AT").type === "variables_get" && block.getInputTargetBlock("AT").getField("VAR").getText() === "positionOfSecondMiddleChar");
         const variablesSet15 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === textPrint11 && block.getInputTargetBlock("VALUE") === t2cTextCharat14 && block.getField("VAR").getText() === "secondMiddleChar");
         const variablesGet16 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfFirstMiddleChar");
         // const variablesGet17 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat18 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat18 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === variablesGet16);
         const variablesSet19 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet15 && block.getInputTargetBlock("VALUE") === t2cTextCharat18 && block.getField("VAR").getText() === "firstMiddleChar");
         // const mathNumber20 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 1);
-        const variablesGet21 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
-        const mathArithmeticBasic22 = workspace.getAllBlocks().find(block => block.type === "math_arithmetic_basic" && block.getInputTargetBlock("A") === variablesGet21 && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
+        // const variablesGet21 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "positionOfSecondMiddleChar");
+        const mathArithmeticBasic22 = workspace.getAllBlocks().find(block => block.type === "math_arithmetic_basic" && block.getInputTargetBlock("A") && block.getInputTargetBlock("A").type === "variables_get" && block.getInputTargetBlock("A").getField("VAR").getText() === "positionOfSecondMiddleChar" && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
         const variablesSet23 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet19 && block.getInputTargetBlock("VALUE") === mathArithmeticBasic22 && block.getField("VAR").getText() === "positionOfFirstMiddleChar");
         const mathNumber24 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 2);
         // const variablesGet25 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
@@ -1705,21 +1707,21 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("A").getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("B") && block.getInputTargetBlock("B").type === "math_number" && block.getInputTargetBlock("B").getFieldValue("NUM") === 1 && block.getFieldValue("OP") === "MINUS");
         // const variablesGet33 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat34 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat34 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathArithmeticBasic32);
         const variablesSet35 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet28 && block.getInputTargetBlock("VALUE") === t2cTextCharat34 && block.getField("VAR").getText() === "lastChar");
         const mathNumber36 = workspace.getAllBlocks().find(block => block.type === "math_number" && block.getFieldValue("NUM") === 0);
         // const variablesGet37 = workspace.getAllBlocks().find(block => block.type === "variables_get" && block.getField("VAR").getText() === "s");
-        const t2cTextCharat38 = workspace.getAllBlocks().find(block => block.type === "t2c_text_charat" && block.getInputTargetBlock("VALUE") 
+        const t2cTextCharat38 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_charat" || block.type === "js_text_charat") && block.getInputTargetBlock("VALUE") 
           && block.getInputTargetBlock("VALUE").type === "variables_get" && block.getInputTargetBlock("VALUE").getField("VAR").getText() === "s" && block.getInputTargetBlock("AT") === mathNumber36);
         const variablesSet39 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet35 && block.getInputTargetBlock("VALUE") === t2cTextCharat38 && block.getField("VAR").getText() === "firstChar");
         const text40 = workspace.getAllBlocks().find(block => block.type === "text");
-        const textInput41 = workspace.getAllBlocks().find(block => block.type === "text_input" && block.getInputTargetBlock("TEXT") === text40);
+        const textInput41 = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input") && block.getInputTargetBlock("TEXT") === text40);
         const variablesSet42 = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === variablesSet39 && block.getInputTargetBlock("VALUE") === textInput41 && block.getField("VAR").getText() === "s");
-        return variablesGet0 && variablesGet1 && t2cTextJoin2 && variablesGet3 && t2cTextJoin4 && variablesGet5 && t2cTextJoin6 && text7 && t2cTextJoin8 && t2cTextJoin10 && textPrint11 && variablesGet12 && t2cTextCharat14 && variablesSet15 && variablesGet16 && t2cTextCharat18 && variablesSet19 && variablesGet21 && mathArithmeticBasic22 && variablesSet23 && mathNumber24 && mathArithmeticBasic27 && variablesSet28 && mathArithmeticBasic32 && t2cTextCharat34 && variablesSet35 && mathNumber36 && t2cTextCharat38 && variablesSet39 && text40 && textInput41 && variablesSet42;
+        return variablesGet0 && variablesGet1 && t2cTextJoin2 && variablesGet3 && t2cTextJoin4 && variablesGet5 && t2cTextJoin6 && text7 && t2cTextJoin8 && t2cTextJoin10 && textPrint11 && t2cTextCharat14 && variablesSet15 && variablesGet16 && t2cTextCharat18 && variablesSet19 && mathArithmeticBasic22 && variablesSet23 && mathNumber24 && mathArithmeticBasic27 && variablesSet28 && mathArithmeticBasic32 && t2cTextCharat34 && variablesSet35 && mathNumber36 && t2cTextCharat38 && variablesSet39 && text40 && textInput41 && variablesSet42;
       },
       new HelpMessageDirection(() => {
-        const textPrint = workspace.getAllBlocks().find(block => block.type === "text_print");
+        const textPrint = workspace.getAllBlocks().find(block => block.type === "text_print" || block.type === "js_text_print");
         const variablesSet = workspace.getAllBlocks().find(block => block.type === "variables_set" && block.getNextBlock() === textPrint && block.getField("VAR").getText() === "secondMiddleChar");
         const previousBlockName = textPrint && textPrint.getPreviousBlock() && textPrint.getPreviousBlock().type === "variables_set"
           && textPrint.getPreviousBlock().getField("VAR").getText();
@@ -1731,7 +1733,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         }
 
         if(nextBlockName) {
-          return "Make sure to attach this block displaying the entered string and its first, last, and first and second middle characters below the last one you entered in which you store the user's second middle character in the variable secondMiddleChar.  Since instructions are run top to bottom, if you place this before the block you did, the computer wouldn't know what " + nextBlockName + " means!";
+          return "Make sure to attach this block displaying the entered string and its first, last, and first and second middle characters below the last one you entered in which you store the user's second middle character in the variable secondMiddleChar.  Since instructions are run top to bottom, if you place this before the block you did, the computer wouldn't know what " + (nextBlockName.startsWith("positionOf") ? nextBlockName.substring(10) : nextBlockName) + " means!";
         }
 
         return "Drag in the type-in-code block and place it below the block that stores the second character in a variable.  Enter code to display the user entered string, followed by the string literal \": \" followed by its first character, then its last character, then its first middle character, and finally its second middle character.\n  So for an input of SCRABBLE, we'd want the output to be as follows: \nSCRABBLE: SEAB";
@@ -1757,9 +1759,8 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
           hideOutputAndCodeContainers();
           clearToolbox(workspace);
-          createToolboxBlock(workspace, "type_in_set_to_position_of_first_middle_char");
-          workspace.options.maxInstances["type_in_set_to_position_of_first_middle_char"] = 1;
-          document.getElementById("toolbox").append(varSetBlock);
+          createToolboxBlock(workspace, "code_statement");
+          workspace.options.maxInstances["code_statement"] = 1;
           workspace.updateToolbox(document.getElementById("toolbox"));
         }
       }

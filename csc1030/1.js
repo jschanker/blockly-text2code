@@ -367,7 +367,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => {
       	const variableBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
-      	const promptBlock = workspace.getAllBlocks().find(x => x.type === "text_input");
+      	const promptBlock = workspace.getAllBlocks().find(x => (x.type === "text_input" || x.type === "js_text_input"));
       	const textBlock = workspace.getAllBlocks().find(x => x.type === "text");
       	return variableBlock && promptBlock && textBlock &&
       	  variableBlock.getField("VAR").getText() === "s" && 
@@ -377,7 +377,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       },
       new HelpMessageDirection(() => {
       	const variableBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
-      	const promptBlock = workspace.getAllBlocks().find(x => x.type === "text_input");
+      	const promptBlock = workspace.getAllBlocks().find(x => (x.type === "text_input" || x.type === "js_text_input"));
       	const textBlock = workspace.getAllBlocks().find(x => x.type === "text");
       	if(variableBlock) {
       		const varName = variableBlock.getField("VAR").getText();
@@ -439,7 +439,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => {
       	const variableSetBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
-      	const displayBlock = workspace.getAllBlocks().find(x => x.type === "text_print");
+      	const displayBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
       	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get");
       	return variableSetBlock && displayBlock && variableGetBlock &&
       	  variableSetBlock.getNextBlock() && variableSetBlock.getNextBlock() === displayBlock && 
@@ -448,7 +448,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       },
       new HelpMessageDirection(() => {
       	const variableSetBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
-      	const displayBlock = workspace.getAllBlocks().find(x => x.type === "text_print");
+      	const displayBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
       	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get");
       	if(variableGetBlock) {
       		const varName = variableGetBlock.getField("VAR").getText();
@@ -506,11 +506,11 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => {
-      	const displayStringBlock = workspace.getAllBlocks().find(x => x.type === "text_print" 
+      	const displayStringBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
       		&& x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
       	const numberBlock = workspace.getAllBlocks().find(x => x.type === "math_number");
-      	const getCharacterBlock = workspace.getAllBlocks().find(x => x.type === "t2c_text_charat");
-      	const displayCharBlock = workspace.getAllBlocks().find(x => x.type === "text_print" 
+      	const getCharacterBlock = workspace.getAllBlocks().find(x => (x.type === "t2c_text_charat" || x.type === "js_text_charat"));
+      	const displayCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
       		&& x !== displayStringBlock);
       	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get" 
       		&& x.getParent() !== displayStringBlock);
@@ -524,11 +524,11 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       	  numberBlock.getFieldValue("NUM") === 0;
       },
       new HelpMessageDirection(() => {
-      	const displayStringBlock = workspace.getAllBlocks().find(x => x.type === "text_print" 
+      	const displayStringBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
       		&& x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
       	const numberBlock = workspace.getAllBlocks().find(x => x.type === "math_number");
-      	const getCharacterBlock = workspace.getAllBlocks().find(x => x.type === "t2c_text_charat");
-      	const displayCharBlock = workspace.getAllBlocks().find(x => x.type === "text_print" 
+      	const getCharacterBlock = workspace.getAllBlocks().find(x => (x.type === "t2c_text_charat" || x.type === "js_text_charat"));
+      	const displayCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
       		&& x !== displayStringBlock);
       	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get" 
       		&& x.getParent() !== displayStringBlock);
@@ -594,12 +594,12 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => {
-      	const displayChar0Block = workspace.getAllBlocks().find(x => x.type === "text_print" 
-      		&& x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "t2c_text_charat");
-      	const displayLastCharBlock = workspace.getAllBlocks().find(x => x.type === "text_print" 
+      	const displayChar0Block = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
+      		&& x.getInputTargetBlock("TEXT") && (x.getInputTargetBlock("TEXT").type === "t2c_text_charat" || x.getInputTargetBlock("TEXT").type === "js_text_charat"));
+      	const displayLastCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
       		&& x.getParent() === displayChar0Block);
       	const numberBlock = workspace.getAllBlocks().find(x => x.type === "math_number" && x.getFieldValue("NUM") === 4);
-      	const getCharacterBlock = workspace.getAllBlocks().find(x => x.type === "t2c_text_charat" 
+      	const getCharacterBlock = workspace.getAllBlocks().find(x => (x.type === "t2c_text_charat" || x.type === "js_text_charat") 
       		&& x.getInputTargetBlock("AT") === numberBlock && x.getParent() === displayLastCharBlock);
       	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get" 
       		&& x.getParent() === getCharacterBlock && x.getField("VAR").getText() === "s");
@@ -607,10 +607,10 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       	return displayChar0Block && numberBlock && getCharacterBlock && displayLastCharBlock && variableGetBlock;
       },
       new HelpMessageDirection(() => {
-      	const displayChar0Block = workspace.getAllBlocks().find(x => x.type === "text_print" 
-      		&& x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "t2c_text_charat");
-      	const displayLastCharBlock = workspace.getAllBlocks().find(x => x.type === "text_print" 
-      		&& x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "t2c_text_charat"
+      	const displayChar0Block = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
+      		&& x.getInputTargetBlock("TEXT") && (x.getInputTargetBlock("TEXT").type === "t2c_text_charat" || x.getInputTargetBlock("TEXT").type === "js_text_charat"));
+      	const displayLastCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
+      		&& x.getInputTargetBlock("TEXT") && (x.getInputTargetBlock("TEXT").type === "t2c_text_charat" || x.getInputTargetBlock("TEXT").type === "js_text_charat")
       		&& x.getInputTargetBlock("TEXT").getInputTargetBlock("AT") && 
       		x.getInputTargetBlock("TEXT").getInputTargetBlock("AT").type === "math_number" &&
       		x.getInputTargetBlock("TEXT").getInputTargetBlock("AT").getFieldValue("NUM") === 4);
