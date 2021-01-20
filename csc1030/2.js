@@ -4,7 +4,7 @@ import CourseInstructionTask from "../core/course_instruction_task.js";
 import GlideAnimation from "../core/glide_animation.js";
 import BlinkAnimation from "../core/blink_animation.js";
 import HelpMessageDirection from "../core/help_message_direction.js";
-import SeriesAnimations from "../core/series_animations.js";
+import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
 
 function restoreAfterMoveAndFlashText(div) {
@@ -91,8 +91,11 @@ let clickedLoadXMLButtonLast = false;
 let clickedSaveXMLButtonLast = false;
 let xmlText;
 
-window.addEventListener('DOMContentLoaded', () => {
-  const workspace = Blockly.getMainWorkspace();
+// window.addEventListener('DOMContentLoaded', () => {
+export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
+  const citf = courseInstructionTaskFlow || new CourseInstructionTaskFlow();
+  const workspace = ws || Blockly.getMainWorkspace(); 
+
   const initialBlocks = ["variables_set", "text", "text_input"];
   // set up level
   clearToolbox(workspace);
@@ -124,7 +127,7 @@ window.addEventListener('DOMContentLoaded', () => {
     courseInstructionTaskFlow.addTask(
       new CourseInstructionTask(
         () => document.getElementById("output-container").classList.contains("show-container"),
-        new SeriesAnimations([
+        new ParallelAnimation([
           new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_RUN_CODE, {
             startPosition: {
               x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth,
@@ -173,7 +176,7 @@ window.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  const citf = new CourseInstructionTaskFlow();
+  // const citf = new CourseInstructionTaskFlow();
   citf.addTask(
     new CourseInstructionTask(
       () => {
@@ -482,7 +485,7 @@ window.addEventListener('DOMContentLoaded', () => {
         animate: () => true,
         finish: () => {
           // moveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          alert("✔ Excellent!  OK, so now that you can use the arithmetic and length blocks, let's combine them with the previous " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block to get the last character of the string, regardless of whether it's 0 characters (empty) or 100 or any other number!  You up for the challenge?  Let's get to it!");
+          alert("✔ Excellent!  OK, so now that you can use the arithmetic and length blocks, let's combine them with the previous " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block to get the last character of the string, regardless of whether it's 1 character or 100 or any other number!  You up for the challenge?  Let's get to it!");
           restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
           hideOutputAndCodeContainers();
           createToolboxBlock(workspace, "t2c_text_charat");
@@ -646,7 +649,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => clickedSaveButtonLast,//document.getElementById("output-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
           startPosition: {
             x: document.getElementById("save-code-button").offsetLeft + document.getElementById("save-code-button").offsetWidth,
@@ -668,7 +671,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => clickedSaveXMLButtonLast,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
           startPosition: () => {
             return {
@@ -713,7 +716,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 0,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", {
           startPosition: () => {
             //const coords = workspace.trashcan.getClientRect();
@@ -752,7 +755,7 @@ window.addEventListener('DOMContentLoaded', () => {
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
       () => clickedLoadButtonLast,//document.getElementById("text-code-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
           startPosition: {
             x: document.getElementById("load-code-button").offsetLeft + document.getElementById("load-code-button").offsetWidth,
@@ -774,7 +777,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => xmlText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Paste the XML you copied in this text box.", {
           startPosition: () => {
             return {
@@ -800,7 +803,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => clickedLoadXMLButtonLast && workspace.getAllBlocks().length === 13,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
           startPosition: () => {
             return {
@@ -839,5 +842,8 @@ window.addEventListener('DOMContentLoaded', () => {
     )
   );
 
-  citf.runTasks();
-});
+//  citf.runTasks();
+//});
+
+  return citf;
+};

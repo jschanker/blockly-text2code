@@ -2,6 +2,7 @@ const T2C = {};
 T2C.MSG = {}
 T2C.MSG.currentLanguage = T2C.MSG.EN = {};
 
+T2C.MSG.EN["LANGUAGE_NAME"] = "English";
 T2C.MSG.EN["TOOLBOX_CATEGORY_PSEUDO_JS_IO"] = "PseudoJS Input/Output";
 T2C.MSG.EN["TOOLBOX_CATEGORY_JS_IO"] = "JavaScript Input/Output";
 T2C.MSG.EN["TOOLBOX_CATEGORY_VARIABLES"] = "Variables";

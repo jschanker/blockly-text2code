@@ -16,62 +16,95 @@
  */
 
 /**
- * @fileoverview Class to handle creation of help message icon and dialog
- * box
+ * @fileoverview Class to handle creation of help message console that 
+ * updates with real-time feedback
  * @author Jason Schanker
  */
 
 "use strict";
 
 /**
- * Class to handle creation of help message icon and dialog box 
+ * Class to handle creation of help message console that 
+ * updates with real-time feedback
  */
 class HelpMessageDirection {
 	constructor(message, options) {
-		//this.message_ = this.value_(message);
-		this.options_ = options;
-		this.helpButton_ = document.createElement("button");
-		this.helpButton_.innerText = "?";
-		this.helpButton_.style.fontSize = "x-large";
-		this.helpButton_.style.fontWeight = "bold";
-		this.helpButton_.style.borderRadius = "5px";
-		this.helpButton_.style.borderColor = "#000";
-		this.helpButton_.style.backgroundColor = "#ccc";
-		this.helpButton_.style.position = "absolute";
-		this.helpButton_.style.zIndex = "1050";
-		this.helpButton_.style.minWidth = "50px";
-		this.helpButton_.style.minHeight = "50px";
-		this.helpButton_.style.textAlign = "center";
-		this.helpButton_.addEventListener("click", () => {
-			alert(this.value_(message));
-		});
-		this.helpButton_.id = "help";
-		this.started_ = false;
-	}
-	start() {
-		this.startPosition_ = this.value_(this.options_.startPosition);
+	  this.options_ = options;
+	  this.started_ = false;
+	  this.message_ = message;
+	  this.currentMessage_ = "";
 
-		this.helpButton_.style.left = this.startPosition_.x + "px";
-	  this.helpButton_.style.top = this.startPosition_.y + "px";
-	  document.body.appendChild(this.helpButton_);
+	  this.alertDisplay_ = document.getElementById("alert-display");
+    if(!this.alertDisplay_) {
+      this.alertDisplay_ = document.createElement("div");
+      this.alertDisplay_.id = "alert-display";
+      this.alertDisplay_.style.fontSize = "small";
+      this.alertDisplay_.style.fontWeight = "bold";
+	    this.alertDisplay_.style.borderColor = "#000";
+	    this.alertDisplay_.style.backgroundColor = "rgba(200, 200, 200, 0.5)";
+	    this.alertDisplay_.style.color = "#f00";
+	    this.alertDisplay_.style.position = "absolute";
+	    this.alertDisplay_.style.zIndex = "1050";
+	    this.alertDisplay_.style.width = "98%";
+	    this.alertDisplay_.style.minHeight = "50px";
+	    this.alertDisplay_.style.left = "0";
+	    this.alertDisplay_.style.bottom = "0";
+	    this.alertDisplay_.style.textAlign = "left";
+	    this.alertDisplay_.style.padding = "1%";
+    }
+	}
+
+	start() {
+	  /* POSITIONING IGNORED FOR NOW - ORIGINALLY FOR HELP MENU DIALOG
+	  this.startPosition_ = this.value_(this.options_.startPosition);
+	  this.alertDisplay_.style.left = this.startPosition_.x + "px";
+	  this.alertyDisplay_.style.top = this.startPosition_.y + "px";
+	  */
+    document.body.appendChild(this.alertDisplay_);
 	  this.started_ = true;
 	}
+
 	isComplete() {
-    return this.started_; 
+		// return (typeof this.message_ === "string"); // message never changes
+		return false;
   }
+
   finish() {
-    document.body.removeChild(this.helpButton_);
+    document.body.removeChild(this.alertDisplay_);
     //this.helpButton_.style.display = "none";
     if(this.options_.finish instanceof Function) {
     	this.options_.finish();
     }
   }
+
   animate(steps=1) {
-  	// NO OP for now
+  	const message = this.value_(this.message_);
+  	const currentMessageWithoutWhitespace = this.currentMessage_.replace(/\s/g, "");
+  	const currentTextWithoutWhitespace = this.alertDisplay_.innerText.replace(/\s/g, "");
+
+  	//if(this.currentMessage_ !== message) {
+  	//if(this.alertDisplay_.innerText !== message) {
+  	if(currentTextWithoutWhitespace !== message.replace(/\s/g, "") && 
+  		 (currentTextWithoutWhitespace === currentMessageWithoutWhitespace || 
+  		 currentTextWithoutWhitespace === "")) {
+  		// console.log("MESSAGE CHANGED");
+  		// only update if the currently displayed message is not equal to the message to avoid 
+  	  // unnecessary DOM edits and it's not currently being used somewhere else 
+  	  // (which would be the case if the inner text were not the current message and not blank) to 
+  	  // permit concurrent use by e.g., type-in-code blocks
+  		this.currentMessage_ = message;	
+	  	if(!this.options_.queue) {
+	      this.alertDisplay_.innerText = message;
+	    } else {
+	      this.alertDisplay_.innerText += message;
+	    }
+	  }
   }
+
   value_(g) {
   	return g instanceof Function ? g() : g;
   }
+
 }
 
 export default HelpMessageDirection;

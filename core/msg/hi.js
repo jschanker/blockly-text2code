@@ -1,5 +1,6 @@
 T2C.MSG.HI = {};
 
+T2C.MSG.HI["LANGUAGE_NAME"] = "हिंदी";
 T2C.MSG.HI["TOOLBOX_CATEGORY_PSEUDO_JS_IO"] = "स्यूडो जे.एस. इनपुट/आउटपुट";
 T2C.MSG.HI["TOOLBOX_CATEGORY_JS_IO"] = "जावास्क्रिप्ट इनपुट/आउटपुट";
 T2C.MSG.HI["TOOLBOX_CATEGORY_VARIABLES"] = "चरों";

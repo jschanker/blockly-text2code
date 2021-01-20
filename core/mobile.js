@@ -142,6 +142,56 @@ export const parseAndConvertToBlocks = function(props, e) {
   }*/
 };
 
+/**** factor into new module languages.js? ****/
+
+function varsToLets(code) {
+  var variableDeclarationStart = code.indexOf("var")+4;
+  var variableDeclarationEnd   = code.indexOf(";", variableDeclarationStart);
+  var variableNames = [];
+  var newCode = code;
+  
+  if(variableDeclarationStart > 3) { // has variable declaration
+    var firstLine = code.substring(variableDeclarationStart, variableDeclarationEnd);
+    variableNames = firstLine.split(", ");
+    newCode = code.substring(0, variableDeclarationStart-4) + code.substring(variableDeclarationEnd+1);
+  }
+  
+  variableNames.forEach(function(variableName) {
+    //console.log(variableName);
+    newCode = newCode.replace("\n" + variableName + " = ", "\nlet " + variableName + " = ");
+  });
+
+  return newCode.trim();
+}
+
+export const workspaceToLanguageCode = function(workspace, language) {
+  //var code = Blockly.JavaScript.workspaceToCode(shared.workspace || Blockly.getMainWorkspace());
+  // Quick fix: Change built-in variables set language block to take language-specific
+  //             text and adjust languages files accordingly
+  //const codeGen = document.getElementById("language").value.toUpperCase() === "PY" ? 
+  const codeGen = language === T2C.MSG.PY ?
+    "Python" : "JavaScript";
+  const convertVarsToLets = (codeGen === "JavaScript");
+  // temporary fix to remove Python variable declarations
+  Blockly.Python.tempFinish = Blockly.Python.finish;
+  Blockly.Python.finish = code => code;
+  const code = Blockly[codeGen].workspaceToCode(workspace || Blockly.getMainWorkspace()); 
+  Blockly.Python.finish = Blockly.Python.tempFinish;
+  return codeGen === "Python" ?
+    code : varsToLets(code);
+};
+
+export const workspaceToXML = function(workspace) {
+  const xmlDom = Blockly.Xml.workspaceToDom(workspace || Blockly.getMainWorkspace());
+  const xmlText = Blockly.Xml.domToPrettyText(xmlDom);//alert(xmlText);
+  return xmlText;
+  //var domParser = new DOMParser();
+  //var xmlDoc = domParser.parseFromString(xmlText, "text/xml");
+  //return xmlDoc;
+};
+
+/**** END proposed languages module ****/
+
 const shared = (function() {
   // hack to get textarea on mobile instead of prompt
   // https://github.com/google/blockly/blob/develop/core/field_textinput.js#L279
@@ -367,10 +417,12 @@ const shared = (function() {
   }
 
   function generateCode() {
+    return workspaceToLanguageCode(shared.workspace, T2C.MSG.currentLanguage);
     //var code = Blockly.JavaScript.workspaceToCode(shared.workspace || Blockly.getMainWorkspace());
     // Quick fix: Change built-in variables set language block to take language-specific
     //             text and adjust languages files accordingly
-    //const codeGen = document.getElementById("language").value.toUpperCase() === "PY" ? 
+    //const codeGen = document.getElementById("language").value.toUpperCase() === "PY" ?
+    /*
     const codeGen = T2C.MSG.currentLanguage === T2C.MSG.PY ?
       "Python" : "JavaScript";
     const convertVarsToLets = (codeGen === "JavaScript");
@@ -381,12 +433,16 @@ const shared = (function() {
     Blockly.Python.finish = Blockly.Python.tempFinish;
     return codeGen === "Python" ?
       code : varsToLets(code);
+    */
   }
 
   function generateXML() {
+    return workspaceToXML(shared.workspace);
+    /*
     const xmlDom = Blockly.Xml.workspaceToDom(shared.workspace);
     const xmlText = Blockly.Xml.domToPrettyText(xmlDom);//alert(xmlText);
     return xmlText;
+    */
     //var domParser = new DOMParser();
     //var xmlDoc = domParser.parseFromString(xmlText, "text/xml");
     //return xmlDoc;

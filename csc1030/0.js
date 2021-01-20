@@ -1,10 +1,10 @@
-import {getParseTree, handleParseTreeToBlocks} from "../core/mobile.js";
+import {getParseTree, handleParseTreeToBlocks, workspaceToLanguageCode, workspaceToXML} from "../core/mobile.js";
 import {refreshWorkspace} from "../core/block_utility_functions.js";
 import CourseInstructionTask from "../core/course_instruction_task.js";
 import GlideAnimation from "../core/glide_animation.js";
 import BlinkAnimation from "../core/blink_animation.js";
 import HelpMessageDirection from "../core/help_message_direction.js";
-import SeriesAnimations from "../core/series_animations.js";
+import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
 //Blockly.Python['code_statement'] = Blockly.JavaScript['code_statement'] =
 Blockly.Python['type_in_display_string_literal'] = Blockly.JavaScript['type_in_display_string_literal'] = Blockly.JavaScript['code_statement'];
@@ -219,8 +219,38 @@ function hideOutputAndCodeContainers() {
   document.getElementById("text-code-container").classList.add("hide-container");   
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const workspace = Blockly.getMainWorkspace(); 
+function addMoveAndFlashTask(courseInstructionTaskFlow, div) {
+  const steps = 200;
+  let currentStep = 0;
+  function flashText() {
+    if(currentStep % 50 < 25) {
+      div.style.color = "#a00";
+    } else {
+      div.style.color = "#000";
+    }
+    currentStep++;
+    if(currentStep < steps) {
+      requestAnimationFrame(flashText);
+    }
+  }  
+  courseInstructionTaskFlow.addTask(
+    new CourseInstructionTask(
+      () => currentStep >= steps,
+      {
+        start: () => {
+          div.style.verticalAlign = "top";
+          requestAnimationFrame(flashText)
+        },
+        isComplete: () => true,
+        animate: () => true
+      }
+    )
+  );
+}
+
+export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
+  const citf = courseInstructionTaskFlow || new CourseInstructionTaskFlow();
+  const workspace = ws || Blockly.getMainWorkspace(); 
   workspace.clear();
   //workspace.options.horizontalLayout = true;
   workspace.options.maxInstances = {text_print: 1, text: 1, type_in_display_string_literal: 1};
@@ -243,21 +273,11 @@ window.addEventListener('DOMContentLoaded', () => {
   d.style.zIndex = "1001";
   document.getElementById("blockly-div").appendChild(d);
 
-/*
-  let clickedSaveTextCodeButton = false;
-  let clickedSaveXMLCodeButton = false;
-  let clickedLoadTextCodeButton = false;
-  let clickedLoadXMLCodeButton = false;
-*/
-  let clipboardText = "";
-  let clickedLoadButtonLast = false;
-  let clickedSaveButtonLast = false;
-
   function addRunTask(courseInstructionTaskFlow) {
     courseInstructionTaskFlow.addTask(
       new CourseInstructionTask(
         () => document.getElementById("output-container").classList.contains("show-container"),
-        new SeriesAnimations([
+        new ParallelAnimation([
           new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_RUN_CODE, {
             startPosition: {
               x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth,
@@ -277,36 +297,22 @@ window.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  function addMoveAndFlashTask(courseInstructionTaskFlow, div) {
-    const steps = 200;
-    let currentStep = 0;
-    function flashText() {
-      if(currentStep % 50 < 25) {
-        div.style.color = "#a00";
-      } else {
-        div.style.color = "#000";
-      }
-      currentStep++;
-      if(currentStep < steps) {
-        requestAnimationFrame(flashText);
-      }
-    }  
-    courseInstructionTaskFlow.addTask(
-      new CourseInstructionTask(
-        () => currentStep >= steps,
-        {
-          start: () => {
-            div.style.verticalAlign = "top";
-            requestAnimationFrame(flashText)
-          },
-          isComplete: () => true,
-          animate: () => true
-        }
-      )
-    );
-  }
+/*
+  let clickedSaveTextCodeButton = false;
+  let clickedSaveXMLCodeButton = false;
+  let clickedLoadTextCodeButton = false;
+  let clickedLoadXMLCodeButton = false;
+*/
+  let clipboardText = "";
+  let clickedLoadButtonLast = false;
+  let clickedSaveButtonLast = false;
+  let generatedXMLCode;
+  let generatedTextCode;
+//  let clickedLoadXMLButtonLast = false;
+//  let clickedSaveXMLButtonLast = false;
+  //let xmlText;
 
-  const citf = new CourseInstructionTaskFlow();
+  // const citf = new CourseInstructionTaskFlow();
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text_print" && Blockly.selected !== x),
@@ -351,7 +357,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text" && x.getFieldValue("TEXT")),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.TYPE_SOMETHING, {
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
@@ -440,7 +446,7 @@ window.addEventListener('DOMContentLoaded', () => {
       () => workspace.getAllBlocks().find(x => x.type === "text_print" && x.getNextBlock() && 
         x.getNextBlock().type === "text_print" && x.getNextBlock().getInputTargetBlock("TEXT")
         && x.getNextBlock().getInputTargetBlock("TEXT").type === "text"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Type in code matching above block but with different text to display.  I.e., Type\n" + 
           T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "\"your new message\"") + "\nreplacing your new message with whatever you want to display.  Be exact with parentheses, quotation marks, etc.  Tap off the block when you're done.", {
           startPosition: () => {
@@ -477,7 +483,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => document.getElementById("output-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         {
           start: () => {
             workspace.options.maxInstances["type_in_display_string_literal"] = 0;
@@ -699,7 +705,7 @@ window.addEventListener('DOMContentLoaded', () => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" &&  
             x.getField("VAR").getText() === "firstName"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "You will be asking the user for his/her first name, and this variable will store it.  Rename the variable:\nfirstName\nThis variable is in camel case, which is a convention in Python and JavaScript.  This means that the first letter of each word after the first is capitalized.", {
           startPosition: () => {
             const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
@@ -742,7 +748,7 @@ window.addEventListener('DOMContentLoaded', () => {
             x.getParent() && x.getParent().type === "text_input" && 
             (x.getFieldValue("TEXT").toLowerCase().includes("name ") ||
              x.getFieldValue("TEXT").toLowerCase().includes(" name"))),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "This text is the message the user will receive asking for his/her name.  Write a message asking the user for his/her name.  Unlike the variable name which cannot have spaces in most programming languages, the message will be seen by the user and should have spaces.  The variable will store the name your user enters.", {
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
@@ -1101,7 +1107,7 @@ window.addEventListener('DOMContentLoaded', () => {
           secondTextBlock.getField("VAR").getText() === "firstName" && 
           thirdTextBlock && thirdTextBlock.type === "text"
       },
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Write a message to welcome the user with his/her name with punctuation at the end.  To do this type:\n(1) Something like welcome *in quotes* because you want it to be displayed as is.\n(2) + firstName (+ to join text and firstName without the quotes to get the name the user typed in and not literally the text firstName)\n(3) + and a punctuation mark in quotes to tack on a punctuation symbol at the end.", {
           startPosition: () => {
             const textPrintBlockWs = workspace.getAllBlocks().find(x => x.type === "text_print");
@@ -1152,23 +1158,41 @@ window.addEventListener('DOMContentLoaded', () => {
         isComplete: () => true,
         animate: () => true,
         finish: () => {
+          const loadSaveTextCodeButton = document.getElementById("load-save-text-code");
           alert("✔✔ Excellent!  You just wrote a program to welcome the user and along the way you learned some things about variables, getting input from the user, and joining together string literals and variables to produce output.  Mission 0 is just about complete; let's just make sure you can save your work and load it up later!  For extra credit, we'll show you what your code looks in pure JavaScript.");
           restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
           hideOutputAndCodeContainers();
           
-          document.getElementById("load-save-text-code").addEventListener("click", () => {
+          loadSaveTextCodeButton.addEventListener("click", () => {
+            // Avoid asking read clipboard permission; assume that button click after disk save button click meant text was copied
+            //if(clickedSaveButtonLast && loadSaveTextCodeButton.textContent !== T2C.MSG.currentLanguage["BUTTON_LOAD_TEXT_CODE"]) {
+            if(clickedSaveButtonLast) {
+              clipboardText = document.getElementById("textCodeBox").value;
+            }
+            /*  
             // may want to read clipboard instead to check for click (DONE)
             navigator.clipboard.readText().then(clipText => {
               clipboardText = clipText;
               //console.warn(clipboardText);
               //console.warn(clipboardText === document.getElementById("textCodeBox").value);
             });
+            */
             //clickedSaveTextCodeButton = true;
           });
 
           document.getElementById("save-code-button").addEventListener("click", () => {
             clickedLoadButtonLast = false;
             clickedSaveButtonLast = true;
+             // save before user potentially changes it; this way you don't need to recall functions generating code/XML 
+             // to check
+             // This event listener needs to be attached AFTER event listener that generates code; may want to just
+             // regenerate code instead so you don't depend on that, export functions from mobile.js
+             if(workspace.getAllBlocks().length === 9) { // make sure the workspace wasn't changed
+               generatedTextCode = workspaceToLanguageCode(workspace, T2C.MSG.currentLanguage) || document.getElementById("textCodeBox").value;
+               generatedXMLCode = workspaceToXML(workspace) || document.getElementById("xmlData").value;
+             } else {
+               alert("Workspace changed, please restore what you originally had before saving");
+             }
           });
           document.getElementById("load-code-button").addEventListener("click", () => {
             clickedLoadButtonLast = true;
@@ -1185,7 +1209,7 @@ window.addEventListener('DOMContentLoaded', () => {
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
       () => clickedSaveButtonLast,//document.getElementById("text-code-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_TEXT_CODE, {
           startPosition: {
             x: document.getElementById("save-code-button").offsetLeft + document.getElementById("save-code-button").offsetWidth,
@@ -1206,8 +1230,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("textCodeBox").value.replace(/\n|\r/g, ""),
-      new SeriesAnimations([
+      //() => clipboardText.replace(/\n|\r/g, "") === document.getElementById("textCodeBox").value.replace(/\n|\r/g, ""),
+      () => clipboardText && generatedTextCode 
+        && clipboardText.replace(/\n|\r/g, "") === generatedTextCode.replace(/\n|\r/g, ""),
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_TEXT_CODE, {
           startPosition: () => {
             return {
@@ -1255,7 +1281,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 0,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", {
           startPosition: () => {
             //const coords = workspace.trashcan.getClientRect();
@@ -1294,7 +1320,7 @@ window.addEventListener('DOMContentLoaded', () => {
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
       () => clickedLoadButtonLast,//document.getElementById("text-code-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_TEXT_CODE, {
           startPosition: {
             x: document.getElementById("load-code-button").offsetLeft + document.getElementById("load-code-button").offsetWidth,
@@ -1315,8 +1341,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("textCodeBox").value.replace(/\n|\r/g, ""),
-      new SeriesAnimations([
+      //() => clipboardText.replace(/\n|\r/g, "") === document.getElementById("textCodeBox").value.replace(/\n|\r/g, ""),
+      () => generatedTextCode.replace(/\n|\r/g, "") === document.getElementById("textCodeBox").value.replace(/\n|\r/g, ""),
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Paste the code you copied in this text box.", {
           startPosition: () => {
             return {
@@ -1342,7 +1369,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 9,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_TEXT_CODE, {
           startPosition: () => {
             return {
@@ -1380,9 +1407,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
           document.getElementById("load-save-xml").addEventListener("click", () => {
             // may want to read clipboard instead to check for click (DONE)
+             // Avoid asking read clipboard permission; assume that button click after disk save button click meant text was copied
+            if(clickedSaveButtonLast) {
+              clipboardText = document.getElementById("xmlData").value;
+            }
+            /*
             navigator.clipboard.readText().then(clipText => {
               clipboardText = clipText;
             });
+            */
             //clickedSaveTextCodeButton = true;
           });
         }
@@ -1396,7 +1429,7 @@ window.addEventListener('DOMContentLoaded', () => {
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
       () => clickedSaveButtonLast,//document.getElementById("text-code-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
           startPosition: {
             x: document.getElementById("save-code-button").offsetLeft + document.getElementById("save-code-button").offsetWidth,
@@ -1417,8 +1450,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
-      new SeriesAnimations([
+      //() => clipboardText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
+      () => clipboardText && generatedXMLCode 
+        && clipboardText.replace(/\n|\r/g, "") === generatedXMLCode.replace(/\n|\r/g, ""),
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
           startPosition: () => {
             return {
@@ -1463,7 +1498,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 0,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", {
           startPosition: () => {
             //const coords = workspace.trashcan.getClientRect();
@@ -1502,7 +1537,7 @@ window.addEventListener('DOMContentLoaded', () => {
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
       () => clickedLoadButtonLast,//document.getElementById("text-code-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
           startPosition: {
             x: document.getElementById("load-code-button").offsetLeft + document.getElementById("load-code-button").offsetWidth,
@@ -1523,8 +1558,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   citf.addTask(
     new CourseInstructionTask(
-      () => clipboardText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
-      new SeriesAnimations([
+      //() => clipboardText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
+      () => generatedXMLCode.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Paste the XML you copied in this text box.", {
           startPosition: () => {
             return {
@@ -1550,7 +1586,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 9,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
           startPosition: () => {
             return {
@@ -1593,7 +1629,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => document.getElementById("language").value === "js",
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Select JavaScript and then see what happens to the toolbox and blocks.", {
           startPosition: {
             x: document.getElementById("language").offsetLeft + document.getElementById("language").offsetWidth,
@@ -1627,5 +1663,5 @@ window.addEventListener('DOMContentLoaded', () => {
     )
   );
 
-  citf.runTasks();
-});
+  return citf;
+};

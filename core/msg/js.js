@@ -1,5 +1,6 @@
 T2C.MSG.JS = {};
 
+T2C.MSG.JS["LANGUAGE_NAME"] = "JavaScript";
 T2C.MSG.JS["TOOLBOX_CATEGORY_PSEUDO_JS_IO"] = "PseudoJS Input/Output";
 T2C.MSG.JS["TOOLBOX_CATEGORY_JS_IO"] = "JavaScript Input/Output";
 T2C.MSG.JS["TOOLBOX_CATEGORY_VARIABLES"] = "Variables";

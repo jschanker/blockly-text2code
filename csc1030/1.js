@@ -1,10 +1,10 @@
 import {getParseTree, handleParseTreeToBlocks} from "../core/mobile.js";
 import {refreshWorkspace} from "../core/block_utility_functions.js";
 import CourseInstructionTask from "../core/course_instruction_task.js";
-import GlideAnimation from "../core/glide_animation.js";
+// import GlideAnimation from "../core/glide_animation.js";
 import BlinkAnimation from "../core/blink_animation.js";
 import HelpMessageDirection from "../core/help_message_direction.js";
-import SeriesAnimations from "../core/series_animations.js";
+import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
 
 
@@ -28,6 +28,33 @@ function getAfterTerminal(inputted, terminal) {
   // return undefined otherwise
 }
 
+function displayMessage(msg, erasePrevious=true) {
+  let alertDisplay = document.getElementById("alert-display");
+  if(!alertDisplay) {
+    alertDisplay = document.createElement("div");
+    alertDisplay.id = "alert-display";
+    alertDisplay.style.fontSize = "small";
+    alertDisplay.style.fontWeight = "bold";
+    alertDisplay.style.borderColor = "#000";
+    alertDisplay.style.backgroundColor = "rgba(200, 200, 200, 0.5)";
+    alertDisplay.style.color = "#f00";
+    alertDisplay.style.position = "absolute";
+    alertDisplay.style.zIndex = "1050";
+    alertDisplay.style.width = "98%";
+    alertDisplay.style.minHeight = "50px";
+    alertDisplay.style.left = "0";
+    alertDisplay.style.bottom = "0";
+    alertDisplay.style.textAlign = "left";
+    alertDisplay.style.padding = "1%";
+    document.body.appendChild(alertDisplay);
+  }
+  if(erasePrevious) {
+    alertDisplay.innerText = msg;
+  } else {
+    alertDisplay.innerText += msg;
+  }
+}
+
 Blockly.Python['type_in_get_last_char_number'] = Blockly.JavaScript['type_in_get_last_char_number'] = Blockly.JavaScript['code_statement'];
 Blockly.Blocks['type_in_get_last_char_number'] = {
   validate: (exp) => {
@@ -41,13 +68,13 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
   	let matchAfterPeriod;
 
   	if(!match) {
-      alert("Check the spelling, case, and punctuation of what you're entering; it should identically match with " + T2C.MSG.currentLanguage["TERMINAL_DISPLAY"]);
+      displayMessage("Check the spelling, case, and punctuation of what you're entering; it should identically match with " + T2C.MSG.currentLanguage["TERMINAL_DISPLAY"]);
       return null;  		
   	}
 
   	// check for opening parenthesis
   	if(match.remaining.length && !match.remaining.startsWith("(")) {
-  		alert("You're missing an opening parenthesis after " + match.terminal);
+  		displayMessage("You're missing an opening parenthesis after " + match.terminal);
       return match.terminal;
   	}
 
@@ -56,9 +83,9 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
   	// check for variable s
     if(match.remaining.length && !match.remaining.startsWith("s")) {
     	if(match.remaining.startsWith('"')) {
-    		alert("Don't use \" here as you want the computer to evaluate what you typed (e.g., the word the user entered instead of the letter s)")
+    		displayMessage("Don't use \" here as you want the computer to evaluate what you typed (e.g., the word the user entered instead of the letter s)")
     	} else {
-  		  alert("Be sure to include the variable s that you want to the get the value's last character from");
+  		  displayMessage("Be sure to include the variable s that you want to the get the value's last character from");
   		}
       return match.terminal + "(";
   	}
@@ -67,11 +94,12 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
 
   	// check for .
   	if(match.remaining.length && !match.remaining.startsWith(".")) {
-    	alert("Be sure to include the . after the variable")
+    	displayMessage("Be sure to include the . after the variable")
       return match.terminal + "(s";
   	}
 
   	if(!match.remaining.length) {
+  		displayMessage("");
   		return exp;
   	}
 
@@ -81,13 +109,13 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
   	matchAfterPeriod = getAfterTerminal(match.remaining.JSSubstring(1).trim(), "GETCHARACTERNUMBER");
 
     if(!matchAfterPeriod) {
-      alert("Check the spelling, case, and punctuation of what you're entering; it should identically match with " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"]);
+      displayMessage("Check the spelling, case, and punctuation of what you're entering; it should identically match with " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"]);
       return processedMatch;
     }
 
     // check for opening parenthesis
   	if(matchAfterPeriod.remaining.length && !matchAfterPeriod.remaining.startsWith("(")) {
-  		alert("You're missing an opening parenthesis after " + matchAfterPeriod.terminal);
+  		displayMessage("You're missing an opening parenthesis after " + matchAfterPeriod.terminal);
       return processedMatch + matchAfterPeriod.terminal;
   	}
 
@@ -96,18 +124,18 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
   	// check for correct position number
     if(matchAfterPeriod.remaining.length && !matchAfterPeriod.remaining.startsWith("4")) {
     	if(matchAfterPeriod.remaining.startsWith('"')) {
-    		alert("Don't use \" here as you want the computer to interpret this as a number and not text.");
+    		displayMessage("Don't use \" here as you want the computer to interpret this as a number and not text.");
     	} else if(matchAfterPeriod.remaining.startsWith("5")) {
-    		alert("Remember that character positions start at the number 0.  If you count the letters of a 5-letter word such as `pizza` starting from 0, you won't get up to position 5.")
+    		displayMessage("Remember that character positions start at the number 0.  If you count the letters of a 5-letter word such as `pizza` starting from 0, you won't get up to position 5.")
     	} else if(matchAfterPeriod.remaining.startsWith("6")) {
-    		alert("Determine the position of the last character a in the 5-letter word `pizza`.  If you count starting from 0, you won't get up to position 6.")
+    		displayMessage("Determine the position of the last character a in the 5-letter word `pizza`.  If you count starting from 0, you won't get up to position 6.")
     	} else if(parseInt(matchAfterPeriod.remaining) === 0) {
-    		alert("You want the position of the last character, not the first.");
+    		displayMessage("You want the position of the last character, not the first.");
     	} else if(parseInt(matchAfterPeriod.remaining)) {
-    		alert("Determine the position of the last character a in the 5-letter word `pizza`.  The number you're entering is incorrect.")
+    		displayMessage("Determine the position of the last character a in the 5-letter word `pizza`.  The number you're entering is incorrect.")
       }
     	else {
-    		alert("Include a number for the position you want after " + matchAfterPeriod.terminal + "(");
+    		displayMessage("Include a number for the position you want after " + matchAfterPeriod.terminal + "(");
     	}
       return processedMatch + matchAfterPeriod.terminal + "(";
   	}
@@ -116,7 +144,7 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
 
     // check for first closing parenthesis
   	if(matchAfterPeriod.remaining.length && !matchAfterPeriod.remaining.startsWith(")")) {
-  		alert("You're missing a closing parenthesis for " + matchAfterPeriod.terminal);
+  		displayMessage("You're missing a closing parenthesis for " + matchAfterPeriod.terminal);
       return processedMatch + matchAfterPeriod.terminal + "(4";
   	}
 
@@ -124,10 +152,11 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
 
     // check for second closing parenthesis
     if(matchAfterPeriod.remaining.length && !matchAfterPeriod.remaining.startsWith(")")) {
-  		alert("You're missing a closing parenthesis for " + match.terminal);
+  		displayMessage("You're missing a closing parenthesis for " + match.terminal);
       return processedMatch + matchAfterPeriod.terminal + "(4)";
   	}
 
+  	displayMessage("")
     return exp;
   },
   init: function() {
@@ -248,8 +277,11 @@ let clickedLoadXMLButtonLast = false;
 let clickedSaveXMLButtonLast = false;
 let xmlText;
 
-window.addEventListener('DOMContentLoaded', () => {
-  const workspace = Blockly.getMainWorkspace();
+// window.addEventListener('DOMContentLoaded', () => {
+export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
+  const citf = courseInstructionTaskFlow || new CourseInstructionTaskFlow();
+  const workspace = ws || Blockly.getMainWorkspace(); 
+
   const initialBlocks = ["variables_set", "text", "text_input"];
   // set up level
   clearToolbox(workspace);
@@ -281,7 +313,7 @@ window.addEventListener('DOMContentLoaded', () => {
     courseInstructionTaskFlow.addTask(
       new CourseInstructionTask(
         () => document.getElementById("output-container").classList.contains("show-container"),
-        new SeriesAnimations([
+        new ParallelAnimation([
           new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_RUN_CODE, {
             startPosition: {
               x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth,
@@ -330,7 +362,7 @@ window.addEventListener('DOMContentLoaded', () => {
     );
   }
 
-  const citf = new CourseInstructionTaskFlow();
+  // const citf = new CourseInstructionTaskFlow();
   citf.addTask(
     new CourseInstructionTask(
       () => {
@@ -644,7 +676,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => clickedSaveButtonLast,//document.getElementById("output-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
           startPosition: {
             x: document.getElementById("save-code-button").offsetLeft + document.getElementById("save-code-button").offsetWidth,
@@ -666,7 +698,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => clickedSaveXMLButtonLast,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
           startPosition: () => {
             return {
@@ -711,7 +743,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 0,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", {
           startPosition: () => {
             //const coords = workspace.trashcan.getClientRect();
@@ -750,7 +782,7 @@ window.addEventListener('DOMContentLoaded', () => {
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
       () => clickedLoadButtonLast,//document.getElementById("text-code-container").classList.contains("show-container"),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
           startPosition: {
             x: document.getElementById("load-code-button").offsetLeft + document.getElementById("load-code-button").offsetWidth,
@@ -772,7 +804,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => xmlText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => "Paste the XML you copied in this text box.", {
           startPosition: () => {
             return {
@@ -798,7 +830,7 @@ window.addEventListener('DOMContentLoaded', () => {
   citf.addTask(
     new CourseInstructionTask(
       () => clickedLoadXMLButtonLast && workspace.getAllBlocks().length === 13,
-      new SeriesAnimations([
+      new ParallelAnimation([
         new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
           startPosition: () => {
             return {
@@ -837,5 +869,8 @@ window.addEventListener('DOMContentLoaded', () => {
     )
   );
 
-  citf.runTasks();
-});
+//  citf.runTasks();
+//});
+
+  return citf;
+};

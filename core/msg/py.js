@@ -1,5 +1,6 @@
 T2C.MSG.PY = {};
 
+T2C.MSG.PY["LANGUAGE_NAME"] = "Python";
 T2C.MSG.PY["TOOLBOX_CATEGORY_PSEUDO_JS_IO"] = "PseudoJS Input/Output";
 T2C.MSG.PY["TOOLBOX_CATEGORY_JS_IO"] = "JavaScript Input/Output";
 T2C.MSG.PY["TOOLBOX_CATEGORY_VARIABLES"] = "Variables";
