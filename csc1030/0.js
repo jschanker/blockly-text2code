@@ -6,6 +6,34 @@ import BlinkAnimation from "../core/blink_animation.js";
 import HelpMessageDirection from "../core/help_message_direction.js";
 import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
+
+function displayMessage(msg, erasePrevious=true) {
+  let alertDisplay = document.getElementById("alert-display");
+  if(!alertDisplay) {
+    alertDisplay = document.createElement("div");
+    alertDisplay.id = "alert-display";
+    alertDisplay.style.fontSize = "small";
+    alertDisplay.style.fontWeight = "bold";
+    alertDisplay.style.borderColor = "#000";
+    alertDisplay.style.backgroundColor = "rgba(200, 200, 200, 0.5)";
+    alertDisplay.style.color = "#f00";
+    alertDisplay.style.position = "absolute";
+    alertDisplay.style.zIndex = "1050";
+    alertDisplay.style.width = "98%";
+    alertDisplay.style.minHeight = "50px";
+    alertDisplay.style.left = "0";
+    alertDisplay.style.bottom = "0";
+    alertDisplay.style.textAlign = "left";
+    alertDisplay.style.padding = "1%";
+    document.body.appendChild(alertDisplay);
+  }
+  if(erasePrevious) {
+    alertDisplay.innerText = msg;
+  } else {
+    alertDisplay.innerText += msg;
+  }
+}
+
 //Blockly.Python['code_statement'] = Blockly.JavaScript['code_statement'] =
 Blockly.Python['type_in_display_string_literal'] = Blockly.JavaScript['type_in_display_string_literal'] = Blockly.JavaScript['code_statement'];
 Blockly.Blocks['type_in_display_string_literal'] = {
@@ -25,17 +53,24 @@ Blockly.Blocks['type_in_display_string_literal'] = {
       // this.setColour("#f00");                 
     }
     if(!val) {
-      alert("Check the spelling, case, and punctuation of what you're entering; it should identically match with " + T2C.MSG.currentLanguage["TERMINAL_DISPLAY"]);
+      displayMessage("Check the spelling, case, and punctuation of what you're entering; it should identically match with " + T2C.MSG.currentLanguage["TERMINAL_DISPLAY"]);
       return null;
     }
     else if(afterText && afterText.length && !afterText.startsWith("(")) {
-      alert("You're missing an opening parenthesis after " + val);
+      displayMessage("You're missing an opening parenthesis after " + val);
       return val;
     }
     else if(afterOpenParenthesis && !afterOpenParenthesis.startsWith('"') && !afterOpenParenthesis.startsWith("'")) {
-      alert("Make sure the text you want to display is between \" and \" so the computer just displays it without trying to figure out what you mean!");
+      displayMessage("Make sure the text you want to display is between \" and \" so the computer just displays it without trying to figure out what you mean!");
       return val + "(";
-    } else {
+    }
+    else if(afterOpenParenthesis && afterOpenParenthesis.indexOf('"', 1) !== -1
+      && !afterOpenParenthesis.substring(afterOpenParenthesis.indexOf('"', 1)+1).trim().startsWith(")")) {
+      displayMessage("Make sure to include a closing parenthesis after the string surrounded by \" and \".");
+      return val + "(" + afterOpenParenthesis.substring(0, afterOpenParenthesis.indexOf('"', 1)+1);
+    }
+    else {
+      displayMessage("");
       return exp;
     }
   },
@@ -94,17 +129,19 @@ Blockly.Blocks['type_in_welcome_message'] = {
       afterText.substring(1).trim();
     */
     if(!trimmedExp.length) {
+      displayMessage("");
       return;
     }
     else if(!trimmedExp.startsWith("\"") && !trimmedExp.startsWith("\'")) {
-      alert("Since you will be starting your message with text to be displayed as is such as Welcome, be sure you let the computer know this by surrounding what appears first with \" and \"");
+      displayMessage("Since you will be starting your message with text to be displayed as is such as Welcome, be sure you let the computer know this by surrounding what appears first with \" and \"");
       return null;
     }
     else if(firstEndQuotePosition > 1 && !"+firstName+".startsWith(afterFirstEndQuote.trim().replace(/\s+\+|\+\s+/g, "+")) && 
       !afterFirstEndQuote.trim().replace(/\s+\+|\+\s+/g, "+").startsWith("+firstName+")) {
-      alert("Be sure that the variable name firstName appears outside of quotation marks since you want its value, not literally firstName and that you include + before and after it to join the welcome at the beginning and the punctuation mark at the end.")
+      displayMessage("Be sure that the variable name firstName appears outside of quotation marks since you want its value, not literally firstName and that you include + before and after it to join the welcome at the beginning and the punctuation mark at the end.")
       return beforeFirstEndQuote;
     } else {
+      displayMessage("");
       return exp;
     }
   },
@@ -316,49 +353,63 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && Blockly.selected !== x),
-      new GlideAnimation(d, {
-        totalSteps: 50,
-        startPosition: {
-          x: displayBlock.x.baseVal.value + displayBlock.width.baseVal.value/2, 
-          y: document.getElementById("top-header").offsetHeight + 
-            displayBlock.y.baseVal.value + displayBlock.height.baseVal.value/2
-        },
-        velocity: {x: 0, y: 2}
-      })
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block somewhere in the workspace.", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
+          }
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 50,
+          startPosition: {
+            x: displayBlock.x.baseVal.value + displayBlock.width.baseVal.value/2, 
+            y: document.getElementById("top-header").offsetHeight + 
+              displayBlock.y.baseVal.value + displayBlock.height.baseVal.value/2
+          },
+          velocity: {x: 0, y: 2}
+        })
+      ])
     )
   );
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text" && x.getParent() && x.getParent().type === "text_print"),
-      new GlideAnimation(d, {
-        totalSteps: 50,
-        startPosition: {
-          x: textBlock.x.baseVal.value + textBlock.width.baseVal.value/2,
-          y: document.getElementById("top-header").offsetHeight + 
-            textBlock.y.baseVal.value + displayBlock.height.baseVal.value/2 
-        },
-        endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
-          // const coords = textBlockWs.getBoundingRectangle();
-          /*
-          return {       
-            x: (coords.left + textBlockWs.width/2)*Blockly.getMainWorkspace().getScale() + d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              (coords.top + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2)*Blockly.getMainWorkspace().getScale() - d.offsetHeight/4
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Drag the text block in the space in the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-          */
-          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight-d.offsetHeight/4);
-          //getAbsolutePosition(Blockly.getMainWorkspace(), textBlockWs, textBlockWs.width/2 + d.offsetWidth/4, document.getElementById("top-header").offsetHeight + textBlockWs.height/2 - d.offsetHeight/4)
-        }
-      })
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 50,
+          startPosition: {
+            x: textBlock.x.baseVal.value + textBlock.width.baseVal.value/2,
+            y: document.getElementById("top-header").offsetHeight + 
+              textBlock.y.baseVal.value + displayBlock.height.baseVal.value/2 
+          },
+          endPosition: () => {
+            const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
+            // const coords = textBlockWs.getBoundingRectangle();
+            /*
+            return {       
+              x: (coords.left + textBlockWs.width/2)*Blockly.getMainWorkspace().getScale() + d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                (coords.top + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2)*Blockly.getMainWorkspace().getScale() - d.offsetHeight/4
+            }
+            */
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight-d.offsetHeight/4);
+            //getAbsolutePosition(Blockly.getMainWorkspace(), textBlockWs, textBlockWs.width/2 + d.offsetWidth/4, document.getElementById("top-header").offsetHeight + textBlockWs.height/2 - d.offsetHeight/4)
+          }
+        })
+      ])
     )
   );
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text" && x.getFieldValue("TEXT")),
       new ParallelAnimation([
-        new HelpMessageDirection(() => T2C.MSG.currentLanguage.TYPE_SOMETHING, {
+        new HelpMessageDirection(() => "Click on the area between the quotation marks in the text block and " + T2C.MSG.currentLanguage.TYPE_SOMETHING, {
           startPosition: () => {
             const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
             // const coords = textBlockWs.getBoundingRectangle();
@@ -370,19 +421,20 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           }
         }),
         new BlinkAnimation(d, {
-        totalSteps: 100,
-        toggleSteps: 25,
-        startPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
-          // const coords = textBlockWs.getBoundingRectangle();
-          // 0.5 for scale on y covers field
-          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, -d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
-          /*return {       
-            x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 - d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2
-          }*/
-        }
-      })])
+          totalSteps: 100,
+          toggleSteps: 25,
+          startPosition: () => {
+            const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
+            // const coords = textBlockWs.getBoundingRectangle();
+            // 0.5 for scale on y covers field
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, -d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
+            /*return {       
+              x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 - d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height/2
+            }*/
+          }
+        })
+      ])
     )
   );
   addRunTask(citf);
@@ -413,32 +465,39 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getNextBlock() && x.getNextBlock().type === "type_in_display_string_literal" && 
         !workspace.isDragging()),
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const typeInDisplayStringLiteralBlock = getToolboxBlock(0);
-          console.warn(typeInDisplayStringLiteralBlock)
-          return {
-            x: typeInDisplayStringLiteralBlock.x.baseVal.value + 
-              typeInDisplayStringLiteralBlock.width.baseVal.value/2, 
-            y: document.getElementById("top-header").offsetHeight + 
-              displayBlock.y.baseVal.value + displayBlock.height.baseVal.value/2
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Drag in the type-in-code block so its top groove connects to the point of the bottom of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-        },
-        endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
-          //const coords = textBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {       
-            x: coords.left + d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const typeInDisplayStringLiteralBlock = getToolboxBlock(0);
+            console.warn(typeInDisplayStringLiteralBlock)
+            return {
+              x: typeInDisplayStringLiteralBlock.x.baseVal.value + 
+                typeInDisplayStringLiteralBlock.width.baseVal.value/2, 
+              y: document.getElementById("top-header").offsetHeight + 
+                displayBlock.y.baseVal.value + displayBlock.height.baseVal.value/2
+            }
+          },
+          endPosition: () => {
+            const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
+            //const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {       
+              x: coords.left + d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
   citf.addTask(
@@ -539,31 +598,38 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
         x.getNextBlock() && (x.getNextBlock().type === "text_print" || x.getNextBlock().type === "js_text_print")),
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const variablesSetBlock = getToolboxBlock(0);
-          return {
-            x: variablesSetBlock.x.baseVal.value + 
-              variablesSetBlock.width.baseVal.value/2, 
-            y: document.getElementById("top-header").offsetHeight + 
-              variablesSetBlock.y.baseVal.value + variablesSetBlock.height.baseVal.value/2
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Drag in the " + T2C.MSG.currentLanguage.TERMINAL_LET  + " variable declaration block directly above the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block so its bottom point connects to the groove of the top of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-        },
-        endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
-          // const coords = textBlockWs.getBoundingRectangle();
-          /*
-          return {       
-            x: coords.left + d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const variablesSetBlock = getToolboxBlock(0);
+            return {
+              x: variablesSetBlock.x.baseVal.value + 
+                variablesSetBlock.width.baseVal.value/2, 
+              y: document.getElementById("top-header").offsetHeight + 
+                variablesSetBlock.y.baseVal.value + variablesSetBlock.height.baseVal.value/2
+            }
+          },
+          endPosition: () => {
+            const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
+            // const coords = textBlockWs.getBoundingRectangle();
+            /*
+            return {       
+              x: coords.left + d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 0}, d.offsetWidth/4, document.getElementById("top-header").offsetHeight);
           }
-          */
-          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 0}, d.offsetWidth/4, document.getElementById("top-header").offsetHeight);
-        }
-      })
+        })
+      ])
     )
   );
 
@@ -571,68 +637,90 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
         x.getInputTargetBlock("VALUE") && x.getInputTargetBlock("VALUE").type === "text"),
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
-          const coords = textBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + textBlockWs.width/2, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + textBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Drag the text from inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block to the inside of the " + T2C.MSG.currentLanguage.TERMINAL_LET + " variable declaration block directly above it so the variable stores the text.", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-          */
-        },
-        endPosition: () => {
-          const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
-          const coords = variablesSetBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + 3*variablesSetBlockWs.width/4, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + variablesSetBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
+            const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + textBlockWs.width/2, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + textBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
+          },
+          endPosition: () => {
+            const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
+            const coords = variablesSetBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + 3*variablesSetBlockWs.width/4, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + variablesSetBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
 
   citf.addTask(
-    new CourseInstructionTask(
+    new CourseInstructionTask(      
       () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get"),
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const variablesGetBlock = getToolboxBlock(1);
-          return {
-            x: variablesGetBlock.x.baseVal.value + 
-              variablesGetBlock.width.baseVal.value/2, 
-            y: document.getElementById("top-header").offsetHeight + 
-              variablesGetBlock.y.baseVal.value + variablesGetBlock.height.baseVal.value/2
+      new ParallelAnimation([
+        new HelpMessageDirection(() => {
+          const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_set");
+          //const valueTextBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
+          const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() === varBlock);
+          const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
+          const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
+          return "Drag the variable get block from the toolbox to the inside of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.  This will cause the variable the text is set to (" + text + ") to display.  (The computer knows to display its value instead of the literal text " 
+           + varBlockName + " because it is not surrounded by quotation marks.";
+        }, {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-        },
-        endPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print")
-            && !x.getInputTargetBlock("TEXT"));
-          //const coords = textBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);          
-          /*
-          return {       
-            x: coords.left + textBlockWs.width/2 + d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + textBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const variablesGetBlock = getToolboxBlock(1);
+            return {
+              x: variablesGetBlock.x.baseVal.value + 
+                variablesGetBlock.width.baseVal.value/2, 
+              y: document.getElementById("top-header").offsetHeight + 
+                variablesGetBlock.y.baseVal.value + variablesGetBlock.height.baseVal.value/2
+            }
+          },
+          endPosition: () => {
+            const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print")
+              && !x.getInputTargetBlock("TEXT"));
+            //const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);          
+            /*
+            return {       
+              x: coords.left + textBlockWs.width/2 + d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + textBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
 
@@ -673,31 +761,45 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
         x.getInputTargetBlock("VALUE") && (x.getInputTargetBlock("VALUE").type === "text_input" || x.getInputTargetBlock("VALUE").type === "js_text_input")),
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const getInputByAskingBlock = getToolboxBlock(0);
-          return {
-            x: getInputByAskingBlock.x.baseVal.value + 
-              getInputByAskingBlock.width.baseVal.value/2, 
-            y: document.getElementById("top-header").offsetHeight + 
-              getInputByAskingBlock.y.baseVal.value + getInputByAskingBlock.height.baseVal.value/2
+      new ParallelAnimation([
+        new HelpMessageDirection(() => {
+          const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_set");
+          const inputBlock = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input"));
+          const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && (block.getParent() === varBlock || block.getParent() === inputBlock));
+          const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
+          const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
+          return "Drag the " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + " block inside the " + T2C.MSG.currentLanguage.TERMINAL_LET + " variable block and move the text block that currently resides there inside the new " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + " block.  This will ask the user for text with the message " + text + " and store whatever the user types in the variable " + varBlockName + ".";
+        }, {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-        },
-        endPosition: () => {
-          const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
-          //const coords = variablesSetBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + 3*variablesSetBlockWs.width/4, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + variablesSetBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const getInputByAskingBlock = getToolboxBlock(0);
+            return {
+              x: getInputByAskingBlock.x.baseVal.value + 
+                getInputByAskingBlock.width.baseVal.value/2, 
+              y: document.getElementById("top-header").offsetHeight + 
+                getInputByAskingBlock.y.baseVal.value + getInputByAskingBlock.height.baseVal.value/2
+            }
+          },
+          endPosition: () => {
+            const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
+            //const coords = variablesSetBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + 3*variablesSetBlockWs.width/4, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + variablesSetBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
 
@@ -825,32 +927,46 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         x.getInputTargetBlock("TEXT").getInputTargetBlock("A").type === "variables_get"
         && x.getInputTargetBlock("TEXT").getInputTargetBlock("B") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("B").type === "text"),*/
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const textJoinBlock = getToolboxBlock(0);
-          return {
-            x: textJoinBlock.x.baseVal.value + 
-              textJoinBlock.width.baseVal.value/2, 
-            y: document.getElementById("top-header").offsetHeight + 
-              textJoinBlock.y.baseVal.value + textJoinBlock.height.baseVal.value/2
+      new ParallelAnimation([
+        new HelpMessageDirection(() => {
+          const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_get");
+          const displayBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
+          const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() === displayBlock);
+          const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
+          const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
+          return "Drag the + block inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block, replacing the variable " + varBlockName + " get block currently inside it.  The + is used to join text expressions together (also called string concatenation).  We will join the text " + text + " currently appearing below with the value of the variable " + varBlockName + ", which is whatever the user types in and use the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block to display the result on a single line.";
+        }, {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-        },
-        endPosition: () => {
-          const displayBlockVarWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
-            x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
-          // const coords = displayBlockVarWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);          
-          /*
-          return {
-            x: coords.left + displayBlockVarWs.width/2, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + displayBlockVarWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const textJoinBlock = getToolboxBlock(0);
+            return {
+              x: textJoinBlock.x.baseVal.value + 
+                textJoinBlock.width.baseVal.value/2, 
+              y: document.getElementById("top-header").offsetHeight + 
+                textJoinBlock.y.baseVal.value + textJoinBlock.height.baseVal.value/2
+            }
+          },
+          endPosition: () => {
+            const displayBlockVarWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
+              x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
+            // const coords = displayBlockVarWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);          
+            /*
+            return {
+              x: coords.left + displayBlockVarWs.width/2, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + displayBlockVarWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
 
@@ -862,36 +978,50 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         x.getInputTargetBlock("TEXT").getInputTargetBlock("A").type === "text"),
         /*&& x.getInputTargetBlock("TEXT").getInputTargetBlock("B") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("B").type === "variables_get"),*/
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
-            x.getParent() && (x.getParent().type === "text_print" || x.getParent().type === "text_print"));
-          // const coords = textBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + textBlockWs.width/2, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + textBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+      new ParallelAnimation([
+        new HelpMessageDirection(() => {
+          const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_get");
+          // const displayBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
+          const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() && (block.getParent().type === "text_print" || block.getParent().type === "js_text_print"));
+          const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
+          const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
+          return "Drag the text " + text + " appearing in the bottom " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block in the left space of the + block.";
+        }, {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-          */
-        },
-        endPosition: () => {
-          const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
-          // const coords = textJoinBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.25, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + textJoinBlockWs.width/4, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + textJoinBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
+              x.getParent() && (x.getParent().type === "text_print" || x.getParent().type === "text_print"));
+            // const coords = textBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + textBlockWs.width/2, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + textBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
+          },
+          endPosition: () => {
+            const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
+            // const coords = textJoinBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.25, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + textJoinBlockWs.width/4, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + textJoinBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
 
@@ -903,70 +1033,91 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         x.getInputTargetBlock("TEXT").getInputTargetBlock("A").type === "text"
         && x.getInputTargetBlock("TEXT").getInputTargetBlock("B") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("B").type === "variables_get"),
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const variableBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_get");
-          // const coords = variableBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, variableBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + variableBlockWs.width/2, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + variableBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+      new ParallelAnimation([
+        new HelpMessageDirection(() => {
+          const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_get");
+          // const displayBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
+          // const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() === displayBlock);
+          const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
+          // const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
+          return "Now drag the variable " + varBlockName + " block inside the right space of the + block.";
+        }, {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-          */
-        },
-        endPosition: () => {
-          const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
-          // const coords = textJoinBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + 3*textJoinBlockWs.width/4, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + textJoinBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const variableBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_get");
+            // const coords = variableBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, variableBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + variableBlockWs.width/2, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + variableBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
+          },
+          endPosition: () => {
+            const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
+            // const coords = textJoinBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.75, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + 3*textJoinBlockWs.width/4, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + textJoinBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
 
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().filter(x => (x.type === "text_print" || x.type === "js_text_print")).length === 1,
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const displayBlockVarWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
-            !x.getInputTargetBlock("TEXT"));
-          // const coords = displayBlockVarWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + displayBlockVarWs.width/2, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + displayBlockVarWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Now drag the bottom " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block in the trashcan since you no longer need it.", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-          */
-        },
-        endPosition: () => {
-          const coords = workspace.trashcan.getClientRect();
-          return {
-            x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
-            y: (coords.top + coords.bottom)/2
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const displayBlockVarWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
+              !x.getInputTargetBlock("TEXT"));
+            // const coords = displayBlockVarWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, displayBlockVarWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
             /*
-            y: document.getElementById("top-header").offsetHeight + 
-              (coords.top + coords.bottom)/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            return {
+              x: coords.left + displayBlockVarWs.width/2, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + displayBlockVarWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
             */
+          },
+          endPosition: () => {
+            const coords = workspace.trashcan.getClientRect();
+            return {
+              x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
+              y: (coords.top + coords.bottom)/2
+              /*
+              y: document.getElementById("top-header").offsetHeight + 
+                (coords.top + coords.bottom)/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+              */
+            }
           }
-        }
-      })
+        })
+      ])
     )
   );
 
@@ -1010,39 +1161,46 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         workspace.getAllBlocks().filter(x => x.type === "t2c_text_join").length === 0 && 
         workspace.getAllBlocks().filter(x => x.type === "variables_get").length === 0 && 
         workspace.getAllBlocks().filter(x => x.type === "text").length === 1,
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
-          // const coords = textJoinBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + textJoinBlockWs.width/2, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + textJoinBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Now drag the + block with the text and variable blocks inside of it into the trashcan.  Do *NOT* drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " statement block in the trashcan since we will be using an expression type-in block.  In JavaScript, an expression is just something that produces a value whereas a statement does not.  As a block, it connects inside such as +, a variable get, text, or " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + ".", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-          */
-        },
-        endPosition: () => {
-          const coords = workspace.trashcan.getClientRect();
-          return {
-            x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
-            y: (coords.top + coords.bottom)/2
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const textJoinBlockWs = workspace.getAllBlocks().find(x => x.type === "t2c_text_join");
+            // const coords = textJoinBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textJoinBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
             /*
-            y: document.getElementById("top-header").offsetHeight + 
-              (coords.top + coords.bottom)/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            return {
+              x: coords.left + textJoinBlockWs.width/2, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + textJoinBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
             */
+          },
+          endPosition: () => {
+            const coords = workspace.trashcan.getClientRect();
+            return {
+              x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
+              y: (coords.top + coords.bottom)/2
+              /*
+              y: document.getElementById("top-header").offsetHeight + 
+                (coords.top + coords.bottom)/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+              */
+            }
+          },
+          finish: () => {
+            workspace.options.maxInstances["t2c_text_join"] = 0;
+            workspace.options.maxInstances["variables_get"] = 0;
+            workspace.updateToolbox(document.getElementById("toolbox"));
           }
-        },
-        finish: () => {
-          workspace.options.maxInstances["t2c_text_join"] = 0;
-          workspace.options.maxInstances["variables_get"] = 0;
-          workspace.updateToolbox(document.getElementById("toolbox"));
-        }
-      })
+        })
+      ])
     )
   );
 
@@ -1051,31 +1209,38 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && 
           x.getInputTargetBlock("TEXT").type === "type_in_welcome_message"),
-      new GlideAnimation(d, {
-        totalSteps: 150,
-        startPosition: () => {
-          const welcomeMessageTypeBlock = getToolboxBlock(0);
-          return {
-            x: welcomeMessageTypeBlock.x.baseVal.value + 
-              welcomeMessageTypeBlock.width.baseVal.value/2, 
-            y: document.getElementById("top-header").offsetHeight + 
-              welcomeMessageTypeBlock.y.baseVal.value + welcomeMessageTypeBlock.height.baseVal.value/2
+      new ParallelAnimation([
+        new HelpMessageDirection(() => "Now drag the type-in-expression block inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " one.", {
+          startPosition: () => {
+            return {x: 0, y: document.getElementById("top-header").offsetHeight}
           }
-        },
-        endPosition: () => {
-          const textPrintBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
-          // const coords = textPrintBlockWs.getBoundingRectangle();
-          return getAbsolutePosition(workspace, textPrintBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
-          /*
-          return {
-            x: coords.left + textPrintBlockWs.width/2, //+ d.offsetWidth/4,
-            y: document.getElementById("top-header").offsetHeight + 
-              coords.top + textPrintBlockWs.height/2 + 
-              Blockly.getMainWorkspace().getMetrics().flyoutHeight
+        }),
+        new GlideAnimation(d, {
+          totalSteps: 150,
+          startPosition: () => {
+            const welcomeMessageTypeBlock = getToolboxBlock(0);
+            return {
+              x: welcomeMessageTypeBlock.x.baseVal.value + 
+                welcomeMessageTypeBlock.width.baseVal.value/2, 
+              y: document.getElementById("top-header").offsetHeight + 
+                welcomeMessageTypeBlock.y.baseVal.value + welcomeMessageTypeBlock.height.baseVal.value/2
+            }
+          },
+          endPosition: () => {
+            const textPrintBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
+            // const coords = textPrintBlockWs.getBoundingRectangle();
+            return getAbsolutePosition(workspace, textPrintBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 0.5}, 0,  document.getElementById("top-header").offsetHeight);
+            /*
+            return {
+              x: coords.left + textPrintBlockWs.width/2, //+ d.offsetWidth/4,
+              y: document.getElementById("top-header").offsetHeight + 
+                coords.top + textPrintBlockWs.height/2 + 
+                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+            }
+            */
           }
-          */
-        }
-      })
+        })
+      ])
     )
   );
 
