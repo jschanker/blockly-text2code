@@ -145,14 +145,68 @@
                 return [parentBlueprint.name].concat(getAncestors(parentBlueprint, blockArr));
               }
             };
+
+            const isSame = (obj1, obj2, properties, aliases, useAlias) => {
+              if(typeof obj1 !== "object" || typeof obj2 !== "object" 
+                || obj1 === null || obj2 === null) {
+                return obj1 === obj2 || useAlias && 
+                  aliases.find(names => names.indexOf(obj1) !== -1 && names.indexOf(obj2) !== -1);
+              }
+
+              properties = (properties instanceof Array) ? properties : Object.keys(obj1);
+              return properties.every(prop =>  
+                isSame(obj1[prop], obj2[prop], undefined, aliases, useAlias || (prop === "inputs")));
+            };
+
+            const simpleDeepCopy = (o) => {
+              // for serializable o 
+              if(typeof o !== "obj") return o;
+              else if(o instanceof Array) return o.map(item => simpleDeepCopy(item));
+              else return Object.keys(o).reduce((acc, prop) => {
+                acc[prop] = simpleDeepCopy(o[prop]);
+                return acc;
+              }, {}); 
+            };
+
+            const combineEqual = (blockBlueprint, properties) => {
+              //const combinedBlockBlueprint; 
+              return blockBlueprint.reduce((acc, block, index) => {
+                const b = acc.find(b => isSame(block, b, properties, acc.map(a => a.aliases)))
+                if(!b) {
+                  block.aliases = [block.name];
+                  return acc.concat(block);
+                } else {
+                  //b.aliases = b.aliases ? [block.name] : b.aliases.concat(block.name);
+                  //b.num = ++b.num || 2; 
+                  b.aliases.push(block.name);
+                  return acc;
+                }
+              }, []);
+            };
+
+            const getEquivalentBlockName = (blockBlueprintArr, blockName) => {
+              const blockEquivalent = blockBlueprintArr.find(b => b.aliases && b.aliases.indexOf(blockName) !== -1);
+              return blockEquivalent && blockEquivalent.name; 
+            };
+
             const getCodeFromBlocks = (blockBlueprintArr, includeNext) => {
               includeNext = includeNext || ((block) => true);
+              const combinedBlockBlueprintArr = combineEqual(
+                simpleDeepCopy(blockBlueprintArr),
+                includeNext ? ["type", "fields", "inputs", "nextStatement"] : ["type", "fields", "inputs"] 
+              )
               const code = 
-                blockBlueprintArr.map(blockBlueprint => {
-                  return `const ${blockBlueprint.name} = workspace.getAllBlocks().find(block => block.type === "${blockBlueprint.type}"` +
+                combinedBlockBlueprintArr.map(blockBlueprint => {
+                  return `const ${blockBlueprint.name} = workspace.getAllBlocks().filter(block => block.type === "${blockBlueprint.type}"` +
 
                   /*(blockBlueprint.isStatement ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +*/
-                  (blockBlueprint.isStatement && includeNext(blockBlueprint) ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +
+
+                  /**** USE OLD - 1/30/21 *****/
+                  // (blockBlueprint.isStatement && includeNext(blockBlueprint) ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +
+                  /***** END USE *****/
+                  (blockBlueprint.isStatement && includeNext(blockBlueprint) && blockBlueprint.nextStatement !== null ? ` && ${getEquivalentBlockName(combinedBlockBlueprintArr, blockBlueprint.nextStatement)}.indexOf(block.getNextBlock()) !== -1` : "") +
+
+                  (blockBlueprint.isStatement && includeNext(blockBlueprint) && blockBlueprint.nextStatement === null ? ` && block.getNextBlock() === null` : "") +
 
                   /*(blockBlueprint.nextStatement !== null ? ` && block.getNextBlock() === ${blockBlueprint.nextStatement}` : "") +*/
 
@@ -161,7 +215,8 @@
                   (blockBlueprint.inputs.length > 0 ? ` && ` : "") +  
 
                   blockBlueprint.inputs.map(input => {
-                    return Object.keys(input).map(key => `block.getInputTargetBlock("${key}") === ${input[key]}`)
+                    // return Object.keys(input).map(key => `block.getInputTargetBlock("${key}") === ${input[key]}`)
+                    return Object.keys(input).map(key => `${getEquivalentBlockName(combinedBlockBlueprintArr, input[key])}.indexOf(block.getInputTargetBlock("${key}")) !== -1`)
                       .join(" && ")
                   }).join(" && ") + 
 
@@ -187,15 +242,19 @@
                 else return 0;
               })
               */
+              const combinedBlockBlueprintArr = combineEqual(
+                simpleDeepCopy(blockBlueprintArr), ["type", "fields", "inputs"] 
+              )
               console.warn("UNSORTED", blockBlueprintArr);
               //console.warn("SORTED", sortedBlockBlueprintArr);
               // factor out into JSON in future
               const prefixCode = 
               `citf.addTask(\n  new CourseInstructionTask(\n    () => {\n      `;
               const code = getCodeFromBlocks(blockBlueprintArr);
-              const retVal = blockBlueprintArr.map(block => block.name).join(" && ")
+              const retVal = combinedBlockBlueprintArr.map(block => block.name + ".length === " + block.aliases.length).join(" && ")
               return prefixCode + code + ");\n" + "      return " + retVal + ";\n    },\n    ";
             };
+
             const toDirections = (blockBlueprintArr) => {
               const prefixCode = "new HelpMessageDirection(() => {\n      ";
               const collapsedBlocks = blockBlueprintArr.filter(block => block.collapsed);
