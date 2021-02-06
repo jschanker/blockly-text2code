@@ -69,14 +69,16 @@ class ToolboxManager {
   }
 
   removeToolboxBlocks(conditionFunc) {
-    const removeBlockBooleans = this.toolBoxBlocks_.map(conditionFunc);
+    const removeBlockBooleans = this.toolboxBlocks_.map(conditionFunc);
+    const blocksToRemove = this.toolboxBlocks_.filter(conditionFunc);
     removeBlockBooleans.forEach((doRemove, index) => {
       if(doRemove) this.toolboxBlocks_[index].remove();
     });
-    this.toolBoxBlocks_ = 
+    this.toolboxBlocks_ = 
       this.toolboxBlocks_.filter((_, index) => !removeBlockBooleans[index]);
     this.workspace_.updateToolbox(document.getElementById("toolbox"));
-    return block;
+    console.log("Removing blocks", blocksToRemove);
+    return blocksToRemove;
   }
 }
 
