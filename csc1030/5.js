@@ -294,7 +294,7 @@ Blockly.Blocks['type_in_between_at_and_period'] = {
           } else if(getAfterTerminal(remaining, "GETTEXTFROMPOSITIONNUMBER")) {
             displayMessage(T2C.MSG.currentLanguage.TERMINAL_GETTEXTFROMPOSITIONNUMBER + " gives you part of the text; you're already using that, but you want a number, which you need for the position to stop before.");
           } else {
-            displayMessage("What property of email do you want to get to determine the ending position here?  Make sure you're spelling and capitalization (e.g., M versus m) are correct.");
+            displayMessage("What property of email do you want to get to determine the ending position here?  Make sure your spelling and capitalization (e.g., M versus m) are correct.");
           }
           // displayMessage("The correct place to stop extracting text cannot be a specific number if you want it to work in general regardless of the e-mail address.  For an email of " + emailSampleInput + ", you'd use " + emailSampleInput.indexOf(".") + "(stopping before it), but for jdoe@foo.com, you'd want to use " + "jdoe@foo.com".indexOf(".") + ".  Since it depends on some property of email, use What do you look for to get the correct position and is there something you recently learned about that you could use to get it?");    
         },
