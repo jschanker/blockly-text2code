@@ -135,7 +135,7 @@
               math_number: "number",
               math_arithmetic_basic: "arithmetic",
               variables_get: "variable get",
-              variables_set: "let variable"
+              variables_set: "\" + T2C.MSG.currentLanguage.TERMINAL_LET + \" variable"
             };
             const getBlockWithName = (blockName, blockArr) => blockArr.find(block => block.name === blockName); 
             const getAncestors = (block, blockArr) => {
@@ -145,6 +145,27 @@
                 return [parentBlueprint.name].concat(getAncestors(parentBlueprint, blockArr));
               }
             };
+
+            const getFieldValueFromArr = (fieldArr, fieldName) => {
+              const fieldObjWithFieldName = fieldArr.find(fieldObj => fieldObj[fieldName]);
+              return fieldObjWithFieldName ? fieldObjWithFieldName[fieldName] : null
+            };
+
+            const getBlockMsgName = (blockBlueprint) => {
+              const blockNameKey = "TERMINAL_" + typesToTerminalConstants[blockBlueprint.type];
+              const blockName = T2C.MSG.currentLanguage[blockNameKey] ?
+                '" + T2C.MSG.currentLanguage.' + blockNameKey + ' + "' : typesToTerminalConstants[blockBlueprint.type];
+
+              return blockName;
+            };
+
+            const getDescendants = (block) => {
+              const childrenBlocks = block.getChildren().filter(c => block.getNextBlock() !== c);
+              return childrenBlocks
+                .filter(c => block.getNextBlock() !== c)
+                .map(childBlock => getDescendants(childBlock))
+                .reduce((acc, blockArr) => acc.concat(blockArr), childrenBlocks);
+            }
 
             const isSame = (obj1, obj2, properties, aliases, useAlias) => {
               if(typeof obj1 !== "object" || typeof obj2 !== "object" 
@@ -223,7 +244,7 @@
                   (blockBlueprint.fields.length > 0 ? ` && ` : "") +
 
                   blockBlueprint.fields.map(field => {
-                    return Object.keys(field).map(key => key === "VAR" ? `block.getField("VAR").getText() === "${field[key]}"` : `block.getFieldValue("${key}") == "${field[key]}"`)
+                    return Object.keys(field).map(key => key === "VAR" ? `block.getField("VAR").getText() === "${field[key]}"` : (typeof field[key] === "string" ? `block.getFieldValue("${key}") === "${field[key]}"` : `block.getFieldValue("${key}") === ${field[key]}`))
                       .join(" && ")
                   }).join(" && ");
 
@@ -268,9 +289,7 @@
               const newBlockFeedback = newBlocks
                 .map(blockBlueprint => {
                   const ancestors = getAncestors(blockBlueprint, blockBlueprintArr);
-                  const blockNameKey = "TERMINAL_" + typesToTerminalConstants[blockBlueprint.type];
-                  const blockName = T2C.MSG.currentLanguage[blockNameKey] ?
-                    '" + T2C.MSG.currentLanguage["' + blockNameKey + '"] + "' : typesToTerminalConstants[blockBlueprint.type]; 
+                  const blockName = getBlockMsgName(blockBlueprint);
 //                  (T2C.MSG.currentLanguage["TERMINAL_" + typesToTerminalConstants[blockBlueprint.type]] ? T2C.MSG.currentLanguage["TERMINAL_" + typesToTerminalConstants[blockBlueprint.type]] : typesToTerminalConstants[blockBlueprint.type]);
                   //console.error(blockBlueprint, ancestors);
                   //(blockBlueprint.inputs.length > 0 ? ` && ` : "") +  
@@ -292,7 +311,44 @@
 
                   const nextStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.nextStatement ? " && " + blockBlueprint.nextStatement : "") + " && " + blockBlueprint.name + ".getNextBlock() !== " + blockBlueprint.nextStatement + ') {\n        return "The next statement above the ' + blockName + ' block is incorrect.";\n      }\n' : "";
 
-                  const previousStatementFeedback = blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.parent ? " && " + blockBlueprint.parent : "") + " && " + blockBlueprint.name + ".getPreviousBlock() !== " + blockBlueprint.parent + ') {\n        return "The previous statement above the ' + blockName + ' block is incorrect.";\n      }\n' : "";
+                  let previousStatementFeedback = "";
+                  if(blockBlueprint.type === "variables_set") {
+                    const varName2 = getFieldValueFromArr(blockBlueprint.fields, "VAR");
+                    // console.error(blockBlueprint)
+                    // blockBlueprint is set variables block with var name foo
+                    // Get all statement blocks b with variable get block foo
+                    blockBlueprintArr
+                      .filter(b => b.isStatement && b.descendants.find(blockName => {
+                        const block = getBlockWithName(blockName, blockBlueprintArr);
+                        
+                        return block.type === "variables_get" && getFieldValueFromArr(block.fields, "VAR") === varName2;
+                      }))
+                      .forEach((b, index, arr) => {
+                        console.error("ARR depending on ", blockBlueprint, arr);
+                        // b is statement block using variable from blockBlueprint so b should appear after it
+                        console.error("B,B",blockBlueprint, blockBlueprint.descendants, b)
+                        /*const varField2 = blockBlueprint.fields.find(fieldObj => Object.keys(fieldObj).indexOf("VAR") !== -1);
+                        const varName2 = varField2 ? varField2.VAR : "";*/
+                        if(b.type === "variables_set") {
+                          const varField = b.fields.find(fieldObj => Object.keys(fieldObj).indexOf("VAR") !== -1);
+                          const varName = varField ? varField.VAR : "";
+                          previousStatementFeedback += "\n      if(" + blockBlueprint.name + " && " + b.name + " && " + b.name + ".getPreviousBlock() === " + blockBlueprint.name + ') {\n        return "The ' + getBlockMsgName(b) + ' block setting ' + varName + ' must go below the ' + getBlockMsgName(blockBlueprint) + ' block setting ' + varName2 + ' because the computer uses this one to determine what ' + varName + ' is.  Since instructions are run from top to bottom, it won\'t know what ' + varName2 + ' means, otherwise!";\n      }\n"'
+                        } else {
+                          previousStatementFeedback += "\n      if(" + blockBlueprint.name + " && " + b.name + " && " + b.name + ".getPreviousBlock() === " + blockBlueprint.name + ') {\n        return "The ' + getBlockMsgName(b) + ' block must go below the ' + getBlockMsgName(blockBlueprint) + ' block setting ' + varName2 + ' because the computer uses the value of this variable in the ' + getBlockMsgName(b) + ' block.  Since instructions are run from top to bottom, it won\'t know what ' + varName2 + ' means, otherwise!";\n      }\n"';
+                        }
+/*
+                        previousStatementFeedback += "\n      if(" + blockBlueprint.name + " && " + b.name + " && " + b.name + ".getPreviousBlock() === " + blockBlueprint.name + ') {\n        return "The ' + getBlockMsgName(blockBlueprint) + ' block setting ' + varName + ' must go below the ' + getBlockMsgName(b) + ' block' + (b.type === "variables_set" ? (' setting ' + varName2) : '') + ' because the computer uses this one to determine what ' + varName + ' is.  Since instructions are run from top to bottom, it won\'t know what ' + varName2 + ' means, otherwise!";\n      }\n"'
+*/
+                      });
+                  }
+
+/*
+                  "The " + T2C.MSG.currentLanguage["TERMINAL_LET"] + " variable block setting afterS must go below the " + T2C.MSG.currentLanguage["TERMINAL_LET"] + " variable block setting " + varName + " because the computer uses this one to determine what afterS is.  Since instructions are run from top to bottom, it won't know what  " + varName + " means, otherwise!";
+
+
+                  = "The " + blockName + " block must go below the " + T2C.MSG.currentLanguage["TERMINAL_LET"] + " variable block setting fullName because the computer needs to know what the user's name is in order to display his/her initials.  Remember that instructions are run from top to bottom.";
+*/
+                  previousStatementFeedback += blockBlueprint.isStatement ? "\n      if(" + blockBlueprint.name + (blockBlueprint.parent ? " && " + blockBlueprint.parent : "") + " && " + blockBlueprint.name + ".getPreviousBlock() !== " + blockBlueprint.parent + ') {\n        return "The previous statement above the ' + blockName + ' block is incorrect.";\n      }\n' : "";
 
                   return previousStatementFeedback + nextStatementFeedback + "\n      if(" + [blockBlueprint.name].concat(ancestors).join(" && ") + ") {\n" + inputFeedback + "\n" + fieldFeedback + '\n      }\n';
                 }).join("");
@@ -355,7 +411,7 @@
                 const blockFields = blocks.map((block, index) => 
                   block.inputList.map(input => 
                     input.fieldRow.map(field => {
-                    if(field.name && block.getFieldValue(field.name) && !field.name.startsWith("_TEMP_COLLAPSED_FIELD")) {
+                    if(field.name /*&& block.getFieldValue(field.name)*/ && !field.name.startsWith("_TEMP_COLLAPSED_FIELD")) {
                       const obj = {};
                       if(field.name !== "VAR") {
                         obj[field.name] = block.getFieldValue(field.name);
@@ -380,7 +436,8 @@
                     nextStatement: blockNexts[index],
                     //isStatement: block.getParent() === block.getPreviousBlock(),
                     isStatement: !!(block.nextConnection || block.previousConnection),
-                    collapsed: block.isCollapsed() || isEnclosingBlockCollapsed(block)//,
+                    collapsed: block.isCollapsed() || isEnclosingBlockCollapsed(block),
+                    descendants: getDescendants(block).map(b => blockVariableNames[blocks.indexOf(b)])
                     //block: block
                   };
                 });

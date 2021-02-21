@@ -484,7 +484,7 @@ Blockly.Blocks['type_in_set_after_s'] = {
         (matchResultArr, remaining) => displayMessage("If we want all of the characters after the first s, we won't stop extracting text until we get to the end of the string.  For " + sampleInput + ", you'd use " + sampleInput.length + " while for " + sampleInput2 + ", you'd use " + sampleInput2.length + ", the position number after the last character.  Do you remember how you can get these positions from the entered string?"),
         (matchResultArr, remaining) => {
           if(remaining.replace(/\s/g, "").indexOf("-1") !== -1) {
-            displayMessage("Remember that " + T2C.MSG.currentLanguage.TERMINAL_GETTEXTFROMPOSITIONNUMBER + " ends one position before the numerical expression given.  So for example, for an enteredTextWithS of " + sampleInput + ", sampleInput.length - 1 would be " + (sampleInput.length-1) + ", which means you'd extract the text ending with the " + sampleInput.charAt(sampleInput.length-2) + " instead of the last character of " + sampleInput.charAt(sampleInput.length-1) + ".");
+            displayMessage("Remember that " + T2C.MSG.currentLanguage.TERMINAL_GETTEXTFROMPOSITIONNUMBER + " ends one position before the numerical expression given.  So for example, for an enteredTextWithS of " + sampleInput + ", enteredTextWithS.length - 1 would be " + (sampleInput.length-1) + ", which means you'd extract the text ending with the " + sampleInput.charAt(sampleInput.length-2) + " instead of the last character of " + sampleInput.charAt(sampleInput.length-1) + ".");
           }
           else if(remaining.replace(/\s/g, "").indexOf("+1") !== -1) {
             displayMessage("For an enteredTextWithS of " + sampleInput + ", enteredTextWithS.length + 1 would be " + (sampleInput.length+1) + ", but there is no character at this position since positions start at 0.");
@@ -995,7 +995,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         
         if(variableSetAfterSBlock && (variableSetAfterSBlock.getNextBlock() !== null && variableSetAfterSBlock.getNextBlock() !== variableSetBeforeSBlock)) {
           const varName = variableSetAfterSBlock.getNextBlock().type === "variables_set" && variableSetAfterSBlock.getNextBlock().getField("VAR").getText();
-          return "The " + T2C.MSG.currentLanguage["TERMINAL_LET"] + " variable block setting afterS must go below the " + T2C.MSG.currentLanguage["TERMINAL_LET"] + " variable block setting " + varName + " because the computer uses this one to determine what afterS is.  Since instructions are run from top to bottom, it won't know what  " + varName + " means, otherwise!";
+          return "The " + T2C.MSG.currentLanguage["TERMINAL_LET"] + " variable block setting afterS must go below the " + T2C.MSG.currentLanguage["TERMINAL_LET"] + " variable block setting " + varName + " because the computer uses this one to determine what afterS is.  Since instructions are run from top to bottom, it won't know what " + varName + " means, otherwise!";
         }
 
         if(variableSetAfterSBlock && (variableSetAfterSBlock.getNextBlock() === variableSetBeforeSBlock || variableSetAfterSBlock.getPreviousBlock() === null)) {

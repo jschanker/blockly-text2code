@@ -6,7 +6,13 @@ import BlinkAnimation from "../core/blink_animation.js";
 import HelpMessageDirection from "../core/help_message_direction.js";
 import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
+import MessageConsoleManager from "../core/message_console_manager.js";
+import TypeInCodeBlock from "../core/type_in_code_block.js";
 
+const helpMsgManager = new MessageConsoleManager();
+const directionsTabId = helpMsgManager.addTab("Directions", "");
+const feedbackTabId = helpMsgManager.addTab("Feedback", "");
+helpMsgManager.start();
 
 // JavaScript built-in substring method overriden for beginner intended use;
 // this is used to get back some of the index out-of-bounds behavior;
@@ -30,6 +36,7 @@ function getAfterTerminal(inputted, terminal) {
 
 function displayMessage(msg, erasePrevious=true) {
   let alertDisplay = document.getElementById("alert-display");
+  let msgBodyDiv = document.getElementById("msg-body");
   if(!alertDisplay) {
     alertDisplay = document.createElement("div");
     alertDisplay.id = "alert-display";
@@ -47,14 +54,100 @@ function displayMessage(msg, erasePrevious=true) {
     alertDisplay.style.textAlign = "left";
     alertDisplay.style.padding = "1%";
     document.body.appendChild(alertDisplay);
+
+    directionsTab = document.createElement("button");
+    directionsTab.innerText = "Directions";
+    directionsTab.id = "directions-tab";
+    alertDisplay.appendChild(directionsTab);
+
+    feedbackTab = document.createElement("button");
+    feedbackTab.innerText = "Feedback";
+    feedbackTab.id = "feedback-tab";
+    alertDisplay.appendChild(feedbackTab);
+
+    msgBodyDiv = document.createElement("div");
+    msgBodyDiv.id = "msg-body";
+    msgBody.style.color = "blue";
+    alertDisplay.appendChild(msgBodyDiv);
   }
+
   if(erasePrevious) {
-    alertDisplay.innerText = msg;
+    msgBodyDiv.innerText = msg;
   } else {
-    alertDisplay.innerText += msg;
+    msgBodyDiv.innerText += msg;
   }
 }
 
+const typeInGetLastCharNumBlock = new TypeInCodeBlock("type_in_get_last_char_number");
+typeInGetLastCharNumBlock.addPossibleMatch(
+  [{token: "display", type: "terminal"}, "(", "s", ".", {token: "getCharacterNUMBER", type: "terminal"}, "(", "4", ")", ")"],
+  [
+    null,
+    null,
+    (matchResultArr, remaining) => {
+      if(remaining.startsWith('"')) {
+        return "Don't use \" here as you want the computer to evaluate what you typed (e.g., the word the user entered instead of the letter s)"
+      } else {
+        return "Be sure to include the variable s that you want to the get the value's last character from";
+      } 
+    },
+    null,
+    null,
+    null,
+    (matchResultArr, remaining) => {
+      if(remaining.startsWith('"')) {
+        return "Don't use \" here as you want the computer to interpret this as a number and not text.";
+      } else if(remaining.startsWith("5")) {
+        return "Remember that character positions start at the number 0.  If you count the letters of a 5-letter word such as `pizza` starting from 0, you won't get up to position 5.";
+      } else if(remaining.startsWith("6")) {
+        return "Determine the position of the last character a in the 5-letter word `pizza`.  If you count starting from 0, you won't get up to position 6.";
+      } else if(parseInt(remaining) === 0) {
+        return "You want the position of the last character, not the first.";
+      } else if(parseInt(remaining)) {
+        return "Determine the position of the last character a in the 5-letter word `pizza`.  The number you're entering is incorrect.";
+      } else {
+        return "Include a number for the position you want after " + matchResultArr[4] + "(";
+      }
+    },
+    null,
+    null
+  ]
+);
+typeInGetLastCharNumBlock.addPossibleMatch(
+  [{token: "display", type: "terminal"}, "(", "s", "[", "4", "]", ")"],
+  [
+    null,
+    null,
+    (matchResultArr, remaining) => {
+      if(remaining.startsWith('"')) {
+        return "Don't use \" here as you want the computer to evaluate what you typed (e.g., the word the user entered instead of the letter s)"
+      } else {
+        return "Be sure to include the variable s that you want to the get the value's last character from";
+      } 
+    },
+    null,
+    (matchResultArr, remaining) => {
+      if(remaining.startsWith('"')) {
+        return "Don't use \" here as you want the computer to interpret this as a number and not text.";
+      } else if(remaining.startsWith("5")) {
+        return "Remember that character positions start at the number 0.  If you count the letters of a 5-letter word such as `pizza` starting from 0, you won't get up to position 5.";
+      } else if(remaining.startsWith("6")) {
+        return "Determine the position of the last character a in the 5-letter word `pizza`.  If you count starting from 0, you won't get up to position 6.";
+      } else if(parseInt(remaining) === 0) {
+        return "You want the position of the last character, not the first.";
+      } else if(parseInt(remaining)) {
+        return "Determine the position of the last character a in the 5-letter word `pizza`.  The number you're entering is incorrect.";
+      } else {
+        return "Include a number for the position you want after " + matchResultArr[3] + ".";
+      }
+    },
+    null,
+    null
+  ]
+);
+typeInGetLastCharNumBlock.addToBlocks();
+
+/*
 Blockly.Python['type_in_get_last_char_number'] = Blockly.JavaScript['type_in_get_last_char_number'] = Blockly.JavaScript['code_statement'];
 Blockly.Blocks['type_in_get_last_char_number'] = {
   validate: (exp) => {
@@ -187,11 +280,12 @@ Blockly.Blocks['type_in_get_last_char_number'] = {
     };
     //this.onchange = parseAndConvertToBlocks.bind(this, props);
   },
+
   /*validate: function(colourHex) {
     console.warn("something");
     this.setColour("#f00");
-  }*/
-};
+  }
+};*/
 
 function restoreAfterMoveAndFlashText(div) {
   div.style.verticalAlign = "middle";
@@ -309,17 +403,29 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   d.style.zIndex = "1001";
   document.getElementById("blockly-div").appendChild(d);
 
+  function createHelpMessageDirections(directions, feedback) {
+    return {
+      start: () => {
+        // console.log("START", directions, feedback);
+        helpMsgManager.changeTab(directionsTabId, "Directions", directions);
+        helpMsgManager.changeTab(feedbackTabId, "Feedback", feedback);
+        helpMsgManager.setSelectedTab(directionsTabId);
+      },
+      isComplete: () => false,
+      animate: (steps) => helpMsgManager.animate(steps)
+    }
+  }
+
+  function createHelpMessageTask(directions, feedback) {
+    return new CourseInstructionTask(() => true, createHelpMessageDirections(directions, feedback));
+  }
+
   function addRunTask(courseInstructionTaskFlow) {
     courseInstructionTaskFlow.addTask(
       new CourseInstructionTask(
         () => document.getElementById("output-container").classList.contains("show-container"),
         new ParallelAnimation([
-          new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_RUN_CODE, {
-            startPosition: {
-              x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth,
-              y: document.getElementById("run-code-button").offsetTop + document.getElementById("run-code-button").offsetHeight
-            }
-          }),
+          createHelpMessageDirections(T2C.MSG.currentLanguage.BUTTON_RUN_CODE, ""),
           new BlinkAnimation(d, {
             totalSteps: 100,
             toggleSteps: 25,
@@ -375,39 +481,41 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       	  promptBlock.getInputTargetBlock("TEXT") === textBlock && 
           textBlock.getFieldValue("TEXT").includes("5") && textBlock.getFieldValue("TEXT").includes("letter");
       },
-      new HelpMessageDirection(() => {
-      	const variableBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
-      	const promptBlock = workspace.getAllBlocks().find(x => (x.type === "text_input" || x.type === "js_text_input"));
-      	const textBlock = workspace.getAllBlocks().find(x => x.type === "text");
-      	if(variableBlock) {
-      		const varName = variableBlock.getField("VAR").getText();
-      		if(varName === "item") {
-      			// Default value
-      			return "You can change the variable name by clicking item and then selecting Rename variable...";
-      		} else if(varName.includes("5") || varName.includes("letter")) {
-      			return "The variable name, which stores the value the user enters, should be s, not " + varName + ".  The message you want to display to the user should be in the \"\" block";
-      		} else if(varName !== "s") {
-      			return "The variable name, which stores the value the user enters, should be s, not " + varName + ".";
-      		}
-      	}
-      	if(textBlock) {
-      		const displayText = textBlock.getFieldValue("TEXT");
-      		if(displayText === "") {
-      			// Default value
-      			return "You can change the text by clicking the blank field and then typing the desired message.";
-      		} else if(displayText === "s") {
-      			return "The text which is displayed to the user should contain 5 and letters; the variable name s should appear in the let block.";
-      		} else if(!displayText.includes("5") || !displayText.includes("letter")) {
-      			return "Make sure the text which is displayed to the user contains 5 and letters so the user knows to enter a 5 letter word.";
-      		}	
-      	}
-      	if(variableBlock && textBlock && variableBlock.getInputTargetBlock("VALUE") === textBlock) {
-      		return "The variable should store what the user enters, which means you'll need to attach it to a getInputByAsking block.";
-      	}
-      	return "Drag in and assemble code blocks to ask the user for a 5-letter word, and store the input in a variable.  \nName the variable s AND\nbe sure that the message includes 5 and letters in it so the user knows to enter 5 letters."
-      }, {
-        startPosition:getAbsolutePosition(workspace, null, {}, 50, document.getElementById("top-header").offsetHeight + 50)
-      })
+      createHelpMessageDirections(
+        () => "Drag in and assemble code blocks to ask the user for a 5-letter word, and store the input in a variable.  \nName the variable s AND\nbe sure that the message includes 5 and letters in it so the user knows to enter 5 letters.",
+        () => {
+        	const variableBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
+        	const promptBlock = workspace.getAllBlocks().find(x => (x.type === "text_input" || x.type === "js_text_input"));
+        	const textBlock = workspace.getAllBlocks().find(x => x.type === "text");
+        	if(variableBlock) {
+        		const varName = variableBlock.getField("VAR").getText();
+        		if(varName === "item") {
+        			// Default value
+        			return "You can change the variable name by clicking item and then selecting Rename variable...";
+        		} else if(varName.includes("5") || varName.includes("letter")) {
+        			return "The variable name, which stores the value the user enters, should be s, not " + varName + ".  The message you want to display to the user should be in the \"\" block";
+        		} else if(varName !== "s") {
+        			return "The variable name, which stores the value the user enters, should be s, not " + varName + ".";
+        		}
+        	}
+        	if(textBlock) {
+        		const displayText = textBlock.getFieldValue("TEXT");
+        		if(displayText === "") {
+        			// Default value
+        			return "You can change the text by clicking the blank field and then typing the desired message.";
+        		} else if(displayText === "s") {
+        			return "The text which is displayed to the user should contain 5 and letters; the variable name s should appear in the let block.";
+        		} else if(!displayText.includes("5") || !displayText.includes("letter")) {
+        			return "Make sure the text which is displayed to the user contains 5 and letters so the user knows to enter a 5 letter word.";
+        		}	
+        	}
+        	if(variableBlock && textBlock && variableBlock.getInputTargetBlock("VALUE") === textBlock) {
+        		return "The variable should store what the user enters, which means you'll need to attach it to a getInputByAsking block.";
+        	}
+          return "";
+        	// return "Drag in and assemble code blocks to ask the user for a 5-letter word, and store the input in a variable.  \nName the variable s AND\nbe sure that the message includes 5 and letters in it so the user knows to enter 5 letters."
+        }
+      )
     )
   );
 
@@ -446,34 +554,36 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       	  displayBlock.getInputTargetBlock("TEXT") === variableGetBlock &&
       	  variableGetBlock.getField("VAR").getText() === "s";
       },
-      new HelpMessageDirection(() => {
-      	const variableSetBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
-      	const displayBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
-      	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get");
-      	if(variableGetBlock) {
-      		const varName = variableGetBlock.getField("VAR").getText();
-      		if(varName !== "s") {
-      			return "Make sure you change the variable name to s since that's what you want to display its value, which is what the user entered.";
-      		}
-      	}
-      	if(displayBlock) {
-      		if(variableSetBlock) {
-      			if(displayBlock.getNextBlock() && displayBlock.getNextBlock() === variableSetBlock) {
-      				return "Make sure the display block appears *after* (below) the variable set block.  Otherwise the computer would try to display what the user enters before he/she enters it!"
-      			} else if(!variableSetBlock.getNextBlock()) {
-      				return "Make sure to connect the display block below the let block above it.  This way the computer will ask the user for a string, store it in s and then display it!";
-      			}
-      		}
-      		if(variableGetBlock) {
-      			if(!displayBlock.getInputTargetBlock("TEXT")) {
-      				return "Place the s block inside the display statement to display its value!";
-      			}
-      		}
-      	}
-      	return "Now assemble the blocks to display the value of the variable that the user entered."
-      }, {
-        startPosition:getAbsolutePosition(workspace, null, {}, 50, document.getElementById("top-header").offsetHeight + 50)
-      })
+      createHelpMessageDirections(
+        () => "Now assemble the blocks to display the value of the variable that the user entered.",
+        () => {
+        	const variableSetBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
+        	const displayBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
+        	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get");
+        	if(variableGetBlock) {
+        		const varName = variableGetBlock.getField("VAR").getText();
+        		if(varName !== "s") {
+        			return "Make sure you change the variable name to s since that's what you want to display its value, which is what the user entered.";
+        		}
+        	}
+        	if(displayBlock) {
+        		if(variableSetBlock) {
+        			if(displayBlock.getNextBlock() && displayBlock.getNextBlock() === variableSetBlock) {
+        				return "Make sure the display block appears *after* (below) the variable set block.  Otherwise the computer would try to display what the user enters before he/she enters it!"
+        			} else if(!variableSetBlock.getNextBlock()) {
+        				return "Make sure to connect the display block below the let block above it.  This way the computer will ask the user for a string, store it in s and then display it!";
+        			}
+        		}
+        		if(variableGetBlock) {
+        			if(!displayBlock.getInputTargetBlock("TEXT")) {
+        				return "Place the s block inside the display statement to display its value!";
+        			}
+        		}
+        	}
+          return "";
+        	// return "Now assemble the blocks to display the value of the variable that the user entered."
+        }
+      )
     )
   );
 
@@ -523,49 +633,50 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       	  getCharacterBlock.getInputTargetBlock("AT") === numberBlock && 
       	  numberBlock.getFieldValue("NUM") === 0;
       },
-      new HelpMessageDirection(() => {
-      	const displayStringBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
-      		&& x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
-      	const numberBlock = workspace.getAllBlocks().find(x => x.type === "math_number");
-      	const getCharacterBlock = workspace.getAllBlocks().find(x => (x.type === "t2c_text_charat" || x.type === "js_text_charat"));
-      	const displayCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
-      		&& x !== displayStringBlock);
-      	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get" 
-      		&& x.getParent() !== displayStringBlock);
+      createHelpMessageDirections(
+        () => "The " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block gets the single character (letter, number, punctuation mark, space, etc.) of the string of characters at the given numerical position, starting with 0.  (E.g., for \"pizza\", the 0th character is 'p', the 1st character is 'i', the 2nd character is 'z', etc.\n  Add a statement to display the entered string's initial character.\n\nThe string to get the character from goes in the left and the number to get goes in the right.",
+        () => {
+        	const displayStringBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
+        		&& x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get");
+        	const numberBlock = workspace.getAllBlocks().find(x => x.type === "math_number");
+        	const getCharacterBlock = workspace.getAllBlocks().find(x => (x.type === "t2c_text_charat" || x.type === "js_text_charat"));
+        	const displayCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
+        		&& x !== displayStringBlock);
+        	const variableGetBlock = workspace.getAllBlocks().find(x => x.type === "variables_get" 
+        		&& x.getParent() !== displayStringBlock);
 
-      	if(displayCharBlock) {
-      		if(displayCharBlock.getParent() !== displayStringBlock) {
-      			return "Make sure to connect the new display statement below the previous one since you want to display word's initial letter after displaying the word itself."
-      		}
-      		if(displayCharBlock.getInputTargetBlock("TEXT") === numberBlock) {
-      			return "You want to display the character at the initial position, not a number.  Use the " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block inside the display.";
-      		}
-      		if(displayCharBlock.getInputTargetBlock("TEXT") === variableGetBlock) {
-      			return "You want to display the word's initial character, not the entire word.  Use the " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block inside the display.";
-      		}
-      	}
-      	if(variableGetBlock) {
-      		const varName = variableGetBlock.getField("VAR").getText();
-      		if(varName !== "s") {
-      			return "Make sure you change the variable name to s since you want its value's (user input's) initial letter.";
-      		}
-      	}
-      	if(getCharacterBlock) {
-      		if(variableGetBlock && getCharacterBlock.getInputTargetBlock("AT") === variableGetBlock) {
-      			return "The variable storing the text (s) that you want to get the character of should go in the left side of the " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block.";
-      		}
-      	}
-      	if(numberBlock) {
-      		if(numberBlock.getFieldValue("NUM") === 1) {
-      			return "Remember that positions of characters start at 0, not 1."
-      		} else if(numberBlock.getFieldValue("NUM") !== 0) {
-      			return "Remember that you want a number representing the word's inital position.  Change the number accordingly.";
-      		}
-      	}
-      	return "The " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block gets the single character (letter, number, punctuation mark, space, etc.) of the string of characters at the given numerical position, starting with 0.  (E.g., for \"pizza\", the 0th character is 'p', the 1st character is 'i', the 2nd character is 'z', etc.\n  Add a statement to display the entered string's initial character.\n\nThe string to get the character from goes in the left and the number to get goes in the right."
-      }, {
-        startPosition:getAbsolutePosition(workspace, null, {}, 50, document.getElementById("top-header").offsetHeight + 50)
-      })
+        	if(displayCharBlock) {
+        		if(displayCharBlock.getParent() !== displayStringBlock) {
+        			return "Make sure to connect the new display statement below the previous one since you want to display word's initial letter after displaying the word itself."
+        		}
+        		if(displayCharBlock.getInputTargetBlock("TEXT") === numberBlock) {
+        			return "You want to display the character at the initial position, not a number.  Use the " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block inside the display.";
+        		}
+        		if(displayCharBlock.getInputTargetBlock("TEXT") === variableGetBlock) {
+        			return "You want to display the word's initial character, not the entire word.  Use the " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block inside the display.";
+        		}
+        	}
+        	if(variableGetBlock) {
+        		const varName = variableGetBlock.getField("VAR").getText();
+        		if(varName !== "s") {
+        			return "Make sure you change the variable name to s since you want its value's (user input's) initial letter.";
+        		}
+        	}
+        	if(getCharacterBlock) {
+        		if(variableGetBlock && getCharacterBlock.getInputTargetBlock("AT") === variableGetBlock) {
+        			return "The variable storing the text (s) that you want to get the character of should go in the left side of the " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block.";
+        		}
+        	}
+        	if(numberBlock) {
+        		if(numberBlock.getFieldValue("NUM") === 1) {
+        			return "Remember that positions of characters start at 0, not 1."
+        		} else if(numberBlock.getFieldValue("NUM") !== 0) {
+        			return "Remember that you want a number representing the word's inital position.  Change the number accordingly.";
+        		}
+        	}
+        	return "";//"The " + T2C.MSG.currentLanguage["TERMINAL_GETCHARACTERNUMBER"] + " block gets the single character (letter, number, punctuation mark, space, etc.) of the string of characters at the given numerical position, starting with 0.  (E.g., for \"pizza\", the 0th character is 'p', the 1st character is 'i', the 2nd character is 'z', etc.\n  Add a statement to display the entered string's initial character.\n\nThe string to get the character from goes in the left and the number to get goes in the right."
+        }
+      )
     )
   );
 
@@ -606,23 +717,30 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 
       	return displayChar0Block && numberBlock && getCharacterBlock && displayLastCharBlock && variableGetBlock;
       },
-      new HelpMessageDirection(() => {
-      	const displayChar0Block = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
-      		&& x.getInputTargetBlock("TEXT") && (x.getInputTargetBlock("TEXT").type === "t2c_text_charat" || x.getInputTargetBlock("TEXT").type === "js_text_charat"));
-      	const displayLastCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
-      		&& x.getInputTargetBlock("TEXT") && (x.getInputTargetBlock("TEXT").type === "t2c_text_charat" || x.getInputTargetBlock("TEXT").type === "js_text_charat")
-      		&& x.getInputTargetBlock("TEXT").getInputTargetBlock("AT") && 
-      		x.getInputTargetBlock("TEXT").getInputTargetBlock("AT").type === "math_number" &&
-      		x.getInputTargetBlock("TEXT").getInputTargetBlock("AT").getFieldValue("NUM") === 4);
+      createHelpMessageDirections(
+        () => "Drag in the new type-in-code block from the toolbox below the statement that displays the inputted word's first character, and type in code to print its last character.\nThe code you type in should match the previous line except you'll use a different number.",
+        () => {
+        	const displayChar0Block = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
+        		&& x.getInputTargetBlock("TEXT") && (x.getInputTargetBlock("TEXT").type === "t2c_text_charat" || x.getInputTargetBlock("TEXT").type === "js_text_charat"));
+        	const displayLastCharBlock = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") 
+        		&& x.getInputTargetBlock("TEXT") && (x.getInputTargetBlock("TEXT").type === "t2c_text_charat" || x.getInputTargetBlock("TEXT").type === "js_text_charat")
+        		&& x.getInputTargetBlock("TEXT").getInputTargetBlock("AT") && 
+        		x.getInputTargetBlock("TEXT").getInputTargetBlock("AT").type === "math_number" &&
+        		x.getInputTargetBlock("TEXT").getInputTargetBlock("AT").getFieldValue("NUM") === 4);
+          const typeInBlock = workspace.getAllBlocks().find(x => x.type === "type_in_get_last_char_number");
 
-      	if(displayChar0Block && displayLastCharBlock && displayLastCharBlock.getParent() !== displayChar0Block) {
-      		return "Make sure to connect the new display statement below the previous one since you want to display word's last letter after displaying its first letter."
-      	}
-      	
-      	return "Drag in the new type-in-code block from the toolbox below the statement that displays the inputted word's first character, and type in code to print its last character.\nThe code you type in should match the previous line except you'll use a different number.";
-      }, {
-        startPosition:getAbsolutePosition(workspace, null, {}, 50, document.getElementById("top-header").offsetHeight + 50)
-      })
+        	if(displayChar0Block && displayLastCharBlock && displayLastCharBlock.getParent() !== displayChar0Block) {
+        		return "Make sure to connect the new display statement below the previous one since you want to display word's last letter after displaying its first letter."
+        	}
+        	
+          if(typeInBlock) {
+            return typeInGetLastCharNumBlock.getErrorFeedback(typeInBlock.getFieldValue("EXP"));
+          }
+
+          return "";
+        	// return "Drag in the new type-in-code block from the toolbox below the statement that displays the inputted word's first character, and type in code to print its last character.\nThe code you type in should match the previous line except you'll use a different number.";
+        }
+      )
     )
   );
 
@@ -677,12 +795,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => clickedSaveButtonLast,//document.getElementById("output-container").classList.contains("show-container"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
-          startPosition: {
-            x: document.getElementById("save-code-button").offsetLeft + document.getElementById("save-code-button").offsetWidth,
-            y: document.getElementById("save-code-button").offsetTop + document.getElementById("save-code-button").offsetHeight
-          }
-        }),
+        createHelpMessageDirections(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -699,14 +812,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => clickedSaveXMLButtonLast,
       new ParallelAnimation([
-        new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, {
-          startPosition: () => {
-            return {
-              x: document.getElementById("load-save-xml").offsetLeft + document.getElementById("load-save-xml").offsetWidth,
-              y: document.getElementById("load-save-xml").offsetTop + document.getElementById("load-save-xml").offsetHeight
-            };
-          }
-        }),
+        createHelpMessageDirections(() => T2C.MSG.currentLanguage.BUTTON_SAVE_XML, ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -744,18 +850,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 0,
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", {
-          startPosition: () => {
-            //const coords = workspace.trashcan.getClientRect();
-            return {
-              x: 50, //(coords.left + coords.right)/2, //+ d.offsetWidth/4,
-              y: document.getElementById("top-header").offsetHeight + 
-                //(coords.top + coords.bottom)/2 + 
-                workspace.getMetrics().flyoutHeight + 
-                100
-            };
-          }
-        }),
+        createHelpMessageDirections(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -783,12 +878,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
       () => clickedLoadButtonLast,//document.getElementById("text-code-container").classList.contains("show-container"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
-          startPosition: {
-            x: document.getElementById("load-code-button").offsetLeft + document.getElementById("load-code-button").offsetWidth,
-            y: document.getElementById("load-code-button").offsetTop + document.getElementById("load-code-button").offsetHeight
-          }
-        }),
+        createHelpMessageDirections(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -805,14 +895,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => xmlText.replace(/\n|\r/g, "") === document.getElementById("xmlData").value.replace(/\n|\r/g, ""),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Paste the XML you copied in this text box.", {
-          startPosition: () => {
-            return {
-              x: document.getElementById("xmlData").offsetLeft + document.getElementById("xmlData").offsetWidth/2,
-              y: document.getElementById("xmlData").offsetTop + document.getElementById("xmlData").offsetHeight
-            };
-          }
-        }),
+        createHelpMessageDirections(() => "Paste the XML you copied in this text box.", ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -831,14 +914,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => clickedLoadXMLButtonLast && workspace.getAllBlocks().length === 13,
       new ParallelAnimation([
-        new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, {
-          startPosition: () => {
-            return {
-              x: document.getElementById("load-save-xml").offsetLeft + document.getElementById("load-save-xml").offsetWidth,
-              y: document.getElementById("load-save-xml").offsetTop + document.getElementById("load-save-xml").offsetHeight
-            };
-          }
-        }),
+        createHelpMessageDirections(() => T2C.MSG.currentLanguage.BUTTON_LOAD_XML, ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,

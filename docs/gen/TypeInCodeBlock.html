@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: BlockEvaluator</title>
+	<title>Documentation Class: TypeInCodeBlock</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -33,7 +33,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="BlinkAnimation.html">BlinkAnimation</a></li><li><a href="BlockBlueprint.html">BlockBlueprint</a></li><li><a href="BlockEvaluator.html">BlockEvaluator</a></li><li><a href="GlideAnimation.html">GlideAnimation</a></li><li><a href="HelpMessageDirection.html">HelpMessageDirection</a></li><li><a href="Memoizer.html">Memoizer</a></li><li><a href="MessageConsoleManager.html">MessageConsoleManager</a></li><li><a href="ParallelAnimation.html">ParallelAnimation</a></li><li><a href="ParseForest.html">ParseForest</a></li><li><a href="Parser.html">Parser</a></li><li><a href="ParseTreeBlockConnector.html">ParseTreeBlockConnector</a></li><li><a href="ParseTreeBlockNode.html">ParseTreeBlockNode</a></li><li><a href="ParseTreeRHSidesNode.html">ParseTreeRHSidesNode</a></li><li><a href="SeriesAnimation.html">SeriesAnimation</a></li><li><a href="Tokenizer.html">Tokenizer</a></li>
+					<li><a href="BlinkAnimation.html">BlinkAnimation</a></li><li><a href="BlockBlueprint.html">BlockBlueprint</a></li><li><a href="BlockEvaluator.html">BlockEvaluator</a></li><li><a href="GlideAnimation.html">GlideAnimation</a></li><li><a href="HelpMessageDirection.html">HelpMessageDirection</a></li><li><a href="Memoizer.html">Memoizer</a></li><li><a href="MessageConsoleManager.html">MessageConsoleManager</a></li><li><a href="ParallelAnimation.html">ParallelAnimation</a></li><li><a href="ParseForest.html">ParseForest</a></li><li><a href="Parser.html">Parser</a></li><li><a href="ParseTreeBlockConnector.html">ParseTreeBlockConnector</a></li><li><a href="ParseTreeBlockNode.html">ParseTreeBlockNode</a></li><li><a href="ParseTreeRHSidesNode.html">ParseTreeRHSidesNode</a></li><li><a href="SeriesAnimation.html">SeriesAnimation</a></li><li><a href="Tokenizer.html">Tokenizer</a></li><li><a href="TypeInCodeBlock.html">TypeInCodeBlock</a></li>
 				</ul>
 			</li>
 			
@@ -72,16 +72,16 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: BlockEvaluator</h1>
+	<h1 class="page-title">Class: TypeInCodeBlock</h1>
 <section>
 
 <header>
     
         <h2>
-        BlockEvaluator
+        TypeInCodeBlock
         </h2>
         
-            <div class="class-description"><p>DESCRIPTION</p></div>
+            <div class="class-description"><p>Class to handle type-in-code block creation</p></div>
         
     
 </header>
@@ -93,73 +93,19 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="BlockEvaluator"><span class="type-signature"></span>new BlockEvaluator(blockInterpretations)</h4>
+    <h4 class="name" id="TypeInCodeBlock"><span class="type-signature"></span>new TypeInCodeBlock()</h4>
     
     
 </dt>
 <dd>
 
     
-    <div class="description">
-        <p>constructor</p>
-    </div>
-    
 
     
 
     
 
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>blockInterpretations</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
     
 
     
@@ -239,7 +185,7 @@
             
 <hr>
 <dt>
-    <h4 class="name" id="evaluate"><span class="type-signature"></span>evaluate(root)</h4>
+    <h4 class="name" id="matchStatement_"><span class="type-signature"></span>matchStatement_(s, matchArr)</h4>
     
     
 </dt>
@@ -247,7 +193,7 @@
 
     
     <div class="description">
-        <p>Creates blueprint for blocks from block parse tree</p>
+        <p>attempts to match s against matchArr, producing appropriate errors</p>
     </div>
     
 
@@ -282,13 +228,13 @@
 
         <tr>
             
-                <td class="name"><code>root</code></td>
+                <td class="name"><code>s</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="ParseTreeBlockNode.html">ParseTreeBlockNode</a></span>
+<span class="param-type">string</span>
 
 
 
@@ -299,7 +245,31 @@
 
             
 
-            <td class="description last"><p>the root of the tree to convert to blueprint</p></td>
+            <td class="description last"><p>the string to parse</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>matchArr</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;(string|{token: string, type: string})></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
         </tr>
 
     
@@ -363,9 +333,10 @@
     
             
 <div class="param-desc">
-    <p>blueprint object from parse tree: matches form from
-block-interpretation JSON files;
-blueprint formed by replacing each %d with blueprint for corresponding block</p>
+    <p>match is the array of matches
+up to the first unsuccessful match, if any;
+error is true exactly when there was an unsuccessful match;
+remainingText is the unmatched text</p>
 </div>
 
 
@@ -376,10 +347,7 @@ blueprint formed by replacing each %d with blueprint for corresponding block</p>
     </dt>
     <dd>
         
-<span class="param-type"><a href="BlockBlueprint.html">BlockBlueprint</a></span>
-|
-
-<span class="param-type">string</span>
+<span class="param-type">Object</span>
 
 
 
@@ -442,7 +410,7 @@ blueprint formed by replacing each %d with blueprint for corresponding block</p>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.5</a>
 	
-		on February 21st 2021, 3:59:12 am
+		on February 20th 2021, 1:36:28 am
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

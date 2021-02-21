@@ -316,7 +316,7 @@ Blockly.Blocks['type_in_between_at_and_period'] = {
         // ) for indexOf
         (matchResultArr, remaining) => {
           if(remaining.startsWith("+") || remaining.startsWith("-")) {
-            displayMessage("Be careful where you place the math operation; you certainly don't want to addto/subtract a number from a period!  Any math you may want to do to the *position* of the period in email (which may not be necessary) should go outside of the parentheses for the character to find in " + matchResultArr[18] + ".");
+            displayMessage("Be careful where you place the math operation; you certainly don't want to add/subtract a number from a period!  Any math you may want to do to the *position* of the period in email (which may not be necessary) should go outside of the parentheses for the character to find in " + matchResultArr[18] + ".");
           } else {
             displayMessage("You're missing a closing parenthesis for " + matchResultArr[22] + ".");
           }

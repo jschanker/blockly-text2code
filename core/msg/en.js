@@ -58,3 +58,11 @@ T2C.MSG.EN["BUTTON_LOAD_XML"] = "Load Block XML";
 
 T2C.MSG.EN["TYPE_SOMETHING"] = "Type something";
 
+T2C.MSG.EN["TYPEIN_ERROR_TERMINAL_MISTYPED"] = "Check the spelling, case, and punctuation of what you're entering; it should identically match with %1.";
+T2C.MSG.EN["TYPEIN_ERROR_MISSING_OPEN_PARENTHESIS"] = "You're missing an open parenthesis for %1.";
+T2C.MSG.EN["TYPEIN_ERROR_MISSING_CLOSE_PARENTHESIS"] = "You're missing a closing parenthesis for %1.";
+T2C.MSG.EN["TYPEIN_ERROR_MISSING_OPEN_BRACKET"] = "You're missing an opening bracket for %1.";
+T2C.MSG.EN["TYPEIN_ERROR_MISSING_CLOSE_BRACKET"] = "You're missing a closing bracket for %1.";
+T2C.MSG.EN["TYPEIN_ERROR_MISSING_PERIOD_AFTER_VARIABLE"] = "Be sure to include a period after the variable %1.";
+T2C.MSG.EN["TYPEIN_WARNING_UNNECESSARY_OPEN_PARENTHESIS"] = "Although you *can* have multiple opening parentheses, it's not necessary in this instance.  When you first start programming, it may be good to include them to make sure operations are performed in the required order, but it can also make your code more difficult to read and correctly match the open parentheses with closing ones.  Before continuing, remove the extra opening parenthesis here since you don't need it.";
+T2C.MSG.EN["TYPEIN_UNKNOWN_ERROR"] = "Try checking what you entered again for mistakes.";

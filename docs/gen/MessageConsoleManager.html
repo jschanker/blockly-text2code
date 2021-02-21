@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: BlockEvaluator</title>
+	<title>Documentation Class: MessageConsoleManager</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,16 +72,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: BlockEvaluator</h1>
+	<h1 class="page-title">Class: MessageConsoleManager</h1>
 <section>
 
 <header>
     
         <h2>
-        BlockEvaluator
+        MessageConsoleManager
         </h2>
         
-            <div class="class-description"><p>DESCRIPTION</p></div>
+            <div class="class-description"><p>Class to handle creation of help message console that
+updates with real-time feedback</p></div>
         
     
 </header>
@@ -93,73 +94,19 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="BlockEvaluator"><span class="type-signature"></span>new BlockEvaluator(blockInterpretations)</h4>
+    <h4 class="name" id="MessageConsoleManager"><span class="type-signature"></span>new MessageConsoleManager()</h4>
     
     
 </dt>
 <dd>
 
     
-    <div class="description">
-        <p>constructor</p>
-    </div>
-    
 
     
 
     
 
     
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>blockInterpretations</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
     
 
     
@@ -232,167 +179,6 @@
 
     
 
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
-            
-<hr>
-<dt>
-    <h4 class="name" id="evaluate"><span class="type-signature"></span>evaluate(root)</h4>
-    
-    
-</dt>
-<dd>
-
-    
-    <div class="description">
-        <p>Creates blueprint for blocks from block parse tree</p>
-    </div>
-    
-
-    
-
-    
-
-    
-    
-        <h5>Parameters:</h5>
-        
-
-<table class="params table table-striped">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>root</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="ParseTreeBlockNode.html">ParseTreeBlockNode</a></span>
-
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>the root of the tree to convert to blueprint</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <h5>Returns:</h5>
-    
-            
-<div class="param-desc">
-    <p>blueprint object from parse tree: matches form from
-block-interpretation JSON files;
-blueprint formed by replacing each %d with blueprint for corresponding block</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="BlockBlueprint.html">BlockBlueprint</a></span>
-|
-
-<span class="param-type">string</span>
-
-
-
-    </dd>
-</dl>
-
-
-        
-
-    
-</dd>
-
-        </dl>
     
 
     
