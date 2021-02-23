@@ -55,6 +55,8 @@ T2C.MSG.JS["BUTTON_LOAD_TEXT_CODE"] = "Load JavaScript Code";
 T2C.MSG.JS["BUTTON_LOAD_XML"] = "Load Block XML";
 
 T2C.MSG.JS["TYPE_SOMETHING"] = "Type something";
+T2C.MSG.JS["FEEDBACK"] = "Feedback";
+T2C.MSG.JS["DIRECTIONS"] = "Directions";
 
 T2C.MSG.JS["TYPEIN_ERROR_TERMINAL_MISTYPED"] = "Check the spelling, case, and punctuation of what you're entering; it should identically match with %1.";
 T2C.MSG.JS["TYPEIN_ERROR_MISSING_OPEN_PARENTHESIS"] = "You're missing an open parenthesis for %1.";

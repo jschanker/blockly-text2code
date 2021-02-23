@@ -39,7 +39,7 @@ class TypeInCodeBlock {
   	this.standardErrorMessages = {
   		MISTYPED_TERMINAL: (terminal, matchResultArr, remaining) => 
   		  T2C.MSG.currentLanguage.TYPEIN_ERROR_TERMINAL_MISTYPED
-  		    .replace("%1", T2C.MSG.currentLanguage["TERMINAL_" + terminal.toUpperCase()]),
+  		    .replace("%1", T2C.MSG.currentLanguage["TERMINAL_" + terminal.toUpperCase()] || terminal),
   		MISSING_OPEN_PARENTHESIS: (forIndex, matchResultArr, remaining) => 
   		  T2C.MSG.currentLanguage.TYPEIN_ERROR_MISSING_OPEN_PARENTHESIS
   		    .replace("%1", matchResultArr[forIndex]),
@@ -251,7 +251,9 @@ class TypeInCodeBlock {
 			
 			if(pattern.type && pattern.type.toUpperCase() === "TERMINAL" || this.equalsTerminal_(pattern)) {
 				messageType = "MISTYPED_TERMINAL";
+				//console.log("PATTERN", pattern);
 				args.push(pattern.type ? pattern.token : pattern);
+				//console.log("ARGS", args)
 			}
 
       // console.log("MSG", messageType, this.standardErrorMessages[messageType], args);

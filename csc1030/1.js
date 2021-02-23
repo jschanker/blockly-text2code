@@ -12,7 +12,7 @@ import TypeInCodeBlock from "../core/type_in_code_block.js";
 const helpMsgManager = new MessageConsoleManager();
 const directionsTabId = helpMsgManager.addTab("Directions", "");
 const feedbackTabId = helpMsgManager.addTab("Feedback", "");
-helpMsgManager.start();
+// helpMsgManager.start();
 
 // JavaScript built-in substring method overriden for beginner intended use;
 // this is used to get back some of the index out-of-bounds behavior;
@@ -374,10 +374,11 @@ let xmlText;
 // window.addEventListener('DOMContentLoaded', () => {
 export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   const citf = courseInstructionTaskFlow || new CourseInstructionTaskFlow();
-  const workspace = ws || Blockly.getMainWorkspace(); 
+  const workspace = ws || Blockly.getMainWorkspace();
 
   const initialBlocks = ["variables_set", "text", "text_input"];
   // set up level
+  helpMsgManager.start();
   clearToolbox(workspace);
   initialBlocks.forEach(blockType => {
   	createToolboxBlock(workspace, blockType, false);

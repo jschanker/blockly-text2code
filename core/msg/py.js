@@ -54,6 +54,9 @@ T2C.MSG.PY["BUTTON_SAVE_XML"] = "Save Block XML";
 T2C.MSG.PY["BUTTON_LOAD_TEXT_CODE"] = "Load Python Code";
 T2C.MSG.PY["BUTTON_LOAD_XML"] = "Load Block XML";
 
+T2C.MSG.PY["FEEDBACK"] = "Feedback";
+T2C.MSG.PY["DIRECTIONS"] = "Directions";
+
 T2C.MSG.PY["TYPE_SOMETHING"] = "Type something";
 
 T2C.MSG.PY["TYPEIN_ERROR_TERMINAL_MISTYPED"] = "Check the spelling, case, and punctuation of what you're entering; it should identically match with %1.";

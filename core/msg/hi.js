@@ -54,6 +54,9 @@ T2C.MSG.HI["BUTTON_SAVE_XML"] = "ब्लॉक को एक्सएमएल
 T2C.MSG.HI["BUTTON_LOAD_TEXT_CODE"] = "स्यूडो जे.एस. कोड लोड करें";
 T2C.MSG.HI["BUTTON_LOAD_XML"] = "ब्लॉक को एक्सएमएल लोड करें";
 
+T2C.MSG.HI["FEEDBACK"] = "प्रतिपुष्टि";
+T2C.MSG.HI["DIRECTIONS"] = "अनुदेश";
+
 T2C.MSG.HI["TYPE_SOMETHING"] = "Kuch type karen";
 
 T2C.MSG.HI["TYPEIN_ERROR_TERMINAL_MISTYPED"] = "आपका टाइपिंग की स्पेलिंग, कैपिटलाइज़ेशन, और पंक्चुएशन जांचें; यह %1 के समान होना चाहिए ।";

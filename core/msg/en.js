@@ -56,6 +56,9 @@ T2C.MSG.EN["BUTTON_SAVE_XML"] = "Save Block XML";
 T2C.MSG.EN["BUTTON_LOAD_TEXT_CODE"] = "Load PseudoJS Code";
 T2C.MSG.EN["BUTTON_LOAD_XML"] = "Load Block XML";
 
+T2C.MSG.EN["FEEDBACK"] = "Feedback";
+T2C.MSG.EN["DIRECTIONS"] = "Directions";
+
 T2C.MSG.EN["TYPE_SOMETHING"] = "Type something";
 
 T2C.MSG.EN["TYPEIN_ERROR_TERMINAL_MISTYPED"] = "Check the spelling, case, and punctuation of what you're entering; it should identically match with %1.";
