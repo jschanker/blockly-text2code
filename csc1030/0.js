@@ -6,176 +6,76 @@ import BlinkAnimation from "../core/blink_animation.js";
 import HelpMessageDirection from "../core/help_message_direction.js";
 import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
+import MessageConsoleManager from "../core/message_console_manager.js";
+import TypeInCodeBlock from "../core/type_in_code_block.js";
+import LevelGenerator from "../core/level_generator";
 
-function displayMessage(msg, erasePrevious=true) {
-  let alertDisplay = document.getElementById("alert-display");
-  if(!alertDisplay) {
-    alertDisplay = document.createElement("div");
-    alertDisplay.id = "alert-display";
-    alertDisplay.style.fontSize = "small";
-    alertDisplay.style.fontWeight = "bold";
-    alertDisplay.style.borderColor = "#000";
-    alertDisplay.style.backgroundColor = "rgba(200, 200, 200, 0.5)";
-    alertDisplay.style.color = "#f00";
-    alertDisplay.style.position = "absolute";
-    alertDisplay.style.zIndex = "1050";
-    alertDisplay.style.width = "98%";
-    alertDisplay.style.minHeight = "50px";
-    alertDisplay.style.left = "0";
-    alertDisplay.style.bottom = "0";
-    alertDisplay.style.textAlign = "left";
-    alertDisplay.style.padding = "1%";
-    document.body.appendChild(alertDisplay);
-  }
-  if(erasePrevious) {
-    alertDisplay.innerText = msg;
-  } else {
-    alertDisplay.innerText += msg;
-  }
-}
+/*
+const helpMsgManager = new MessageConsoleManager();
+const directionsTabId = helpMsgManager.addTab(T2C.MSG.currentLanguage.DIRECTIONS, "");
+const feedbackTabId = helpMsgManager.addTab(T2C.MSG.currentLanguage.FEEDBACK, "");
+*/
 
-//Blockly.Python['code_statement'] = Blockly.JavaScript['code_statement'] =
-Blockly.Python['type_in_display_string_literal'] = Blockly.JavaScript['type_in_display_string_literal'] = Blockly.JavaScript['code_statement'];
-Blockly.Blocks['type_in_display_string_literal'] = {
-  validate: (exp) => {
-    const langDisplays = Object.values(T2C.MSG)
-      .map(langObj => langObj["TERMINAL_DISPLAY"])
-      .filter(text => typeof text === "string");
-    const val = langDisplays.find(text => 
-      text.startsWith(exp) || exp.startsWith(text));
-    const afterText = val && val.length <= exp.length && 
-      exp.substring(val.length).trim();
-    const afterOpenParenthesis = afterText && 
-      afterText.substring(1).trim();
-    if(exp) {
-      // props.editing = true;
-      // console.warn("something");
-      // this.setColour("#f00");                 
-    }
-    if(!val) {
-      displayMessage("Check the spelling, case, and punctuation of what you're entering; it should identically match with " + T2C.MSG.currentLanguage["TERMINAL_DISPLAY"]);
-      return null;
-    }
-    else if(afterText && afterText.length && !afterText.startsWith("(")) {
-      displayMessage("You're missing an opening parenthesis after " + val);
-      return val;
-    }
-    else if(afterOpenParenthesis && !afterOpenParenthesis.startsWith('"') && !afterOpenParenthesis.startsWith("'")) {
-      displayMessage("Make sure the text you want to display is between \" and \" so the computer just displays it without trying to figure out what you mean!");
-      return val + "(";
-    }
-    else if(afterOpenParenthesis && afterOpenParenthesis.indexOf('"', 1) !== -1
-      && !afterOpenParenthesis.substring(afterOpenParenthesis.indexOf('"', 1)+1).trim().startsWith(")")) {
-      displayMessage("Make sure to include a closing parenthesis after the string surrounded by \" and \".");
-      return val + "(" + afterOpenParenthesis.substring(0, afterOpenParenthesis.indexOf('"', 1)+1);
-    }
-    else {
-      displayMessage("");
-      return exp;
-    }
-  },
-  init: function() {
-    this.appendDummyInput("STRING")
-        .appendField(new Blockly.FieldTextInput("", this.validate), "EXP");
-    this.setInputsInline(false);
-    this.setOutput(false);
-    this.setPreviousStatement(true);
-    this.setNextStatement(true);
-    this.setColour(60);
-    this.setTooltip(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TOOLTIP);
-    this.onchange = e => {
-      if(this.getFieldValue("EXP").endsWith("\r") || 
-        this.getFieldValue("EXP").endsWith("\n") || (this.getFieldValue("EXP").length > 0 && e.element === "workspaceClick")) {
-        if(!this.validate(this.getFieldValue("EXP")) || 
-          (!this.getFieldValue("EXP").endsWith(")") && 
-            !this.getFieldValue("EXP").endsWith(";"))) return;
-        else {
-          const parseTree = getParseTree(this.getFieldValue("EXP"));
-          if(parseTree) {
-            handleParseTreeToBlocks(parseTree, this);
-          } else {
-            alert("Try checking what you entered again for mistakes.");
-          }
-        }
+const typeInCodeDisplayStringLiteralBlock = new TypeInCodeBlock("type_in_display_string_literal");
+typeInCodeDisplayStringLiteralBlock.addPossibleMatch(
+  [{token: "display", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]+"|^'[^"]+'/, type: "regexp"}, ")"],
+   [
+    null, 
+    null,//genericTerminalErrorMsg.bind(null, displayMessage, "GETINPUTBYASKING"),
+    (matchResultArr, remaining) => {
+      if(!remaining.startsWith('"') && !remaining.startsWith("'")) {
+        return "Make sure the text you want to display is between \" and \" so the computer just displays it without trying to figure out what you mean!";
+      } else if(remaining === '""' || remaining === "''") {
+        return "Include some message in between the quotation marks so that the user sees some text!";
+      } else { // shouldn't reach here
+        return "";
       }
-    };
-    //this.onchange = parseAndConvertToBlocks.bind(this, props);
-  },
-  /*validate: function(colourHex) {
-    console.warn("something");
-    this.setColour("#f00");
-  }*/
-};
+    },
+    null //(matchResultArr, remaining) => displayMessage("You're missing a closing parenthesis for " + matchResultArr[3] + ".")
+  ]
+);
 
-Blockly.Python['type_in_welcome_message'] = Blockly.JavaScript['type_in_welcome_message'] = Blockly.JavaScript['code_statement'];
-Blockly.Blocks['type_in_welcome_message'] = {
-  validate: (exp) => {
-    const trimmedExp = exp.trim();
-    const firstEndQuotePosition = trimmedExp.length ? 
-      trimmedExp.substring(1).search(/[^\\]['|"]/)+2 : -1;
-    const beforeFirstEndQuote = firstEndQuotePosition > 1 ? 
-      trimmedExp.substring(0, firstEndQuotePosition) : trimmedExp;
-    const afterFirstEndQuote = firstEndQuotePosition > 1 ? 
-      trimmedExp.substring(firstEndQuotePosition+1) : trimmedExp;
-    /*
-    const langDisplays = Object.values(T2C.MSG)
-      .map(langObj => langObj["TERMINAL_DISPLAY"])
-      .filter(text => typeof text === "string");
-    const val = langDisplays.find(text => 
-      text.startsWith(exp) || exp.startsWith(text));
-    const afterText = val && val.length <= exp.length && 
-      exp.substring(val.length).trim();
-    const afterOpenParenthesis = afterText && 
-      afterText.substring(1).trim();
-    */
-    if(!trimmedExp.length) {
-      displayMessage("");
-      return;
-    }
-    else if(!trimmedExp.startsWith("\"") && !trimmedExp.startsWith("\'")) {
-      displayMessage("Since you will be starting your message with text to be displayed as is such as Welcome, be sure you let the computer know this by surrounding what appears first with \" and \"");
-      return null;
-    }
-    else if(firstEndQuotePosition > 1 && !"+firstName+".startsWith(afterFirstEndQuote.trim().replace(/\s+\+|\+\s+/g, "+")) && 
-      !afterFirstEndQuote.trim().replace(/\s+\+|\+\s+/g, "+").startsWith("+firstName+")) {
-      displayMessage("Be sure that the variable name firstName appears outside of quotation marks since you want its value, not literally firstName and that you include + before and after it to join the welcome at the beginning and the punctuation mark at the end.")
-      return beforeFirstEndQuote;
-    } else {
-      displayMessage("");
-      return exp;
-    }
-  },
-  init: function() {
-    this.appendDummyInput("STRING")
-        .appendField(new Blockly.FieldTextInput("", this.validate), "EXP");
-    this.setInputsInline(false);
-    this.setOutput(true);
-    this.setPreviousStatement(false);
-    this.setNextStatement(false);
-    this.setColour(60);
-    this.setTooltip(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TOOLTIP);
-    this.onchange = e => {
-      if(this.getFieldValue("EXP").endsWith("\r") || 
-        this.getFieldValue("EXP").endsWith("\n") || (this.getFieldValue("EXP").length > 0 && e.element === "workspaceClick")) {
-        if(!this.validate(this.getFieldValue("EXP"))) return;
-        else if(this.getFieldValue("EXP").trim().endsWith('"') || 
-          this.getFieldValue("EXP").trim().endsWith("'")) {
-          const parseTree = getParseTree(this.getFieldValue("EXP"));
-          if(parseTree) {
-            handleParseTreeToBlocks(parseTree, this);
-          } else {
-            alert("Try checking what you entered again for mistakes.");
-          }
-        }
+typeInCodeDisplayStringLiteralBlock.addToBlocks();
+
+const typeInWelcomeMessageBlock = new TypeInCodeBlock("type_in_welcome_message");
+typeInWelcomeMessageBlock.addPossibleMatch(
+  [{token: /^"[^"]*$|^'[^']*$|^"[^"]+ "|^'[^"]+ '/, type: "regexp"}, "+", "firstName", "+", {token: /^"[^"]*$|^'[^']*$|^"[^"]+"|^'[^"]+'/, type: "regexp"}],
+   [
+    (matchResultArr, remaining) => {
+      if(!remaining.startsWith('"') && !remaining.startsWith("'")) {
+        return "Make sure the text you want to display is between \" and \" so the computer just displays it without trying to figure out what you mean!";
+      } else if(remaining === '""' || remaining === "''") {
+        return "Include some greeting in between the quotation marks that will appear before the person's first name such as hi or welcome.";
+      } else if(/^"[^"]+[^ ]"|^'[^"]+[^ ]'/.test(remaining)) {
+        return "Be sure to include a space at the end of the greeting before the quotation marks so the greeting and person's first name will appear with a space in between them (e.g., Hi Jane instead of HiJane).\n NOTE: Including a space *outside* of quotation marks will NOT appear in the message displayed to the user.";
+      } else { // shouldn't reach here
+        return "";
       }
-    };
-    //this.onchange = parseAndConvertToBlocks.bind(this, props);
-  },
-  /*validate: function(colourHex) {
-    console.warn("something");
-    this.setColour("#f00");
-  }*/
-};
+    },
+    (matchResultArr, remaining) => "Include a + to join the greeting " + matchResultArr[0].substring(1,matchResultArr[0].length-1) + " text with the user's first name.",
+    (matchResultArr, remaining) => {
+      if(remaining.startsWith('"') || remaining.startsWith("'")) {
+        return "Be sure that the variable name firstName appears outside of quotation marks since you want its value, which will be the name the user enters instead of the text firstName (e.g., you want " + matchResultArr[0].substring(1,matchResultArr[0].length-1) + "Jane instead of " + matchResultArr[0].substring(1,matchResultArr[0].length-1) + "firstName.";
+      } else if(remaining.startsWith("firstn")) {
+        return "Be sure to enter firstName in camel case (first letter of every word after the first capitalized)";
+      } else {
+        return "Type the variable name firstName exactly so that its value, mainly what the user entered for his/her first name, will be displayed after " + matchResultArr[0].substring(1,matchResultArr[0].length-1) + ".";
+      }
+    },
+    (matchResultArr, remaining) => "Include a + to join the greeting " + matchResultArr[0].substring(1,matchResultArr[0].length-1) + " and the name the user entered with a final punctuation mark (to be gramatically correct).", 
+    (matchResultArr, remaining) => {
+      if(!remaining.startsWith('"') && !remaining.startsWith("'")) {
+        return "Since the punctuation mark should be displayed exactly as is without evaluating it any way, be sure you let the computer know this by surrounding the punctuation mark with \" and \".";
+      } else if(remaining === '""' || remaining === "''") {
+        return "Include some punctuation mark such as . or ! in between the quotation marks so your English teacher doesn't complain.";
+      } else { // shouldn't reach here
+        return "";
+      }
+    }
+  ]
+);
+
+typeInWelcomeMessageBlock.addToBlocks({isExpression: true});
 
 function getToolboxBlock(index) {
   return Array.from(document.querySelectorAll("rect"))
@@ -286,6 +186,8 @@ function addMoveAndFlashTask(courseInstructionTaskFlow, div) {
 }
 
 export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
+  const levelGenerator = new LevelGenerator();
+  const helpMsgManager = levelGenerator.createStandardHelpMessageManager();
   const citf = courseInstructionTaskFlow || new CourseInstructionTaskFlow();
   const workspace = ws || Blockly.getMainWorkspace(); 
   workspace.clear();
@@ -301,64 +203,14 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   const displayBlock = toolboxBlocks[0];
   const textBlock = toolboxBlocks[1];
   console.warn("TEXT", textBlock);
-  const d = document.createElement("div");
-
-  d.innerText = "👆";
-  d.id = "ptr";
-  d.style.fontSize = "x-large";
-  d.style.position = "absolute";
-  d.style.zIndex = "1001";
+  const d = levelGenerator.createPointer();
   document.getElementById("blockly-div").appendChild(d);
 
-  function addRunTask(courseInstructionTaskFlow) {
-    courseInstructionTaskFlow.addTask(
-      new CourseInstructionTask(
-        () => document.getElementById("output-container").classList.contains("show-container"),
-        new ParallelAnimation([
-          new HelpMessageDirection(() => T2C.MSG.currentLanguage.BUTTON_RUN_CODE, {
-            startPosition: {
-              x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth,
-              y: document.getElementById("run-code-button").offsetTop + document.getElementById("run-code-button").offsetHeight
-            }
-          }),
-          new BlinkAnimation(d, {
-            totalSteps: 100,
-            toggleSteps: 25,
-            startPosition: {
-              x: document.getElementById("run-code-button").offsetLeft + document.getElementById("run-code-button").offsetWidth/2,
-              y: document.getElementById("run-code-button").offsetTop + document.getElementById("run-code-button").offsetHeight/2
-            }
-          })
-        ])
-      )
-    );
-  }
-
-/*
-  let clickedSaveTextCodeButton = false;
-  let clickedSaveXMLCodeButton = false;
-  let clickedLoadTextCodeButton = false;
-  let clickedLoadXMLCodeButton = false;
-*/
-  let clipboardText = "";
-  let clickedLoadButtonLast = false;
-  let clickedSaveButtonLast = false;
-  let generatedXMLCode;
-  let generatedTextCode;
-//  let clickedLoadXMLButtonLast = false;
-//  let clickedSaveXMLButtonLast = false;
-  //let xmlText;
-
-  // const citf = new CourseInstructionTaskFlow();
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && Blockly.selected !== x),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block somewhere in the workspace.", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager, "Drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block somewhere in the workspace.", ""),
         new GlideAnimation(d, {
           totalSteps: 50,
           startPosition: {
@@ -375,11 +227,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text" && x.getParent() && x.getParent().type === "text_print"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Drag the text block in the space in the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager, "Drag the text block in the space in the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", ""),
         new GlideAnimation(d, {
           totalSteps: 50,
           startPosition: {
@@ -409,17 +257,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "text" && x.getFieldValue("TEXT")),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Click on the area between the quotation marks in the text block and " + T2C.MSG.currentLanguage.TYPE_SOMETHING, {
-          startPosition: () => {
-            const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text");
-            // const coords = textBlockWs.getBoundingRectangle();
-            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight + d.offsetHeight);
-            /*return {       
-              x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
-              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height + d.offsetHeight // textBlockWs.height/2 covers field
-            }*/
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Click on the area between the quotation marks in the text block and " + T2C.MSG.currentLanguage.TYPE_SOMETHING, ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -437,40 +275,25 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       ])
     )
   );
-  addRunTask(citf);
-  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-  citf.addTask(
-    new CourseInstructionTask(
-      () => true,
-      {
-        start: () => true,
-        isComplete: () => true,
-        animate: () => true,
-        finish: () => {
-          // moveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          alert("✔ Congratulations! You just created and ran your first program!");
-          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          hideOutputAndCodeContainers();
-          const typeBlock = document.createElement("block");
-          typeBlock.setAttribute("type", "type_in_display_string_literal");
-          document.getElementById("toolbox").prepend(typeBlock);
-          workspace.options.maxInstances["type_in_display_string_literal"] = 1;
-          workspace.updateToolbox(document.getElementById("toolbox"));
-        }
-      }
-    )
-  );
+  levelGenerator.addRunTask(helpMsgManager, citf, () => {
+    alert("✔ Congratulations! You just created and ran your first program!");
+    // restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+    // hideOutputAndCodeContainers();
+    const typeBlock = document.createElement("block");
+    typeBlock.setAttribute("type", "type_in_display_string_literal");
+    document.getElementById("toolbox").prepend(typeBlock);
+    workspace.options.maxInstances["type_in_display_string_literal"] = 1;
+    workspace.updateToolbox(document.getElementById("toolbox"));    
+  }, d);
+  //addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getNextBlock() && x.getNextBlock().type === "type_in_display_string_literal" && 
         !workspace.isDragging()),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Drag in the type-in-code block so its top groove connects to the point of the bottom of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Drag in the type-in-code block so its top groove connects to the point of the bottom of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -506,20 +329,18 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         (x.getNextBlock().type === "text_print" || x.getNextBlock().type === "js_text_print") && x.getNextBlock().getInputTargetBlock("TEXT")
         && x.getNextBlock().getInputTargetBlock("TEXT").type === "text"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Type in code matching above block but with different text to display.  I.e., Type\n" + 
-          T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "\"your new message\"") + "\nreplacing your new message with whatever you want to display.  Be exact with parentheses, quotation marks, etc.  Tap off the block when you're done.", {
-          startPosition: () => {
-            const textBlockWs = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");
-            // const coords = textBlockWs.getBoundingRectangle();
-            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight + d.offsetHeight);
-            /*
-            return {
-              x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
-              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height + d.offsetHeight // use textBlockWs.height/2 covers text field
+        levelGenerator.createHelpMessageDirections(helpMsgManager,
+          () => "Type in code matching above block but with different text to display.  I.e., Type\n" + 
+            T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "\"your new message\"") + "\nreplacing your new message with whatever you want to display.  Be exact with parentheses, quotation marks, etc.  Tap off the block when you're done.", 
+          () => {
+            const typeInBlock = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");
+            if(typeInBlock) {
+              return typeInCodeDisplayStringLiteralBlock.getErrorFeedback();
+            } else {
+              return "";
             }
-            */
           }
-        }),
+        ),
       new BlinkAnimation(d, {
         totalSteps: 200,
         toggleSteps: 50,
@@ -539,6 +360,27 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     )
   );
 
+  levelGenerator.addRunTask(
+    helpMsgManager, 
+    citf, 
+    () => {
+      alert("✔ Awesome! You just typed code for and ran your first program!");
+      // restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+      // hideOutputAndCodeContainers();
+      workspace.options.maxInstances["type_in_display_string_literal"] = 0;
+      // workspace.updateToolbox(document.getElementById("toolbox"));
+      ["variables_get", "variables_set"].forEach(blockType => {
+        const typeBlock = document.createElement("block");
+        typeBlock.setAttribute("type", blockType);
+        document.getElementById("toolbox").prepend(typeBlock);
+        workspace.options.maxInstances[blockType] = 1;
+      });
+      workspace.updateToolbox(document.getElementById("toolbox"));
+    },
+    d
+  );
+
+/*
   citf.addTask(
     new CourseInstructionTask(
       () => document.getElementById("output-container").classList.contains("show-container"),
@@ -569,41 +411,15 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     )
   );
 
-  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-
-  citf.addTask(
-    new CourseInstructionTask(
-      () => true,
-      {
-        start: () => true,
-        isComplete: () => true,
-        animate: () => true,
-        finish: () => {
-          alert("✔ Awesome! You just typed code for and ran your first program!");
-          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          hideOutputAndCodeContainers();
-          ["variables_get", "variables_set"].forEach(blockType => {
-            const typeBlock = document.createElement("block");
-            typeBlock.setAttribute("type", blockType);
-            document.getElementById("toolbox").prepend(typeBlock);
-            workspace.options.maxInstances[blockType] = 1;
-          });
-          workspace.updateToolbox(document.getElementById("toolbox"));
-        }
-      }
-    )
-  );
+  levelGenerator.addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+*/
 
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
         x.getNextBlock() && (x.getNextBlock().type === "text_print" || x.getNextBlock().type === "js_text_print")),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Drag in the " + T2C.MSG.currentLanguage.TERMINAL_LET  + " variable declaration block directly above the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block so its bottom point connects to the groove of the top of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Drag in the " + T2C.MSG.currentLanguage.TERMINAL_LET + " variable declaration block directly above the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block so its bottom point connects to the groove of the top of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -638,11 +454,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
         x.getInputTargetBlock("VALUE") && x.getInputTargetBlock("VALUE").type === "text"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Drag the text from inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block to the inside of the " + T2C.MSG.currentLanguage.TERMINAL_LET + " variable declaration block directly above it so the variable stores the text.", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Drag the text from inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block to the inside of the " + T2C.MSG.currentLanguage.TERMINAL_LET + " variable declaration block directly above it so the variable stores the text.", ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -681,19 +493,15 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
         x.getInputTargetBlock("TEXT") && x.getInputTargetBlock("TEXT").type === "variables_get"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => {
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => {
           const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_set");
           //const valueTextBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
           const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() === varBlock);
           const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
           const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
           return "Drag the variable get block from the toolbox to the inside of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.  This will cause the variable the text is set to (" + text + ") to display.  (The computer knows to display its value instead of the literal text " 
-           + varBlockName + " because it is not surrounded by quotation marks.";
-        }, {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+           + varBlockName + " because it is not surrounded by quotation marks.)";
+        }, ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -724,56 +532,46 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     )
   );
 
-  addRunTask(citf);
-  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-
-  citf.addTask(
-    new CourseInstructionTask(
-      () => true,
-      {
-        start: () => true,
-        isComplete: () => true,
-        animate: () => true,
-        finish: () => {
-          alert("👍 Great!  Notice how the output is the same as before, but in this program, we store one of the lines of text to display in a variable first.  Variables are useful for storing stuff we'll want to use later.");
-          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          hideOutputAndCodeContainers();
-          const inputBlock = document.createElement("block");
-          inputBlock.setAttribute("type", "text_input");
-          document.getElementById("toolbox").prepend(inputBlock);
-          workspace.options.maxInstances["text_input"] = 1;
-          workspace.updateToolbox(document.getElementById("toolbox"));        
-          /*
-          ["variables_get", "variables_set"].forEach(blockType => {
-            const typeBlock = document.createElement("block");
-            typeBlock.setAttribute("type", blockType);
-            document.getElementById("toolbox").prepend(typeBlock);
-            workspace.options.maxInstances[blockType] = 1;
-          });
-          workspace.options.maxInstances["type_in_display_string_literal"] = 0;
-          workspace.updateToolbox(document.getElementById("toolbox"));
-          */
-        }
-      }
-    )
+  levelGenerator.addRunTask(
+    helpMsgManager, 
+    citf, 
+    () => {
+      alert("👍 Great!  Notice how the output is the same as before, but in this program, we store one of the lines of text to display in a variable first.  Variables are useful for storing stuff we'll want to use later.");
+      // restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+      // hideOutputAndCodeContainers();
+      const inputBlock = document.createElement("block");
+      inputBlock.setAttribute("type", "text_input");
+      document.getElementById("toolbox").prepend(inputBlock);
+      workspace.options.maxInstances["text_input"] = 1;
+      workspace.updateToolbox(document.getElementById("toolbox"));
+      /*
+      ["variables_get", "variables_set"].forEach(blockType => {
+        const typeBlock = document.createElement("block");
+        typeBlock.setAttribute("type", blockType);
+        document.getElementById("toolbox").prepend(typeBlock);
+        workspace.options.maxInstances[blockType] = 1;
+      });
+      workspace.options.maxInstances["type_in_display_string_literal"] = 0;
+      workspace.updateToolbox(document.getElementById("toolbox"));
+      */
+    },
+    d
   );
+  // addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+
   citf.addTask(
     new CourseInstructionTask(
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" && 
         x.getInputTargetBlock("VALUE") && (x.getInputTargetBlock("VALUE").type === "text_input" || x.getInputTargetBlock("VALUE").type === "js_text_input")),
       new ParallelAnimation([
-        new HelpMessageDirection(() => {
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => {
           const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_set");
           const inputBlock = workspace.getAllBlocks().find(block => (block.type === "text_input" || block.type === "js_text_input"));
           const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && (block.getParent() === varBlock || block.getParent() === inputBlock));
           const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
           const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
           return "Drag the " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + " block inside the " + T2C.MSG.currentLanguage.TERMINAL_LET + " variable block and move the text block that currently resides there inside the new " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + " block.  This will ask the user for text with the message " + text + " and store whatever the user types in the variable " + varBlockName + ".";
-        }, {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        }, ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -808,23 +606,22 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       () => workspace.getAllBlocks().find(x => x.type === "variables_set" &&  
             x.getField("VAR").getText() === "firstName"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "You will be asking the user for his/her first name, and this variable will store it.  Rename the variable:\nfirstName\nThis variable is in camel case, which is a convention in Python and JavaScript.  This means that the first letter of each word after the first is capitalized.", {
-          startPosition: () => {
-            const variablesSetBlockWs = workspace.getAllBlocks().find(x => x.type === "variables_set");
-            //const coords = variablesSetBlockWs.getBoundingRectangle();
-            return getAbsolutePosition(workspace, variablesSetBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight);
-            /*
-            return {       
-              //x: coords.left + variablesSetBlockWs.width/8,
-              //y: document.getElementById("top-header").offsetHeight + 
-              //coords.top + 7*variablesSetBlockWs.height/8 + 
-              //Blockly.getMainWorkspace().getMetrics().flyoutHeight
-              x: variablesSetBlockWs.getBoundingRectangle().left + d.offsetWidth,//+ variablesSetBlockWs.width,// + variablesSetBlockWs.width/8,
-              y: document.getElementById("top-header").offsetHeight + variablesSetBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + variablesSetBlockWs.height
+        levelGenerator.createHelpMessageDirections(
+          helpMsgManager, 
+          () => "You will be asking the user for his/her first name, and this variable will store it.  Rename the variable:\nfirstName\nThis variable is in camel case, which is a convention in Python and JavaScript.  This means that the first letter of each word after the first is capitalized.", 
+          () => {
+            const variableSetBlock = workspace.getAllBlocks().find(x => x.type === "variables_set");
+            const varName = variableSetBlock && variableSetBlock.getField("VAR") 
+              && variableSetBlock.getField("VAR").getText() || "";
+            if(/\s/.test(varName)) {
+              return "Be sure you type firstName exactly as it appears without spaces.  You're not allowed to use spaces in variable names in most programming languages such as Python or JavaScript.";
+            } else if(varName.toLowerCase() === "firstname" && varName !== "firstName") {
+              return "Be sure to enter firstName in camel case (first letter of every word after the first capitalized), a convention for variable names in some programming languages such as Python or JavaScript since spaces are *not* allowed in variable names.";
+            } else if(varName !== "firstName") {
+              return "Check your spelling of firstName, and retype it accordingly.";
             }
-            */
           }
-        }),
+        ),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -851,20 +648,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
             (x.getFieldValue("TEXT").toLowerCase().includes("name ") ||
              x.getFieldValue("TEXT").toLowerCase().includes(" name"))),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "This text is the message the user will receive asking for his/her name.  Write a message asking the user for his/her name.  Unlike the variable name which cannot have spaces in most programming languages, the message will be seen by the user and should have spaces.  The variable will store the name your user enters.", {
-          startPosition: () => {
-            const textBlockWs = workspace.getAllBlocks().find(x => x.type === "text" && 
-              x.getParent() && (x.getParent().type === "text_input" || x.getParent().type === "js_text_input"));
-            // const coords = textBlockWs.getBoundingRectangle();
-            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0.5, blockOffsetScaleY: 1}, d.offsetWidth,  document.getElementById("top-header").offsetHeight);
-            /*
-            return {       
-              x: textBlockWs.getBoundingRectangle().left + textBlockWs.width/2 + d.offsetWidth,
-              y: document.getElementById("top-header").offsetHeight + textBlockWs.getBoundingRectangle().top + Blockly.getMainWorkspace().getMetrics().flyoutHeight + textBlockWs.height
-            }
-            */
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "This text is the message the user will receive asking for his/her name.  Write a message asking the user for his/her name.  Unlike the variable name which cannot have spaces in most programming languages, the message will be seen by the user and should have spaces.  The variable will store the name your user enters.", ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -885,39 +669,32 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     )
   );
 
-  addRunTask(citf);
-  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-
-  citf.addTask(
-    new CourseInstructionTask(
-      () => true,
-      {
-        start: () => true,
-        isComplete: () => true,
-        animate: () => true,
-        finish: () => {
-          alert("👍 Cool!  Notice how the output includes what you typed in for your first name.  If you run it again and type in something different, you'll see this different name.");
-          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          hideOutputAndCodeContainers();
-          const textJoinBlock = document.createElement("block");
-          textJoinBlock.setAttribute("type", "t2c_text_join");
-          document.getElementById("toolbox").prepend(textJoinBlock);
-          workspace.options.maxInstances["t2c_text_join"] = 1;
-          workspace.updateToolbox(document.getElementById("toolbox"));        
-          /*
-          ["variables_get", "variables_set"].forEach(blockType => {
-            const typeBlock = document.createElement("block");
-            typeBlock.setAttribute("type", blockType);
-            document.getElementById("toolbox").prepend(typeBlock);
-            workspace.options.maxInstances[blockType] = 1;
-          });
-          workspace.options.maxInstances["type_in_display_string_literal"] = 0;
-          workspace.updateToolbox(document.getElementById("toolbox"));
-          */
-        }
-      }
-    )
+  levelGenerator.addRunTask(
+    helpMsgManager, 
+    citf, 
+    () => {
+      alert("👍 Cool!  Notice how the output includes what you typed in for your first name.  If you run it again and type in something different, you'll see this different name.");
+      // restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+      // hideOutputAndCodeContainers();
+      const textJoinBlock = document.createElement("block");
+      textJoinBlock.setAttribute("type", "t2c_text_join");
+      document.getElementById("toolbox").prepend(textJoinBlock);
+      workspace.options.maxInstances["t2c_text_join"] = 1;
+      workspace.updateToolbox(document.getElementById("toolbox"));        
+      /*
+      ["variables_get", "variables_set"].forEach(blockType => {
+        const typeBlock = document.createElement("block");
+        typeBlock.setAttribute("type", blockType);
+        document.getElementById("toolbox").prepend(typeBlock);
+        workspace.options.maxInstances[blockType] = 1;
+      });
+      workspace.options.maxInstances["type_in_display_string_literal"] = 0;
+      workspace.updateToolbox(document.getElementById("toolbox"));
+      */
+    },
+    d
   );
+  // addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   citf.addTask(
     new CourseInstructionTask(
@@ -928,18 +705,14 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         && x.getInputTargetBlock("TEXT").getInputTargetBlock("B") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("B").type === "text"),*/
       new ParallelAnimation([
-        new HelpMessageDirection(() => {
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => {
           const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_get");
           const displayBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
           const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() === displayBlock);
           const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
           const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
           return "Drag the + block inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block, replacing the variable " + varBlockName + " get block currently inside it.  The + is used to join text expressions together (also called string concatenation).  We will join the text " + text + " currently appearing below with the value of the variable " + varBlockName + ", which is whatever the user types in and use the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block to display the result on a single line.";
-        }, {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        }, ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -979,18 +752,14 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         /*&& x.getInputTargetBlock("TEXT").getInputTargetBlock("B") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("B").type === "variables_get"),*/
       new ParallelAnimation([
-        new HelpMessageDirection(() => {
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => {
           const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_get");
           // const displayBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
           const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() && (block.getParent().type === "text_print" || block.getParent().type === "js_text_print"));
           const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
           const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
           return "Drag the text " + text + " appearing in the bottom " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block in the left space of the + block.";
-        }, {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        }, ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -1034,18 +803,14 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         && x.getInputTargetBlock("TEXT").getInputTargetBlock("B") && 
         x.getInputTargetBlock("TEXT").getInputTargetBlock("B").type === "variables_get"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => {
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => {
           const varBlock = workspace.getAllBlocks().find(block => block.type === "variables_get");
           // const displayBlock = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print"));
           // const valueTextBlock = workspace.getAllBlocks().find(block => block.type === "text" && block.getParent() === displayBlock);
           const varBlockName = varBlock ? varBlock.getField("VAR").getText() : "item";
           // const text = valueTextBlock ? valueTextBlock.getFieldValue("TEXT") : "";
           return "Now drag the variable " + varBlockName + " block inside the right space of the + block.";
-        }, {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        }, ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -1083,11 +848,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().filter(x => (x.type === "text_print" || x.type === "js_text_print")).length === 1,
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Now drag the bottom " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block in the trashcan since you no longer need it.", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Now drag the bottom " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block in the trashcan since you no longer need it.", ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -1121,39 +882,32 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     )
   );
 
-  addRunTask(citf);
-  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-
-  citf.addTask(
-    new CourseInstructionTask(
-      () => true,
-      {
-        start: () => true,
-        isComplete: () => true,
-        animate: () => true,
-        finish: () => {
-          alert("👍 Great!  Notice how the + was used to concatenate or join together the literal message (in quotes) and the name the user enters (*NOT* in quotes).");
-          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          hideOutputAndCodeContainers();
-          const typeInWelcomeNameBlock = document.createElement("block");
-          typeInWelcomeNameBlock.setAttribute("type", "type_in_welcome_message");
-          document.getElementById("toolbox").prepend(typeInWelcomeNameBlock);
-          workspace.options.maxInstances["type_in_welcome_message"] = 1;
-          workspace.updateToolbox(document.getElementById("toolbox"));        
-          /*
-          ["variables_get", "variables_set"].forEach(blockType => {
-            const typeBlock = document.createElement("block");
-            typeBlock.setAttribute("type", blockType);
-            document.getElementById("toolbox").prepend(typeBlock);
-            workspace.options.maxInstances[blockType] = 1;
-          });
-          workspace.options.maxInstances["type_in_display_string_literal"] = 0;
-          workspace.updateToolbox(document.getElementById("toolbox"));
-          */
-        }
-      }
-    )
+  levelGenerator.addRunTask(
+    helpMsgManager, 
+    citf, 
+    () => {
+      alert("👍 Great!  Notice how the + was used to concatenate or join together the literal message (in quotes) and the name the user enters (*NOT* in quotes).");
+      restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+      hideOutputAndCodeContainers();
+      const typeInWelcomeNameBlock = document.createElement("block");
+      typeInWelcomeNameBlock.setAttribute("type", "type_in_welcome_message");
+      document.getElementById("toolbox").prepend(typeInWelcomeNameBlock);
+      workspace.options.maxInstances["type_in_welcome_message"] = 1;
+      workspace.updateToolbox(document.getElementById("toolbox"));        
+      /*
+      ["variables_get", "variables_set"].forEach(blockType => {
+        const typeBlock = document.createElement("block");
+        typeBlock.setAttribute("type", blockType);
+        document.getElementById("toolbox").prepend(typeBlock);
+        workspace.options.maxInstances[blockType] = 1;
+      });
+      workspace.options.maxInstances["type_in_display_string_literal"] = 0;
+      workspace.updateToolbox(document.getElementById("toolbox"));
+      */
+    },
+    d
   );
+  // addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   citf.addTask(
     new CourseInstructionTask(
@@ -1162,11 +916,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         workspace.getAllBlocks().filter(x => x.type === "variables_get").length === 0 && 
         workspace.getAllBlocks().filter(x => x.type === "text").length === 1,
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Now drag the + block with the text and variable blocks inside of it into the trashcan.  Do *NOT* drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " statement block in the trashcan since we will be using an expression type-in block.  In JavaScript, an expression is just something that produces a value whereas a statement does not.  As a block, it connects inside such as +, a variable get, text, or " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + ".", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
-          }
-        }),
+        new levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Now drag the + block with the text and variable blocks inside of it into the trashcan.  Do *NOT* drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " statement block in the trashcan since we will be using an expression type-in block.  In JavaScript, an expression is just something that produces a value whereas a statement does not.  As a block, it connects inside such as +, a variable get, text, or " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + ".", ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -1210,11 +960,12 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         x.getInputTargetBlock("TEXT") && 
           x.getInputTargetBlock("TEXT").type === "type_in_welcome_message"),
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Now drag the type-in-expression block inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " one.", {
-          startPosition: () => {
-            return {x: 0, y: document.getElementById("top-header").offsetHeight}
+        levelGenerator.createHelpMessageDirections(helpMsgManager,
+          () => "Now drag the type-in-expression block inside the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " one.",
+          () => {
+            return "";
           }
-        }),
+        ),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
@@ -1273,21 +1024,17 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           thirdTextBlock && thirdTextBlock.type === "text"
       },
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Write a message to welcome the user with his/her name with punctuation at the end.  To do this type:\n(1) Something like welcome *in quotes* because you want it to be displayed as is.\n(2) + firstName (+ to join text and firstName without the quotes to get the name the user typed in and not literally the text firstName)\n(3) + and a punctuation mark in quotes to tack on a punctuation symbol at the end.", {
-          startPosition: () => {
-            const textPrintBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
-            // const coords = textPrintBlockWs.getBoundingRectangle();
-            return getAbsolutePosition(workspace, textPrintBlockWs, {blockOffsetScaleX: 1, blockOffsetScaleY: 1}, 0,  document.getElementById("top-header").offsetHeight);
-            /*
-            return {
-              x: coords.left + textPrintBlockWs.width, //+ d.offsetWidth/4,
-              y: document.getElementById("top-header").offsetHeight + 
-                coords.top + textPrintBlockWs.height + 
-                Blockly.getMainWorkspace().getMetrics().flyoutHeight
-            };
-            */
+        levelGenerator.createHelpMessageDirections(helpMsgManager,
+          () => "Write a message to welcome the user with his/her name with punctuation at the end.  To do this type:\n(1) Something like welcome *in quotes* because you want it to be displayed as is.\n(2) + firstName (+ to join text and firstName without the quotes to get the name the user typed in and not literally the text firstName)\n(3) + and a punctuation mark in quotes to tack on a punctuation symbol at the end.",
+          () => {
+            const typeInBlock = workspace.getAllBlocks().find(x => x.type === "type_in_welcome_message");
+            if(typeInBlock) {
+              return typeInWelcomeMessageBlock.getErrorFeedback();
+            } else {
+              return "";
+            }
           }
-        }),
+        ),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -1312,64 +1059,62 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     )
   );
 
-  addRunTask(citf);
-  addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-
-  citf.addTask(
-    new CourseInstructionTask(
-      () => true,
-      {
-        start: () => true,
-        isComplete: () => true,
-        animate: () => true,
-        finish: () => {
-          const loadSaveTextCodeButton = document.getElementById("load-save-text-code");
-          alert("✔✔ Excellent!  You just wrote a program to welcome the user and along the way you learned some things about variables, getting input from the user, and joining together string literals and variables to produce output.  Mission 0 is just about complete; let's just make sure you can save your work and load it up later!  For extra credit, we'll show you what your code looks in pure JavaScript.");
-          restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
-          hideOutputAndCodeContainers();
-          
-          loadSaveTextCodeButton.addEventListener("click", () => {
-            // Avoid asking read clipboard permission; assume that button click after disk save button click meant text was copied
-            //if(clickedSaveButtonLast && loadSaveTextCodeButton.textContent !== T2C.MSG.currentLanguage["BUTTON_LOAD_TEXT_CODE"]) {
-            if(clickedSaveButtonLast) {
-              clipboardText = document.getElementById("textCodeBox").value;
-            }
-            /*  
-            // may want to read clipboard instead to check for click (DONE)
-            navigator.clipboard.readText().then(clipText => {
-              clipboardText = clipText;
-              //console.warn(clipboardText);
-              //console.warn(clipboardText === document.getElementById("textCodeBox").value);
-            });
-            */
-            //clickedSaveTextCodeButton = true;
-          });
-
-          document.getElementById("save-code-button").addEventListener("click", () => {
-            clickedLoadButtonLast = false;
-            clickedSaveButtonLast = true;
-             // save before user potentially changes it; this way you don't need to recall functions generating code/XML 
-             // to check
-             // This event listener needs to be attached AFTER event listener that generates code; may want to just
-             // regenerate code instead so you don't depend on that, export functions from mobile.js
-             if(workspace.getAllBlocks().length === 9) { // make sure the workspace wasn't changed
-               generatedTextCode = workspaceToLanguageCode(workspace, T2C.MSG.currentLanguage) || document.getElementById("textCodeBox").value;
-               generatedXMLCode = workspaceToXML(workspace) || document.getElementById("xmlData").value;
-             } else {
-               alert("Workspace changed, please restore what you originally had before saving");
-             }
-          });
-          document.getElementById("load-code-button").addEventListener("click", () => {
-            clickedLoadButtonLast = true;
-            clickedSaveButtonLast = false;
-          });
+  levelGenerator.addRunTask(
+    helpMsgManager, 
+    citf, 
+    () => {
+      // const loadSaveTextCodeButton = document.getElementById("load-save-text-code");
+      alert("✔✔ Excellent!  You just wrote a program to welcome the user and along the way you learned some things about variables, getting input from the user, and joining together string literals and variables to produce output.  Mission 0 is just about complete; let's just make sure you can save your work and load it up later!  For extra credit, we'll show you what your code looks in pure JavaScript.");
+      // restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
+      // hideOutputAndCodeContainers();
+      
+      /*
+      loadSaveTextCodeButton.addEventListener("click", () => {
+        // Avoid asking read clipboard permission; assume that button click after disk save button click meant text was copied
+        //if(clickedSaveButtonLast && loadSaveTextCodeButton.textContent !== T2C.MSG.currentLanguage["BUTTON_LOAD_TEXT_CODE"]) {
+        if(clickedSaveButtonLast) {
+          clipboardText = document.getElementById("textCodeBox").value;
         }
-      }
-    )
+        /*  
+        // may want to read clipboard instead to check for click (DONE)
+        navigator.clipboard.readText().then(clipText => {
+          clipboardText = clipText;
+          //console.warn(clipboardText);
+          //console.warn(clipboardText === document.getElementById("textCodeBox").value);
+        });
+        */
+      /*
+        //clickedSaveTextCodeButton = true;
+      });
+
+      document.getElementById("save-code-button").addEventListener("click", () => {
+        clickedLoadButtonLast = false;
+        clickedSaveButtonLast = true;
+         // save before user potentially changes it; this way you don't need to recall functions generating code/XML 
+         // to check
+         // This event listener needs to be attached AFTER event listener that generates code; may want to just
+         // regenerate code instead so you don't depend on that, export functions from mobile.js
+         if(workspace.getAllBlocks().length === 9) { // make sure the workspace wasn't changed
+           generatedTextCode = workspaceToLanguageCode(workspace, T2C.MSG.currentLanguage) || document.getElementById("textCodeBox").value;
+           generatedXMLCode = workspaceToXML(workspace) || document.getElementById("xmlData").value;
+         } else {
+           alert("Workspace changed, please restore what you originally had before saving");
+         }
+      });
+      document.getElementById("load-code-button").addEventListener("click", () => {
+        clickedLoadButtonLast = true;
+        clickedSaveButtonLast = false;
+      });
+      */
+    },
+    d
   );
+  // addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   // save textual code
+  levelGenerator.addSaveTextCodeTask(helpMsgManager, citf, workspace, null, d, true);
 
+/*
   citf.addTask(
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
@@ -1420,7 +1165,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       ])
     )
   );
-
+*/
   citf.addTask(
     new CourseInstructionTask(
       () => true,
@@ -1433,7 +1178,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
           // SHOULD CALL EVENT LISTENER INSTEAD FOR NEXT 2 LINES
           //document.getElementById("output-container").classList.remove("show-container");
           //document.getElementById("output-container").classList.add("hide-container");
-          hideOutputAndCodeContainers();
+          levelGenerator.hideOutputAndCodeContainers();
           /*document.getElementById("load-save-text-code").addEventListener("click", () => {
             // may want to read clipboard instead to check for click
             clickedSaveTextCodeButton = true;
@@ -1447,18 +1192,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 0,
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", {
-          startPosition: () => {
-            //const coords = workspace.trashcan.getClientRect();
-            return {
-              x: 50, //(coords.left + coords.right)/2, //+ d.offsetWidth/4,
-              y: document.getElementById("top-header").offsetHeight + 
-                //(coords.top + coords.bottom)/2 + 
-                workspace.getMetrics().flyoutHeight + 
-                100
-            };
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -1480,7 +1214,9 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   );
 
   // load textual code
+  levelGenerator.addLoadTextCodeTask(helpMsgManager, citf, workspace, null, d);
 
+/*
   citf.addTask(
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
@@ -1556,7 +1292,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       ])
     )
   );
-
+*/
   // SAVE/LOAD XML
 
   citf.addTask(
@@ -1568,28 +1304,15 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         animate: () => true,
         finish: () => {
           alert("👍 Great! You can also save/load the information about the blocks (XML) from/to the second box.  This will lay out the blocks exactly as you had them in the workspace.  So let's try that now.");
-          hideOutputAndCodeContainers();
-
-          document.getElementById("load-save-xml").addEventListener("click", () => {
-            // may want to read clipboard instead to check for click (DONE)
-             // Avoid asking read clipboard permission; assume that button click after disk save button click meant text was copied
-            if(clickedSaveButtonLast) {
-              clipboardText = document.getElementById("xmlData").value;
-            }
-            /*
-            navigator.clipboard.readText().then(clipText => {
-              clipboardText = clipText;
-            });
-            */
-            //clickedSaveTextCodeButton = true;
-          });
+          levelGenerator.hideOutputAndCodeContainers();
         }
       }
     )
   );
 
   // save XML
-
+  levelGenerator.addSaveXMLTask(helpMsgManager, citf, workspace, null, d, true);
+/*
   citf.addTask(
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
@@ -1640,7 +1363,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       ])
     )
   );
-
+*/
   citf.addTask(
     new CourseInstructionTask(
       () => true,
@@ -1650,7 +1373,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         animate: () => true,
         finish: () => {
           alert("OK, now that you've copied the XML for the blocks, let's clear the workspace of the blocks and then load it (without reloading the page!) to confirm that everything works.  BE SURE NOT TO overwrite the clipboard until you load the code again or you'll lose your work!");
-          hideOutputAndCodeContainers();
+          levelGenerator.hideOutputAndCodeContainers();
           /*document.getElementById("load-save-text-code").addEventListener("click", () => {
             // may want to read clipboard instead to check for click
             clickedSaveTextCodeButton = true;
@@ -1664,18 +1387,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => workspace.getAllBlocks().length === 0,
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", {
-          startPosition: () => {
-            //const coords = workspace.trashcan.getClientRect();
-            return {
-              x: 50, //(coords.left + coords.right)/2, //+ d.offsetWidth/4,
-              y: document.getElementById("top-header").offsetHeight + 
-                //(coords.top + coords.bottom)/2 + 
-                workspace.getMetrics().flyoutHeight + 
-                100
-            };
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,
@@ -1697,7 +1409,8 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   );
 
   // load XML
-
+  levelGenerator.addLoadXMLTask(helpMsgManager, citf, workspace, null, d);
+/*
   citf.addTask(
     new CourseInstructionTask(
       // add event listener so this isn't confused with clicking on load button and then entering code (DONE)
@@ -1773,7 +1486,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       ])
     )
   );
-
+*/
   // CHANGE LANGUAGE - FINAL STEP
 
   citf.addTask(
@@ -1785,7 +1498,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         animate: () => true,
         finish: () => {
           alert("👍 Excellent! As the last part of this initial exercise, let's see how the blocks look in pure JavaScript.");
-          hideOutputAndCodeContainers();
+          levelGenerator.hideOutputAndCodeContainers();
         }
       }
     )
@@ -1795,12 +1508,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     new CourseInstructionTask(
       () => document.getElementById("language").value === "js",
       new ParallelAnimation([
-        new HelpMessageDirection(() => "Select JavaScript and then see what happens to the toolbox and blocks.", {
-          startPosition: {
-            x: document.getElementById("language").offsetLeft + document.getElementById("language").offsetWidth,
-            y: document.getElementById("language").offsetTop + document.getElementById("language").offsetHeight
-          }
-        }),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Select JavaScript and then see what happens to the toolbox and blocks.", ""),
         new BlinkAnimation(d, {
           totalSteps: 100,
           toggleSteps: 25,

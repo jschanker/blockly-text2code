@@ -36,7 +36,7 @@ class CourseInstructionTaskFlow {
   	const stages = this.tasks_.length;
   	let currentStage = 0;//{taskNum: 0, directionsComplete: false};
   	let lastTime = 0;
-  	this.tasks_[0].startDirections();
+  	this.tasks_[currentStage].startDirections();
   	const runTasksHelper = (ms) => {
   		if(ms - lastTime >= FRAME_RATE) {
   		  if(!this.tasks_[currentStage].areDirectionsCompleted() && 

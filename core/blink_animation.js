@@ -29,12 +29,17 @@ class BlinkAnimation {
 	constructor(obj, options) {
 		this.obj_ = obj;
 		this.options_ = options;
+    this.container_ = this.options_.container || document.body;
 	}
 	start() {
 		this.numOfSteps_ = 0;
 		this.totalSteps_ = this.value_(this.options_.totalSteps);
 		this.startPosition_ = this.value_(this.options_.startPosition);
 		this.toggleSteps_ = this.value_(this.options_.toggleSteps);
+
+    if(this.options_.addAtStart) {
+      this.container_.appendChild(this.obj_)
+    }
 
 		this.obj_.style.left = this.startPosition_.x + "px";
 	  this.obj_.style.top = this.startPosition_.y + "px";
@@ -50,6 +55,9 @@ class BlinkAnimation {
   }
   finish() {
   	this.obj_.style.display = "block";
+    if(this.options_.removeAtEnd) {
+      this.container_.removeChild(this.obj_)
+    }
   	if(this.options_.finish instanceof Function) {
     	this.options_.finish();
     }

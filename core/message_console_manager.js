@@ -33,9 +33,12 @@ class MessageConsoleManager {
 		this.tabContainer_ = this.createTabContainer_(this.container_);
 		this.msgDisplay_ = this.createMsgDisplay_(this.container_);
 		this.currentTab_ = null;
-	  this.options_ = options;
+	  this.options_ = options || {};
 	  this.tabs_ = [];
 	  this.unassignedTabId_ = 0;
+	  if(container) {
+			this.providedContainer_ = true;
+		}
 	}
 
 	createContainer_() {
@@ -106,6 +109,25 @@ class MessageConsoleManager {
     return this.unassignedTabId_++;
 	}
 
+	getTabIdByTitle(title) {
+		return this.tabs_.filter(tab => tab.title === title)
+		  .map(tab => tab.id)[0];
+	}
+
+
+	setTabHandlerByTitle(tabTitle, msgHandler, index=0) {
+		const tab = this.tabs_.filter(tab => tab.title === tabTitle)[index]
+		if(tab) {
+			console.log("Changing tab ", tab, "with title", tabTitle, "#", index);
+			// tab.title = newTabTitle;
+			tab.display.innerText = tabTitle;
+			tab.message = msgHandler;
+			console.log("Tab is now", tab);
+		}
+
+		return !!tab;
+	}
+
 	changeTab(id, newTabTitle, newMessage) {
 		const tab = this.tabs_.find(tab => tab.id === id);
 
@@ -122,7 +144,7 @@ class MessageConsoleManager {
 
 	setSelectedTab(id) {
 		const tab = this.tabs_.find(tab => tab.id === id);
-		console.log("SETTING TAB TO ", tab);
+		console.log("Setting tab to", tab);
 		if(tab) {
 			// maybe add CSS class for selected
     	// console.log("CLICKED", tab);
@@ -151,8 +173,20 @@ class MessageConsoleManager {
 	  this.alertDisplay_.style.left = this.startPosition_.x + "px";
 	  this.alertyDisplay_.style.top = this.startPosition_.y + "px";
 	  */
-    document.body.appendChild(this.container_);
+    if(!document.getElementById("message_console_manager_container")) {
+    	document.body.appendChild(this.container_);
+    } else {
+    	this.show();
+    }
 	  this.started_ = true;
+	}
+
+  show() {
+  	this.container_.style.display = "block";
+  }
+
+	hide() {
+		this.container_.style.display = "none";
 	}
 
 	isComplete() {
@@ -161,9 +195,16 @@ class MessageConsoleManager {
   }
 
   finish() {
-    document.body.removeChild(this.container_);
+  	this.tabs_.map(tab => tab.display)
+  	  .forEach(tabDisplay => this.tabContainer_.removeChild(tabDisplay))
+  	this.container_.removeChild(this.msgDisplay_);
+  	this.container_.removeChild(this.tabContainer_);
+    if(!this.providedContainer_) {
+    	// remove container only if this class created it
+    	document.body.removeChild(this.container_);
+    }
     //this.helpButton_.style.display = "none";
-    if(this.options_.finish instanceof Function) {
+    if(typeof this.options_.finish === "function") {
     	this.options_.finish();
     }
   }

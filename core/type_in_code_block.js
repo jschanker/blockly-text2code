@@ -59,8 +59,8 @@ class TypeInCodeBlock {
   		  T2C.MSG.currentLanguage.TYPEIN_WARNING_UNNECESSARY_OPEN_PARENTHESIS
   		    .replace("%1", matchResultArr[forIndex]),
   		UNKNOWN: (forIndex, matchResultArr, remaining) => 
-  		  T2C.MSG.currentLanguage.TYPEIN_WARNING_UNNECESSARY_OPEN_PARENTHESIS
-  		    .replace("%1", matchResultArr[forIndex]),
+  		  T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR
+  		    .replace("%1", matchResultArr[forIndex])
   	};
   }
 
@@ -211,6 +211,13 @@ class TypeInCodeBlock {
 	    //(this.displayMessage_("") || "")};
 	}
 
+	hasFullMatch_(s) {
+		return this.possibleMatches_.find(possibleMatchArr => {
+		  const match = this.matchStatement_(s, possibleMatchArr).match;
+		  return possibleMatchArr.length === match.length;
+		});
+	}
+
 	generateErrorFunction(errorHandler, patternArr, index) {
 		const pattern = patternArr[index];
 		/*if(errorHandler instanceof Array) {
@@ -310,7 +317,8 @@ class TypeInCodeBlock {
 	  }
   }
 
-  addToBlocks() {
+  addToBlocks(options={}) {
+  	const typeInCodeBlock = this;
   	Blockly.Python[this.blockName_] = Blockly.JavaScript[this.blockName_] = Blockly.JavaScript['code_statement'];
   	Blockly.Blocks[this.blockName_] = {
 		  validate: (exp) => {
@@ -338,34 +346,29 @@ class TypeInCodeBlock {
 		  	// const result = this.matchStatement_(exp, this.possibleMatches_[0], this.possibleErrorFunctions_[0]);
 		  	// return result.error ? result.match.join("") : exp;
 		  },
+
 		  init: function() {
 		    this.appendDummyInput("STRING")
 		        .appendField(new Blockly.FieldTextInput("", this.validate), "EXP");
 		    this.setInputsInline(false);
-		    this.setOutput(false);
-		    this.setPreviousStatement(true);
-		    this.setNextStatement(true);
+		    this.setOutput(options.isExpression);
+		    this.setPreviousStatement(!options.isExpression);
+		    this.setNextStatement(!options.isExpression);
 		    this.setColour(60);
 		    this.setTooltip(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TOOLTIP);
 		    this.onchange = e => {
-		      //if(this.getFieldValue("EXP").trim())
-		      this.hasUnknownError_ = false;
-		      if(this.getFieldValue("EXP").endsWith("\r") || 
-		        this.getFieldValue("EXP").endsWith("\n") || (this.getFieldValue("EXP").length > 0 && e.element === "workspaceClick")) {
-		        if(!this.validate(this.getFieldValue("EXP")) || 
-		          (!this.getFieldValue("EXP").endsWith(")") && 
-		            !this.getFieldValue("EXP").endsWith(";"))) return;
-		        else {
-		          const parseTree = getParseTree(this.getFieldValue("EXP"));
-		          if(parseTree) {
-		            handleParseTreeToBlocks(parseTree, this);
-		          } else {
-		            //displayMessage(T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR);
-		            //alert(T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR);
-		            this.hasUnknownError_ = true;
-		          }
-		        }
-		      }
+		    	const exp = this.getFieldValue("EXP");
+		      typeInCodeBlock.hasUnknownError_ = false;
+	        if(exp.length > 0 && e.element === "workspaceClick" && typeInCodeBlock.hasFullMatch_(exp)) {
+	          const parseTree = getParseTree(this.getFieldValue("EXP"));
+	          if(parseTree) {
+	            handleParseTreeToBlocks(parseTree, this);
+	          } else {
+	            //displayMessage(T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR);
+	            //alert(T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR);
+	            typeInCodeBlock.hasUnknownError_ = true;
+	          }
+	        }
 		    };
 		    //this.onchange = parseAndConvertToBlocks.bind(this, props);
 		  },
