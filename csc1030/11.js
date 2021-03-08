@@ -59,12 +59,6 @@ typeInGetFirst3NumBlock.addToBlocks();
 
 blockTemplates.push(typeInGetFirst3NumBlock);
 
-// switch to JavaScript: should call function from mobile.js to do this
-if(document.getElementById("language")) {
-  document.getElementById("language").value = "js";
-}
-T2C.MSG.currentLanguage = T2C.MSG.JS;
-
 for(let i = 1; i < blockNames.length; i++) {
 	blockTemplates.push(new TypeInCodeBlock(blockNames[i], {collapseWhenFinished: true}));
   if(i === 7) {
@@ -112,6 +106,13 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   workspace.clear();
   toolboxManager.clearToolbox();
   const codeBlocks = blockNames.map(blockName => newBlock(workspace, blockName));
+
+  // switch to JavaScript: should call function from mobile.js to do this
+  if(document.getElementById("language")) {
+    document.getElementById("language").value = "js";
+  }
+  T2C.MSG.currentLanguage = T2C.MSG.JS;
+  
   codeBlocks.slice(0, codeBlocks.length-1)
     .forEach((block, index) => setNextBlock(block, codeBlocks[index+1]));
 
