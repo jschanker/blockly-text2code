@@ -103,7 +103,7 @@ class LevelGenerator {
 	  document.getElementById("text-code-container").classList.add("hide-container");   
 	}
 
-  addHelpMessageTask(courseInstructionTaskFlow, condition, directions, feedback, finish) {
+  addHelpMessageTask(courseInstructionTaskFlow, helpMsgManager, condition, directions, feedback, finish) {
     courseInstructionTaskFlow.addTask(this.createHelpMessageTask(helpMsgManager, condition, directions, feedback, finish));
   }
 
@@ -192,6 +192,33 @@ class LevelGenerator {
     if(doFlashTaskAfter) {
     	this.addMoveAndFlashTask(courseInstructionTaskFlow, document.getElementById("output-container").querySelectorAll(".table-cell")[0], finish);
     }
+  }
+
+  addDeleteAllBlocksTask(helpMsgManager, courseInstructionTaskFlow, workspace, finish, ptr) {
+	  courseInstructionTaskFlow.addTask(
+	    new CourseInstructionTask(
+	      () => workspace.getAllBlocks().length === 0,
+	      new ParallelAnimation([
+	        this.createHelpMessageDirections(helpMsgManager,() => "Move all blocks to the trashcan or rightmouse click (hold down finger on phone) on an empty place in the workspace and select Delete.", ""),
+	        new BlinkAnimation(ptr || this.createPointer(), {
+	          totalSteps: 100,
+	          toggleSteps: 25,
+	          startPosition: () => {
+	            const coords = workspace.trashcan.getClientRect();
+	            return {
+	              x: (coords.left + coords.right)/2, //+ d.offsetWidth/4,
+	              y: (coords.top + coords.bottom)/2
+	              /*
+	              y: document.getElementById("top-header").offsetHeight + 
+	                (coords.top + coords.bottom)/2 + 
+	                Blockly.getMainWorkspace().getMetrics().flyoutHeight
+	              */
+	            };
+	          }
+	        })
+	      ])
+	    )
+	  );
   }
 
   addLoadSaveListeners_(workspace, resetState=false) {

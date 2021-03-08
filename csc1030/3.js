@@ -6,6 +6,9 @@ import BlinkAnimation from "../core/blink_animation.js";
 import HelpMessageDirection from "../core/help_message_direction.js";
 import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
+import MessageConsoleManager from "../core/message_console_manager.js";
+import TypeInCodeBlock from "../core/type_in_code_block.js";
+import LevelGenerator from "../core/level_generator.js";
 
 // JavaScript built-in substring method overriden for beginner intended use;
 // this is used to get back some of the index out-of-bounds behavior;

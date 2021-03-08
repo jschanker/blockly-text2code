@@ -29,12 +29,13 @@
 import {getParseTree, handleParseTreeToBlocks} from "../core/mobile.js";
 
 class TypeInCodeBlock {
-  constructor(blockName) {
+  constructor(blockName, options={}) {
   	this.blockName_ = blockName;
   	this.possibleMatches_ = [];
   	this.possibleErrorFunctions_ = [];
   	this.currentExp_ = "";
   	this.hasUnknownError_ = false;
+  	this.options_ = options;
 
   	this.standardErrorMessages = {
   		MISTYPED_TERMINAL: (terminal, matchResultArr, remaining) => 
@@ -85,7 +86,7 @@ class TypeInCodeBlock {
       .filter(text => typeof text === "string");
     const val = langTerminals.find(text => this.oneStartsWithOther_(text, inputted, true));
       // text.startsWith(inputted) || inputted.startsWith(text));
-    if(val) {
+    if(typeof val === "string") {
       return {terminal: val, remaining: inputted.JSSubstring(val.length).trim()};
     }
     // return undefined otherwise
@@ -160,8 +161,10 @@ class TypeInCodeBlock {
 	  let matchResult;
 	  let hasError = false;
 	  let i = -1;
+	  let isMatchComplete;
 
 	  while(i < matchArr.length-1 && remainingText && !hasError) {
+	  	isMatchComplete = false;
 	    ++i;
 	    if(typeof matchArr[i] === "string") {
 	      if(remainingText.length < matchArr[i].length && matchArr[i].startsWith(remainingText)) {
@@ -170,10 +173,12 @@ class TypeInCodeBlock {
 	      } else if(remainingText.startsWith(matchArr[i])) {
 	        matchResult = matchArr[i];
 	        remainingText = remainingText.substring(matchArr[i].length).trim();
+	        isMatchComplete = true;
 	      } else {
 	        hasError = true;
 	      }
 	    } else if(matchArr[i].type === "terminal") {
+	    	// currently isMatchComplete is always false in this case, adjust getAfterTerminal
 	      const result = this.getAfterTerminal_(remainingText.trim(), matchArr[i].token);
 	      if(result) {
 	        matchResult = result.terminal;
@@ -182,11 +187,13 @@ class TypeInCodeBlock {
 	        hasError = true;
 	      }
 	    } else if(matchArr[i].type === "regexp") {
+	    	// this doesn't allow partial matches of regex, regex needs to account for partial
 	      const result = remainingText.trim().match(matchArr[i].token);
 	      // console.log("REG", result, remainingText.trim())
 	      if(result) {
 	        matchResult = result[0];
 	        remainingText = remainingText.substring(result[0].length).trim();
+	        isMatchComplete = true;
 	      } else {
 	        hasError = true;
 	      }
@@ -200,21 +207,32 @@ class TypeInCodeBlock {
 	    }
 	  }
 
+    // add matches for regex that match empty strings
+	  if(!remainingText && isMatchComplete) {
+	  	while(i < matchArr.length-1 && matchArr[++i] && matchArr[i].type === "regexp" && matchArr[i].token.test("")) {
+	  		matchResultArr.push("");
+	  	}
+	  }
+
 	  // displayMessage("") should not be part of non-error
 	  return {
 	  	match: matchResultArr, 
 	  	error: hasError, 
-	  	remainingText: remainingText
+	  	remainingText: remainingText,
+	  	isMatchComplete
 	  };
 
 	    //errorMsg: hasError ? errorFunctionArr[i](matchResultArr, remainingText) : 
 	    //(this.displayMessage_("") || "")};
 	}
 
-	hasFullMatch_(s) {
+	hasFullMatch(s, allowExtra=true) {
 		return this.possibleMatches_.find(possibleMatchArr => {
-		  const match = this.matchStatement_(s, possibleMatchArr).match;
-		  return possibleMatchArr.length === match.length;
+		  const {match, error, remainingText, isMatchComplete} = 
+		    this.matchStatement_(s, possibleMatchArr);//.match;
+		  return isMatchComplete && 
+		    (possibleMatchArr.length === match.length && allowExtra || 
+		    possibleMatchArr.length === match.length && !remainingText);
 		});
 	}
 
@@ -280,6 +298,12 @@ class TypeInCodeBlock {
 		}*/
 	}
 
+  /**
+   * Finds language object with this terminal if such a language exists; returns undefined otherwise
+   * @param {string} s the string to determine if a terminal
+   * @returns {Object|undefined} a language object with a key prefixed with TERMINAL whose value is s
+   * or undefined if no such language object exists 
+   */
 	equalsTerminal_(s) {
     return Object.values(T2C.MSG)
       .find(langObj => Object.keys(langObj).find(key => 
@@ -298,7 +322,37 @@ class TypeInCodeBlock {
   	);
   }
 
-  getErrorFeedback() {
+  addAllPossibleLanguageMatches(arr, errorArr) {
+  	// This method currently only does terminal substitutions when they're in the same place
+  	const languageMatchArrays = 
+	  	Object.values(T2C.MSG)
+	  	  .map(langObj => arr
+	  	  	.map(pattern => (pattern && pattern.type === "terminal") ? 
+	  	  		(typeof langObj["TERMINAL_" + pattern.token.toUpperCase()] === "string" ? 
+	  	  			langObj["TERMINAL_" + pattern.token.toUpperCase()] : pattern.token) : pattern)
+	  	  	);
+	  languageMatchArrays.forEach(langMatchArr => {
+	  	this.addPossibleMatch(langMatchArr, errorArr);
+	  });
+  }
+
+  getErrorFeedback(currentExp) {
+  	currentExp = typeof currentExp === "string" ? currentExp : this.currentExp_;
+  	const result = this.possibleMatches_.reduce((acc, pattern, index) => {
+  		const patternResult = this.matchStatement_(this.currentExp_, pattern);
+  		patternResult.pattern = pattern;
+  		patternResult.index = index;
+  		if(patternResult.error && !acc.error) {
+  			return acc;
+  		} else if(!patternResult.error && acc.error) {
+  			return patternResult;
+  		} else {
+  			return acc.pattern.length === 0 || (patternResult.match.length/pattern.length >= acc.match.length/acc.pattern.length) ? 
+  		    patternResult : acc;
+  		}
+		}, {pattern: [], match: [], error: true, remainingText: this.currentExp_, index: -1});
+
+/*
   	const result = this.possibleMatches_.reduce((acc, pattern, index) => {
   		const patternResult = this.matchStatement_(this.currentExp_, pattern);
   		patternResult.pattern = pattern;
@@ -307,8 +361,9 @@ class TypeInCodeBlock {
   		return (acc.pattern.length === 0 || !patternResult.error && acc.error || patternResult.match.length > acc.match.length) ? 
   		  patternResult : acc;
   	}, {pattern: [], match: [], error: true, remainingText: this.currentExp_, index: -1});
-
+*/
   	if(result.error) {
+  		// console.log("ERRORS", result.index, this.possibleErrorFunctions_);
       return this.possibleErrorFunctions_[result.index][result.match.length](result.match, result.remainingText);
     } else if(this.hasUnknownError_) {
     	return T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR;
@@ -317,26 +372,89 @@ class TypeInCodeBlock {
 	  }
   }
 
+  getCodeGeneratorForLanguage(langCode, isStatement) {
+  	const typeInBlockObj = this;
+  	return function(block) {
+  	  const exp = block.getFieldValue("EXP");
+  	  let i = 0;
+
+  	  while(i < typeInBlockObj.possibleMatches_.length) {
+  	  	const langObj = T2C.MSG[langCode];
+  	  	const possibleMatchArr = typeInBlockObj.possibleMatches_[i];
+  	  	const {match, error, remainingText, isMatchComplete} = 
+  	  	  typeInBlockObj.matchStatement_(exp, possibleMatchArr);
+        if(possibleMatchArr.length === match.length && !remainingText && isMatchComplete) {
+        	const code = match
+        	  .map((matchPart, index) => {
+        	  	const pattern = possibleMatchArr[index];
+        	  	if(pattern && pattern.type === "terminal") {
+        	  		if(typeof langObj["TERMINAL_" + pattern.token.toUpperCase()] === "string") {
+        	  			return langObj["TERMINAL_" + pattern.token.toUpperCase()];
+        	  		} else {
+        	  			return pattern.token;
+        	  		}
+        	  	} else if(typeof pattern === "string" && typeInBlockObj.equalsTerminal_(pattern)) {
+        	  		// THIS WON'T NECESSARILY WORK IF MULTIPLE TERMINAL KEYS WITH SAME VALUE
+        	  		// console.log("HERE", pattern, langObj);
+        	  		const usedLangObj = typeInBlockObj.equalsTerminal_(pattern)
+        	  		const terminalKey = Object.keys(usedLangObj)
+        	  		  .find(key => key.toUpperCase().startsWith("TERMINAL_") && usedLangObj[key] === pattern)
+        	  		return terminalKey ? langObj[terminalKey] : pattern;
+        	  	} else {
+        	  		return matchPart;
+        	  	}
+        	  })
+        	  .join("");
+
+        	if(isStatement) {
+        		return (code.endsWith(T2C.MSG[langCode].STATEMENT_SEPARATOR) ? 
+        			code : (code + T2C.MSG[langCode].STATEMENT_SEPARATOR)) + "\n";
+        	} else {
+        		return [code, Blockly[T2C.MSG[langCode].LANGUAGENAME].ORDER_NONE]
+        	}
+        }
+        ++i;
+  	  }
+
+  	  return "";
+  	};
+  }
+
   addToBlocks(options={}) {
   	const typeInCodeBlock = this;
-  	Blockly.Python[this.blockName_] = Blockly.JavaScript[this.blockName_] = Blockly.JavaScript['code_statement'];
+  	Blockly.Python[this.blockName_] = this.getCodeGeneratorForLanguage("PY", !options.isExpression);
+  	Blockly.JavaScript[this.blockName_] = this.getCodeGeneratorForLanguage("JS", !options.isExpression);
+  	// Blockly.Python[this.blockName_] = Blockly.JavaScript[this.blockName_] = Blockly.JavaScript['code_statement'];
   	Blockly.Blocks[this.blockName_] = {
-		  validate: (exp) => {
-		  	const result = this.possibleMatches_.reduce((acc, pattern, index) => {
-		  		const patternResult = this.matchStatement_(exp, pattern);
+		  validate: function(exp) {
+		  	const sourceBlock = this.getSourceBlock();
+		  	const result = typeInCodeBlock.possibleMatches_.reduce((acc, pattern, index) => {
+		  		const patternResult = typeInCodeBlock.matchStatement_(exp, pattern);
 		  		patternResult.pattern = pattern;
 		  		patternResult.index = index;
-		  		return (!patternResult.error && acc.error || patternResult.match.length/pattern.length >= acc.match.length/acc.pattern.length) ? 
-		  		  patternResult : acc;
-		  	}, {pattern: [false], match: [], error: true, remainingText: exp, index: -1});
+		  		if(patternResult.error && !acc.error) {
+		  			return acc;
+		  		} else if(!patternResult.error && acc.error) {
+		  			return patternResult;
+		  		} else {
+		  			return acc.pattern.length === 0 || (patternResult.match.length/pattern.length >= acc.match.length/acc.pattern.length) ? 
+		  		    patternResult : acc;
+		  		}
+		  	}, {pattern: [], match: [], error: true, remainingText: exp, index: -1});
 		  	
-        this.setCurrentExp(exp);
-
+		  	// probably don't want to change state in what should be pure validate function
+        typeInCodeBlock.setCurrentExp(exp);
         if(result.error) {
+        	console.log("ERROR", result);
+        	sourceBlock.setColour("#800");
         	// this.setCurrentExp(exp);
         	// this.possibleErrorFunctions_[result.index][result.match.length](result.match, result.remainingText);
-        } else { 
+        } else if(typeInCodeBlock.hasFullMatch(exp, false)) {
+        	sourceBlock.setColour("#080");
+        } else {
+        	sourceBlock.setColour(60);
 	        // this.displayMessage_("");
+	        // Blockly.utils.dom.addClass(htmlInput, 'blocklyInvalidInput');
 	        return exp;
 	      }
 
@@ -358,8 +476,32 @@ class TypeInCodeBlock {
 		    this.setTooltip(T2C.MSG.currentLanguage.TYPEIN_STATEMENT_TOOLTIP);
 		    this.onchange = e => {
 		    	const exp = this.getFieldValue("EXP");
+		    	const hasFullMatch = typeInCodeBlock.hasFullMatch(exp, false);
+		    	if(Blockly.selected !== this) {
+		    		// update value to validated one that now appears on block
+		    		// so there won't be error feedback for this one that now
+		    		// has correct code
+		    		typeInCodeBlock.setCurrentExp(exp);
+		    		this.setColour(hasFullMatch ? "#080" : 60);
+		    		// this.getColour()
+		    		// this.setColour(this.getColour());
+		    	}
+		    	// console.log(this.type, Blockly.selected !== this, exp, typeInCodeBlock.currentExp_)
 		      typeInCodeBlock.hasUnknownError_ = false;
-	        if(exp.length > 0 && e.element === "workspaceClick" && typeInCodeBlock.hasFullMatch_(exp)) {
+		      /*
+		      if(hasFullMatch) {
+		      	// this.setColour("#afa");
+		      	this.setColour("#080");
+		      } else if(exp !== typeInCodeBlock.currentExp_) {
+		      	// this.setColour("#faa"); // Blockly Error color (https://github.com/google/blockly/blob/fd239e49b2ad1bd9adaf00dcac74b247f94558d9/core/css.js#L439)
+		        this.setColour("#800");
+		      } else {
+		      	this.setColour(60);
+		      }*/
+	        if(exp.length > 0 && e.element === "workspaceClick" && hasFullMatch) {
+	        	if(typeInCodeBlock.options_.collapseWhenFinished) {
+	        		return this.setCollapsed(true);
+	        	}
 	          const parseTree = getParseTree(this.getFieldValue("EXP"));
 	          if(parseTree) {
 	            handleParseTreeToBlocks(parseTree, this);

@@ -8,7 +8,7 @@ import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
 import MessageConsoleManager from "../core/message_console_manager.js";
 import TypeInCodeBlock from "../core/type_in_code_block.js";
-import LevelGenerator from "../core/level_generator";
+import LevelGenerator from "../core/level_generator.js";
 
 /*
 const helpMsgManager = new MessageConsoleManager();
@@ -916,7 +916,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         workspace.getAllBlocks().filter(x => x.type === "variables_get").length === 0 && 
         workspace.getAllBlocks().filter(x => x.type === "text").length === 1,
       new ParallelAnimation([
-        new levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Now drag the + block with the text and variable blocks inside of it into the trashcan.  Do *NOT* drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " statement block in the trashcan since we will be using an expression type-in block.  In JavaScript, an expression is just something that produces a value whereas a statement does not.  As a block, it connects inside such as +, a variable get, text, or " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + ".", ""),
+        levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Now drag the + block with the text and variable blocks inside of it into the trashcan.  Do *NOT* drag the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " statement block in the trashcan since we will be using an expression type-in block.  In JavaScript, an expression is just something that produces a value whereas a statement does not.  As a block, it connects inside such as +, a variable get, text, or " + T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING + ".", ""),
         new GlideAnimation(d, {
           totalSteps: 150,
           startPosition: () => {
