@@ -38,6 +38,9 @@ class TypeInCodeBlock {
   	this.options_ = options;
 
   	this.standardErrorMessages = {
+  		EXTRA_AT_END: (forIndex, matchResultArr, remaining) => 
+  		  T2C.MSG.currentLanguage.TYPEIN_ERROR_REMOVE_EXTRA_AT_END
+  		    .replace("%1", remaining),
   		MISTYPED_TERMINAL: (terminal, matchResultArr, remaining) => 
   		  T2C.MSG.currentLanguage.TYPEIN_ERROR_TERMINAL_MISTYPED
   		    .replace("%1", T2C.MSG.currentLanguage["TERMINAL_" + terminal.toUpperCase()] || terminal),
@@ -187,13 +190,21 @@ class TypeInCodeBlock {
 	        hasError = true;
 	      }
 	    } else if(matchArr[i].type === "regexp") {
-	    	// this doesn't allow partial matches of regex, regex needs to account for partial
-	      const result = remainingText.trim().match(matchArr[i].token);
+	    	// this logic doesn't have automatic way for determining partial matches of regexp from full match, 
+	    	// currently caller needs to explicitly tell it what partial match means in tokenPartial,
+	    	// needed when regexp is last pattern to match so type-in-block knows when to turn green indicating
+	    	// full match 
+	      let result = remainingText.trim().match(matchArr[i].token); 
+	      const partialResult = matchArr[i].tokenPartial && remainingText.trim().match(matchArr[i].tokenPartial);
 	      // console.log("REG", result, remainingText.trim())
-	      if(result) {
+	      if(result || partialResult) {
+	      	if(result) {
+	      		isMatchComplete = true;
+	      	} else {
+	      		result = partialResult;
+	      	}
 	        matchResult = result[0];
 	        remainingText = remainingText.substring(result[0].length).trim();
-	        isMatchComplete = true;
 	      } else {
 	        hasError = true;
 	      }
@@ -227,6 +238,7 @@ class TypeInCodeBlock {
 	}
 
 	hasFullMatch(s, allowExtra=true) {
+		/*
 		return this.possibleMatches_.find(possibleMatchArr => {
 		  const {match, error, remainingText, isMatchComplete} = 
 		    this.matchStatement_(s, possibleMatchArr);//.match;
@@ -234,6 +246,22 @@ class TypeInCodeBlock {
 		    (possibleMatchArr.length === match.length && allowExtra || 
 		    possibleMatchArr.length === match.length && !remainingText);
 		});
+		*/
+		/*
+	  return this.possibleMatches_.find(possibleMatchArr => {
+	  	const usePossibleMatchArr = allowExtra ? 
+	  	  possibleMatchArr : possibleMatchArr.concat({type: "regexp", token: /^$/});
+		  const {match, error, remainingText, isMatchComplete} = 
+		    this.matchStatement_(s, usePossibleMatchArr);//.match;
+		  return isMatchComplete && (usePossibleMatchArr.length === match.length);
+		});
+		*/
+		return (allowExtra && this.possibleMatches_ || this.addNoExtraMatches_())
+		  .find(possibleMatchArr => {
+		    const {match, error, remainingText, isMatchComplete} = 
+		      this.matchStatement_(s, possibleMatchArr);//.match;
+		    return isMatchComplete && (possibleMatchArr.length === match.length);
+		  });
 	}
 
 	generateErrorFunction(errorHandler, patternArr, index) {
@@ -336,9 +364,25 @@ class TypeInCodeBlock {
 	  });
   }
 
+  addNoExtraMatches_(possibleMatchesArr) {
+  	possibleMatchesArr = possibleMatchesArr || this.possibleMatches_;
+  	return possibleMatchesArr.map(possibleMatch => 
+  		possibleMatch.concat({type: "regexp", token: /^$/}));
+  }
+
+  addNoExtraErrorMessages_(errorFunctionArr) {
+  	errorFunctionArr = errorFunctionArr || this.possibleErrorFunctions_;
+  	return errorFunctionArr.map(errorFunctionArr => 
+  		errorFunctionArr.concat(
+  			(matchResultArr, remaining) => 
+  			  this.standardErrorMessages.EXTRA_AT_END("", matchResultArr, remaining)
+  		)
+  	);
+  }
+
   getErrorFeedback(currentExp) {
   	currentExp = typeof currentExp === "string" ? currentExp : this.currentExp_;
-  	const result = this.possibleMatches_.reduce((acc, pattern, index) => {
+  	const result = this.addNoExtraMatches_().reduce((acc, pattern, index) => {
   		const patternResult = this.matchStatement_(this.currentExp_, pattern);
   		patternResult.pattern = pattern;
   		patternResult.index = index;
@@ -364,7 +408,7 @@ class TypeInCodeBlock {
 */
   	if(result.error) {
   		// console.log("ERRORS", result.index, this.possibleErrorFunctions_);
-      return this.possibleErrorFunctions_[result.index][result.match.length](result.match, result.remainingText);
+      return this.addNoExtraErrorMessages_()[result.index][result.match.length](result.match, result.remainingText);
     } else if(this.hasUnknownError_) {
     	return T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR;
     } else {

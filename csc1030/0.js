@@ -18,7 +18,7 @@ const feedbackTabId = helpMsgManager.addTab(T2C.MSG.currentLanguage.FEEDBACK, ""
 
 const typeInCodeDisplayStringLiteralBlock = new TypeInCodeBlock("type_in_display_string_literal");
 typeInCodeDisplayStringLiteralBlock.addPossibleMatch(
-  [{token: "display", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]+"|^'[^"]+'/, type: "regexp"}, ")"],
+  [{token: "display", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]+"|^'[^"]+'/, type: "regexp"}, ")", {token: /^[;]*/, type: "regexp"}],
    [
     null, 
     null,//genericTerminalErrorMsg.bind(null, displayMessage, "GETINPUTBYASKING"),
@@ -31,7 +31,8 @@ typeInCodeDisplayStringLiteralBlock.addPossibleMatch(
         return "";
       }
     },
-    null //(matchResultArr, remaining) => displayMessage("You're missing a closing parenthesis for " + matchResultArr[3] + ".")
+    null, //(matchResultArr, remaining) => displayMessage("You're missing a closing parenthesis for " + matchResultArr[3] + ".")
+    null//(matchResultArr, remaining) => "Remove " + remaining.substring(Array.from(remaining).findIndex(ch => ch !== ";")) + " from the end."
   ]
 );
 
@@ -39,7 +40,8 @@ typeInCodeDisplayStringLiteralBlock.addToBlocks();
 
 const typeInWelcomeMessageBlock = new TypeInCodeBlock("type_in_welcome_message");
 typeInWelcomeMessageBlock.addPossibleMatch(
-  [{token: /^"[^"]*$|^'[^']*$|^"[^"]+ "|^'[^"]+ '/, type: "regexp"}, "+", "firstName", "+", {token: /^"[^"]*$|^'[^']*$|^"[^"]+"|^'[^"]+'/, type: "regexp"}],
+  [{token: /^"[^"]*$|^'[^']*$|^"[^"]+ "|^'[^"]+ '/, type: "regexp"}, "+", "firstName", "+", 
+   {token: /^"[^"]+"|^'[^"]+'/, tokenPartial: /^"[^"]*$|^'[^']*$/, type: "regexp"}],
    [
     (matchResultArr, remaining) => {
       if(!remaining.startsWith('"') && !remaining.startsWith("'")) {

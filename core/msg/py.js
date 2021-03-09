@@ -36,6 +36,7 @@ T2C.MSG.PY["TERMINAL_FINDFIRSTTAIL"] = "";
 T2C.MSG.PY["TERMINAL_KE_STHITI_SANKHYA"] = "";
 T2C.MSG.PY["TERMINAL_PARSEINT"] = "int";
 T2C.MSG.PY["TERMINAL_PARSEFLOAT"] = "float";
+T2C.MSG.PY["TERMINAL_TRUNC"] = "math.trunc";
 T2C.MSG.PY["STATEMENT_SEPARATOR"] = "";
 T2C.MSG.PY["TEXT_T2C_INDEXOF_TITLE"] = "%1.find(%2)";
 T2C.MSG.PY["TEXT_T2C_INDEXOF_TOOLTIP"] = "Returns the index of the first/last occurrence of the first text in the second text. Returns %1 if text is not found.";
@@ -62,6 +63,7 @@ T2C.MSG.PY["DIRECTIONS"] = "Directions";
 
 T2C.MSG.PY["TYPE_SOMETHING"] = "Type something";
 
+T2C.MSG.PY["TYPEIN_ERROR_REMOVE_EXTRA_AT_END"] = "Remove %1 from the end.";
 T2C.MSG.PY["TYPEIN_ERROR_TERMINAL_MISTYPED"] = "Check the spelling, case, and punctuation of what you're entering; it should identically match with %1.";
 T2C.MSG.PY["TYPEIN_ERROR_MISSING_OPEN_PARENTHESIS"] = "You're missing an open parenthesis for %1.";
 T2C.MSG.PY["TYPEIN_ERROR_MISSING_CLOSE_PARENTHESIS"] = "You're missing a closing parenthesis for %1.";

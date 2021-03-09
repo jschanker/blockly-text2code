@@ -38,6 +38,7 @@ T2C.MSG.EN["TERMINAL_FINDFIRSTTAIL"] = "";
 T2C.MSG.EN["TERMINAL_KE_STHITI_SANKHYA"] = "";
 T2C.MSG.EN["TERMINAL_PARSEINT"] = "parseInt";
 T2C.MSG.EN["TERMINAL_PARSEFLOAT"] = "parseFloat";
+T2C.MSG.EN["TERMINAL_TRUNC"] = "Math.trunc";
 T2C.MSG.EN["STATEMENT_SEPARATOR"] = ";";
 T2C.MSG.EN["TEXT_T2C_INDEXOF_TITLE"] = "%1.positionNumberOfTEXT(%2)";
 T2C.MSG.EN["TEXT_T2C_INDEXOF_TOOLTIP"] = "Returns the index of the first/last occurrence of the first text in the second text. Returns %1 if text is not found.";
@@ -64,6 +65,7 @@ T2C.MSG.EN["DIRECTIONS"] = "Directions";
 
 T2C.MSG.EN["TYPE_SOMETHING"] = "Type something";
 
+T2C.MSG.EN["TYPEIN_ERROR_REMOVE_EXTRA_AT_END"] = "Remove %1 from the end.";
 T2C.MSG.EN["TYPEIN_ERROR_TERMINAL_MISTYPED"] = "Check the spelling, case, and punctuation of what you're entering; it should identically match with %1.";
 T2C.MSG.EN["TYPEIN_ERROR_MISSING_OPEN_PARENTHESIS"] = "You're missing an open parenthesis for %1.";
 T2C.MSG.EN["TYPEIN_ERROR_MISSING_CLOSE_PARENTHESIS"] = "You're missing a closing parenthesis for %1.";
