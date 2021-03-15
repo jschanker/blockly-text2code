@@ -32,7 +32,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 	   {token: /^[;]*$/, type: "regexp"}]
 	];
 
-	let errorFeedbackArr = [    
+	let errorFeedbackArr = [
 		null, 
 		null,
 		null,
@@ -145,12 +145,12 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 		    helpMsgManager, 
 		    citf, 
 		    () => {
-		    	if(i < 15) {
-		    		alert("Directions to be added later");
-		    		refreshBlocksAndAdd(i);
-		    	} else {
-		        alert("✔✔✔ Congratulations!  You just completed Mission 12!  In the next mission, you'll be learning about how Excel and other spreadsheet applications represents dates and times and how to break down the way you calculate the time in hours (0 - 23), minutes (0 - 59), and seconds (0 - 59) from a number of days in decimal after midnight into a series of steps using addition, subtraction, multiplication, and (integer) division that the computer (or some other person) could mindlessly follow to get the answer!  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
-		      }
+		    	if(i === 5) {
+		        alert("Great, so now for the trickier calculations.  To determine the seconds that'll display on a clock, you'll need to get the remaining number of seconds after you've accounted for the minutes.  So for example, 90 seconds after midnight would be 00:01:30 (1 minute, 30 seconds), 130 seconds after would be 00:02:10 (2 minutes, 10 seconds), and 200 seconds after would be 00:03:20 (3 minutes, 20 seconds).  You got the 1, 2, and 3 from 90, 130, and 210 so how do you go from:\n90 and 1 => 30,\n 130 and 2 => 10, \n 200 and 3 => 20 \nFind the common operations you use in each and then substitute these numbers with the variables totalSeconds and totalMinutes to get your answer, which you should store in remainingSeconds.")
+		      } else { 
+		    	  alert("Directions to be added later");
+		    	}
+		    	refreshBlocksAndAdd(i);
 		    },
 		    d
 		  );
@@ -171,7 +171,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 	        	      "To do this, you'll need to know about " + T2C.MSG.currentLanguage.TERMINAL_TRUNC + ", which can be used to convert a number to an integer (...,-3,-2,-1,0,1,2,3,...) by truncating or removing all digits to the right of the decimal point (e.g., " + T2C.MSG.currentLanguage.TERMINAL_TRUNC + "(2.41) is 2).  When we are dividing 0 or some positive integer by a positive integer, we can use " + T2C.MSG.currentLanguage.TERMINAL_TRUNC + " to perform integer division.  So " + T2C.MSG.currentLanguage.TERMINAL_TRUNC + "(14/5) = " + T2C.MSG.currentLanguage.TERMINAL_TRUNC + "(2.8) = 2, which is the quotient when you divide 14 by 5."
 	              alert("Sahee (Right), so remembering that there are 1000 ms (milliseconds) in a second, let's get the total number of *whole* seconds contained in the entered number of ms.  So the answer for 64000, 64500, and 64543.21 should all be 64.  " + integerDivisionMessage + "  So using this information, can you do this?  Store the answer in totalSeconds.");
 		          } else {
-		          	alert("Message forthcoming");
+		          	alert("Message to be added later");
 		          }
 		          codeBlocks = codeBlocks.map(currentBlock => 
 		          	workspace.getAllBlocks().find(newBlock => currentBlock.type === newBlock.type));
@@ -206,9 +206,13 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 	    	} else if(i === 3) {
 	    		return "Apply the appropriate math operation on " + varNames[1] + " and the appropriate integer to convert to the total number of whole minutes.  For some examples, 90, 130, and 200 seconds, the answers should be 1, 2, and 3 minutes, respectively.  As in the previous conversion, be sure to apply " + T2C.MSG.currentLanguage.TERMINAL_TRUNC + " to the result of this operation so that you get whole numbers in each case.  Store the final answer in " + varNames[2] + ".";
 	    	} else if(i === 5) {
-	    		return "Apply the appropriate math operations on " + varNames[1] + " and " + varNames[2] + " with the appropriate integer to convert to the remaining number of seconds.  For some examples:\n90 seconds = 1 whole minute & *30 remaining seconds* \n 130 seconds = 2 whole minutes & *10 remaining seconds*\n200 seconds = 3 whole minutes & *20 remaining seconds*\nConsider what you could do with the total number of seconds and number of whole minutes to get the remaining number of seconds.  Store the final answer in " + varNames[3] + ".  Do *NOT* include parentheses as you will not need them since the computer performs multiplication/division before addition/subtraction because they have higher precedence as they do in math (Parentheses first, exponentation next, multiplication/division next, addition/subtraction last).";
+	    		return "Apply the appropriate math operations on " + varNames[1] + " and " + varNames[2] + " and the appropriate integer to convert to the remaining number of seconds.  For some examples:\n90 seconds = 1 whole minute & *30 remaining seconds* \n 130 seconds = 2 whole minutes & *10 remaining seconds*\n200 seconds = 3 whole minutes & *20 remaining seconds*\nConsider what you could do with the total number of seconds and number of whole minutes to get the remaining number of seconds.  Store the final answer in " + varNames[3] + ".  Do *NOT* include parentheses as you will not need them since the computer performs multiplication/division before addition/subtraction because they have higher precedence as they do in math (Parentheses first, exponentation next, multiplication/division next, addition/subtraction last).";
+	    	} else if(i === 7 || i === 11) {
+	    		return "Apply the appropriate math operation on " + varNames[(i-3)/2] + " and the appropriate integer to convert to the total number of whole " + (i === 7 ? "hours" : "days") + " in the given number of " + (i === 7 ? "minutes" : "hours") + ".  Remember to apply " + T2C.MSG.currentLanguage.TERMINAL_TRUNC + " to the result of this operation so you get a whole number.  Store the final answer in " + varNames[(i+1)/2] + ".";
+	    	} else if(i === 9 || i === 13) {
+	    		return "Apply the appropriate math operations on " + varNames[Math.trunc((i-1)/3)] + ", " + varNames[(i-1)/2] + ", and the appropriate integer to convert to the remaining number of " + (i === 9 ? "minutes" : "hours") + " after accounting for the " + (i === 9 ? "hours" : "days") + ".  As you did when getting the number of remaining seconds after extracting the seconds from the minutes, be sure to consider some examples to determine the appropriate calculations.  Store the final answer in " + varNames[(i+1)/2] + ".  Do *NOT* include parentheses as you will not need them since the computer performs multiplication/division before addition/subtraction because they have higher precedence as they do in math (Parentheses first, exponentation next, multiplication/division next, addition/subtraction last).";
 	    	} else {
-	    		return "Directions to be added later.";
+	    		return "Display the time in the form hour (0 - 23): minute (0 - 59): second (0 - 59).  Don't worry about including a leading 0, e.g., 2 : 4 : 5 is fine if the time is 2:04:05 AM.  Use commas in your " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " between the variables representing the numbers and the string literals ':' separating them.";
 	    	}
 	    },
 	    () => {
@@ -233,6 +237,15 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
 	    null
 	  );
 	}
+
+	levelGenerator.addRunTask(
+    helpMsgManager, 
+    citf, 
+    () => {
+      alert("✔✔✔ Congratulations!  You just completed Mission 12!  In the next mission, you'll be learning about how Excel and other spreadsheet applications represents dates and times and how to break down the way you calculate the time in hours (0 - 23), minutes (0 - 59), and seconds (0 - 59) from a number of days in decimal after midnight into a series of steps using addition, subtraction, multiplication, and (integer) division that the computer (or some other person) could mindlessly follow to get the answer!  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
+    },
+    d
+  );
 
   return citf;
 };
