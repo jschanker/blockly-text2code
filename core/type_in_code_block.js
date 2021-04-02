@@ -312,8 +312,14 @@ class TypeInCodeBlock {
       // console.log("MSG", messageType, this.standardErrorMessages[messageType], args);
       // console.log("MSG", messageType, this.standardErrorMessages[messageType](...args, [], "ac"));
 		  // this.displayMessage_(this.standardErrorMessages[messageType](...errorHandler.args, matchResultArr, remaining));
-			return (matchResultArr, remaining) => 
-			  this.standardErrorMessages[messageType](...args, matchResultArr, remaining);
+			return (matchResultArr, remaining) => {
+				if(messageType === "UNKNOWN") {
+					if(pattern && typeof pattern === "string" && !pattern.startsWith("(") && remaining.startsWith("(")) {
+						messageType = "UNNECESSARY_OPEN_PARENTHESIS";
+					}
+				}
+			  return this.standardErrorMessages[messageType](...args, matchResultArr, remaining);
+			}
 		}
 
 		/*else if(!errorHandler) {
@@ -370,6 +376,9 @@ class TypeInCodeBlock {
   		possibleMatch.concat({type: "regexp", token: /^$/}));
   }
 
+  /**
+   * Add error function for extra text at end of match (e.g., print("foo")garbage)
+   */  
   addNoExtraErrorMessages_(errorFunctionArr) {
   	errorFunctionArr = errorFunctionArr || this.possibleErrorFunctions_;
   	return errorFunctionArr.map(errorFunctionArr => 
@@ -391,11 +400,12 @@ class TypeInCodeBlock {
   		} else if(!patternResult.error && acc.error) {
   			return patternResult;
   		} else {
-  			return acc.pattern.length === 0 || (patternResult.match.length/pattern.length >= acc.match.length/acc.pattern.length) ? 
+  			// return acc.pattern.length === 0 || (patternResult.match.length/pattern.length > acc.match.length/acc.pattern.length) ?
+  		  return acc.pattern.length === 0 || (patternResult.match.filter(x => x).length > acc.match.filter(x => x).length) ? 
   		    patternResult : acc;
   		}
 		}, {pattern: [], match: [], error: true, remainingText: this.currentExp_, index: -1});
-
+// if(currentExp && this.addNoExtraMatches_().length > 0) throw new Error(JSON.stringify(result));
 /*
   	const result = this.possibleMatches_.reduce((acc, pattern, index) => {
   		const patternResult = this.matchStatement_(this.currentExp_, pattern);
@@ -407,7 +417,7 @@ class TypeInCodeBlock {
   	}, {pattern: [], match: [], error: true, remainingText: this.currentExp_, index: -1});
 */
   	if(result.error) {
-  		// console.log("ERRORS", result.index, this.possibleErrorFunctions_);
+  		// result.index = result.match.join("") ? result.index : 0; // has at least one match
       return this.addNoExtraErrorMessages_()[result.index][result.match.length](result.match, result.remainingText);
     } else if(this.hasUnknownError_) {
     	return T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR;
@@ -481,7 +491,8 @@ class TypeInCodeBlock {
 		  		} else if(!patternResult.error && acc.error) {
 		  			return patternResult;
 		  		} else {
-		  			return acc.pattern.length === 0 || (patternResult.match.length/pattern.length >= acc.match.length/acc.pattern.length) ? 
+		  			// return acc.pattern.length === 0 || (patternResult.match.length/pattern.length >= acc.match.length/acc.pattern.length) ? 
+		  			return acc.pattern.length === 0 || (patternResult.match.filter(x => x).length > acc.match.filter(x => x).length) ? 
 		  		    patternResult : acc;
 		  		}
 		  	}, {pattern: [], match: [], error: true, remainingText: exp, index: -1});
