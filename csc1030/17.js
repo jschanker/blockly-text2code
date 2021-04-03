@@ -107,29 +107,29 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     return arr.reduce((acc, x) => acc.concat([separator]).concat(x), []).slice(1);
   }
 
-  const blockNames = ["cs1030_14_type_in_get_is_weekday",
-  "cs1030_14_type_in_get_is_vacation", "cs1030_14_type_in_set_can_sleep_in", 
-  "cs1030_14_type_in_display_can_sleep_in"];
+  const blockNames = ["cs1030_17_type_in_is_mets_fan",
+  "cs1030_17_type_in_is_yankees_fan", "cs1030_17_type_in_set_can_be_true_fan", 
+  "cs1030_17_type_in_display_in_can_be_true_fan"];
 
-  const varNames = ["isWeekday", "isVacation", "canSleepIn"];
+  const varNames = ["isMetsFan", "isYankeesFan", "canBeTrueFan"];
 
   const blockTemplates = blockNames.map(blockName => (new TypeInCodeBlock(blockName, {collapseWhenFinished: true})));
 
-  // const canSleepInBlock = new TypeInCodeBlock("cs1030_14_type_in_can_sleep_in", {collapseWhenFinished: true});
   const possibleLongMatches = getEquivalentCAMatches([[
-   varNames[0], {token: "and", type: "terminal"}, varNames[1], {token: "or", type: "terminal"},
+   varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1], {token: "or", type: "terminal"},
    {token: "not", type: "terminal"}, varNames[0], {token: "and", type: "terminal"}, varNames[1], {token: "or", type: "terminal"},
    {token: "not", type: "terminal"}, varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1]]], ["or", "and"])
   const possibleShortMatches = 
     [
-     [{token: "not", type: "terminal"}, "(", {token: "not", type: "terminal"}, varNames[1], {token: "and", type: "terminal"}, varNames[0], ")"],
-     [{token: "not", type: "terminal"}, "(", varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1], ")"],
-     [{token: "not", type: "terminal"}, varNames[0], {token: "or", type: "terminal"}, varNames[1]],
-     [varNames[1], {token: "or", type: "terminal"}, {token: "not", type: "terminal"}, varNames[0]]
+     [{token: "not", type: "terminal"}, "(", varNames[0], {token: "and", type: "terminal"}, varNames[1], ")"],
+     [{token: "not", type: "terminal"}, "(", varNames[1], {token: "and", type: "terminal"}, varNames[0], ")"],
+     [{token: "not", type: "terminal"}, varNames[0], {token: "or", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1]],
+     [{token: "not", type: "terminal"}, varNames[1], {token: "or", type: "terminal"}, {token: "not", type: "terminal"}, varNames[0]]
     ];
+
   const promptStrings = [
-    "\"Is it a weekday? (true:OK or false:Cancel)\"",
-    "\"Is it a vacation? (true:OK or false:Cancel)\""
+    "\"Are you a Mets fan? (true:OK or false:CANCEL)\"",
+    "\"Are you a Yankees fan? (true:OK or false:CANCEL)\""
   ]
 
   let errorFeedbackArr = 
@@ -154,10 +154,11 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       null
     ];
 
-  const sleepInMatches = possibleLongMatches.concat(possibleShortMatches).map(booleanExp => [{token: "let", type: "terminal"}, varNames[2], "="].concat(booleanExp).concat([{token: /^[;]*$/, type: "regexp"}]));
-  sleepInMatches.forEach(patternArr => blockTemplates[2].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
+  const canBeTrueFanMatches = possibleLongMatches.concat(possibleShortMatches).map(booleanExp => [{token: "let", type: "terminal"}, varNames[2], "="].concat(booleanExp).concat([{token: /^[;]*$/, type: "regexp"}]));
+  canBeTrueFanMatches.forEach(patternArr => blockTemplates[2].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
 
-  console.log("SLEEP IN MATCHES", sleepInMatches);
+  console.log(possibleLongMatches.length, possibleShortMatches.length)
+  canBeTrueFanMatches.forEach(match => console.log(match));
 
   const patternArrs = [
     [{token: "let", type: "terminal"}, varNames[0], "=", {token: "confirm", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]*"|^'[^']*'/, type: "regexp"}, ")",
@@ -205,7 +206,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         isComplete: () => true,
         animate: () => true,
         finish: () => {
-          alert("In progress: ADAPTED FROM SLEEP IN (http://codingbat.com/prob/p173401): The parameter " + varNames[0] + " is true if it is a weekday, and the parameter " + varNames[1] + " is true if we are on vacation. We can sleep in if it is not a weekday or we're on vacation.  Write a line of code to set " + varNames[2] + " so that the computer displays true exactly when we can sleep in.")
+          alert("In progress: A TRUE BASEBALL FAN - A TRUE BASEBALL FAN MAY BE A METS FAN OR A YANKEES FAN BUT NEVER BOTH (HYPOTHETICAL):  A true baseball fan may be a Mets fan or a Yankees fan or neither but cannot be both.  Write a line of code to set " + varNames[2] + " so that the computer displays true exactly when the person can be a true baseball fan.")
         }
       }
     )
@@ -242,7 +243,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     helpMsgManager, 
     citf, 
     () => {
-      alert("✔✔✔ Congratulations!  You just completed Mission 14!  In the next mission, we continue with another Boolean problem.  (When does our pair of monkeys smile?)  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
+      alert("✔✔✔ Congratulations!  You just completed Mission 17!  In the next mission, we continue with another Boolean problem but this time with three variables.  (Exactly One)  Kyaa aap taiyaar hain? (Are you ready?)  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
     },
     d
   );

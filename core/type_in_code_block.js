@@ -418,6 +418,8 @@ class TypeInCodeBlock {
 */
   	if(result.error) {
   		// result.index = result.match.join("") ? result.index : 0; // has at least one match
+  		// Nonreproducible error from this line on level 14, investigate later
+  		// (this.addNoExtraErrorMessages_()[result.index][result.match.length] not a function)
       return this.addNoExtraErrorMessages_()[result.index][result.match.length](result.match, result.remainingText);
     } else if(this.hasUnknownError_) {
     	return T2C.MSG.currentLanguage.TYPEIN_UNKNOWN_ERROR;

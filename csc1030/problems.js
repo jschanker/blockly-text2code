@@ -14,12 +14,19 @@ import {loadLevelTasks as loadLevelTasks10} from "./10.js";
 import {loadLevelTasks as loadLevelTasks11} from "./11.js";
 import {loadLevelTasks as loadLevelTasks12} from "./12.js";
 import {loadLevelTasks as loadLevelTasks13} from "./13.js";
+import {loadLevelTasks as loadLevelTasks14} from "./14.js";
+import {loadLevelTasks as loadLevelTasks15} from "./15.js";
+import {loadLevelTasks as loadLevelTasks16} from "./16.js";
+import {loadLevelTasks as loadLevelTasks17} from "./17.js";
+import {loadLevelTasks as loadLevelTasks18} from "./18.js";
 
 const loadLevelTasksArr = [loadLevelTasks0, loadLevelTasks1, loadLevelTasks2, 
                            loadLevelTasks3, loadLevelTasks4, loadLevelTasks5,
                            loadLevelTasks6, loadLevelTasks7, loadLevelTasks8,
                            loadLevelTasks9, loadLevelTasks10, loadLevelTasks11,
-                           loadLevelTasks12, loadLevelTasks13];
+                           loadLevelTasks12, loadLevelTasks13, loadLevelTasks14,
+                           loadLevelTasks15, loadLevelTasks16, loadLevelTasks17,
+                           loadLevelTasks18];
 
 window.addEventListener('DOMContentLoaded', () => {
 	const levelIndex = window.location && typeof window.location.href === "string"

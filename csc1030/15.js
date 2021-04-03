@@ -107,29 +107,22 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     return arr.reduce((acc, x) => acc.concat([separator]).concat(x), []).slice(1);
   }
 
-  const blockNames = ["cs1030_14_type_in_get_is_weekday",
-  "cs1030_14_type_in_get_is_vacation", "cs1030_14_type_in_set_can_sleep_in", 
-  "cs1030_14_type_in_display_can_sleep_in"];
+  const blockNames = ["cs1030_15_type_in_get_is_a_smile",
+  "cs1030_15_type_in_get_is_b_smile", "cs1030_15_type_in_set_in_trouble", 
+  "cs1030_15_type_in_display_in_trouble"];
 
-  const varNames = ["isWeekday", "isVacation", "canSleepIn"];
+  const varNames = ["isASmile", "isBSmile", "inTrouble"];
 
   const blockTemplates = blockNames.map(blockName => (new TypeInCodeBlock(blockName, {collapseWhenFinished: true})));
 
   // const canSleepInBlock = new TypeInCodeBlock("cs1030_14_type_in_can_sleep_in", {collapseWhenFinished: true});
-  const possibleLongMatches = getEquivalentCAMatches([[
+  const possibleMatches = getEquivalentCAMatches([[
    varNames[0], {token: "and", type: "terminal"}, varNames[1], {token: "or", type: "terminal"},
-   {token: "not", type: "terminal"}, varNames[0], {token: "and", type: "terminal"}, varNames[1], {token: "or", type: "terminal"},
    {token: "not", type: "terminal"}, varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1]]], ["or", "and"])
-  const possibleShortMatches = 
-    [
-     [{token: "not", type: "terminal"}, "(", {token: "not", type: "terminal"}, varNames[1], {token: "and", type: "terminal"}, varNames[0], ")"],
-     [{token: "not", type: "terminal"}, "(", varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1], ")"],
-     [{token: "not", type: "terminal"}, varNames[0], {token: "or", type: "terminal"}, varNames[1]],
-     [varNames[1], {token: "or", type: "terminal"}, {token: "not", type: "terminal"}, varNames[0]]
-    ];
+
   const promptStrings = [
-    "\"Is it a weekday? (true:OK or false:Cancel)\"",
-    "\"Is it a vacation? (true:OK or false:Cancel)\""
+    "\"Is monkey A smiling? (true:OK or false:CANCEL)\"",
+    "\"Is monkey B smiling? (true:OK or false:CANCEL)\""
   ]
 
   let errorFeedbackArr = 
@@ -154,10 +147,12 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       null
     ];
 
-  const sleepInMatches = possibleLongMatches.concat(possibleShortMatches).map(booleanExp => [{token: "let", type: "terminal"}, varNames[2], "="].concat(booleanExp).concat([{token: /^[;]*$/, type: "regexp"}]));
-  sleepInMatches.forEach(patternArr => blockTemplates[2].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
+  const monkeyTroubleMatches = possibleMatches.map(booleanExp => [{token: "let", type: "terminal"}, varNames[2], "="].concat(booleanExp).concat([{token: /^[;]*$/, type: "regexp"}]));
+  monkeyTroubleMatches.forEach(patternArr => blockTemplates[2].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
 
-  console.log("SLEEP IN MATCHES", sleepInMatches);
+  //console.log("MONKEY TROUBLE MATCHES-A", monkeyTroubleMatches, JSON.stringify(monkeyTroubleMatches));
+  console.log(possibleMatches.length)
+  monkeyTroubleMatches.forEach(match => console.log(match));
 
   const patternArrs = [
     [{token: "let", type: "terminal"}, varNames[0], "=", {token: "confirm", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]*"|^'[^']*'/, type: "regexp"}, ")",
@@ -205,7 +200,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         isComplete: () => true,
         animate: () => true,
         finish: () => {
-          alert("In progress: ADAPTED FROM SLEEP IN (http://codingbat.com/prob/p173401): The parameter " + varNames[0] + " is true if it is a weekday, and the parameter " + varNames[1] + " is true if we are on vacation. We can sleep in if it is not a weekday or we're on vacation.  Write a line of code to set " + varNames[2] + " so that the computer displays true exactly when we can sleep in.")
+          alert("In progress: ADAPTED FROM Monkey Trouble (http://codingbat.com/prob/p120546): We have two monkeys, a and b, and the parameters " + varNames[0] + " and " + varNames[1] + " indicate if each is smiling. We are in trouble if they are both smiling or if neither of them is smiling (and not in trouble otherwise).  Write a line of code to set " + varNames[2] + " so that the computer displays true exactly when we are in trouble.")
         }
       }
     )
@@ -242,7 +237,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     helpMsgManager, 
     citf, 
     () => {
-      alert("✔✔✔ Congratulations!  You just completed Mission 14!  In the next mission, we continue with another Boolean problem.  (When does our pair of monkeys smile?)  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
+      alert("✔✔✔ Congratulations!  You just completed Mission 15!  In the next mission, we continue with another Boolean problem.  (Are you a true New York Baseball fan?)  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
     },
     d
   );

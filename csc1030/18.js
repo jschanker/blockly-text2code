@@ -107,29 +107,23 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     return arr.reduce((acc, x) => acc.concat([separator]).concat(x), []).slice(1);
   }
 
-  const blockNames = ["cs1030_14_type_in_get_is_weekday",
-  "cs1030_14_type_in_get_is_vacation", "cs1030_14_type_in_set_can_sleep_in", 
-  "cs1030_14_type_in_display_can_sleep_in"];
+  const blockNames = ["cs1030_18_type_in_p",
+  "cs1030_18_type_in_q", "cs1030_18_type_in_r", "cs1030_18_type_in_set_exactly_two", 
+  "cs1030_18_type_in_display_exactly_two"];
 
-  const varNames = ["isWeekday", "isVacation", "canSleepIn"];
+  const varNames = ["p", "q", "r", "exactlyOne"];
 
   const blockTemplates = blockNames.map(blockName => (new TypeInCodeBlock(blockName, {collapseWhenFinished: true})));
 
-  // const canSleepInBlock = new TypeInCodeBlock("cs1030_14_type_in_can_sleep_in", {collapseWhenFinished: true});
-  const possibleLongMatches = getEquivalentCAMatches([[
-   varNames[0], {token: "and", type: "terminal"}, varNames[1], {token: "or", type: "terminal"},
-   {token: "not", type: "terminal"}, varNames[0], {token: "and", type: "terminal"}, varNames[1], {token: "or", type: "terminal"},
-   {token: "not", type: "terminal"}, varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1]]], ["or", "and"])
-  const possibleShortMatches = 
-    [
-     [{token: "not", type: "terminal"}, "(", {token: "not", type: "terminal"}, varNames[1], {token: "and", type: "terminal"}, varNames[0], ")"],
-     [{token: "not", type: "terminal"}, "(", varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1], ")"],
-     [{token: "not", type: "terminal"}, varNames[0], {token: "or", type: "terminal"}, varNames[1]],
-     [varNames[1], {token: "or", type: "terminal"}, {token: "not", type: "terminal"}, varNames[0]]
-    ];
+  const possibleMatches = getEquivalentCAMatches([[
+   varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[2], {token: "or", type: "terminal"},
+   varNames[1], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[2], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[0], {token: "or", type: "terminal"},
+   varNames[2], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[0], {token: "and", type: "terminal"}, {token: "not", type: "terminal"}, varNames[1]]], ["or", "and"])
+
   const promptStrings = [
-    "\"Is it a weekday? (true:OK or false:Cancel)\"",
-    "\"Is it a vacation? (true:OK or false:Cancel)\""
+    "\"Enter p: (true:OK or false:CANCEL)\"",
+    "\"Enter q: (true:OK or false:CANCEL)\"",
+    "\"Enter r: (true:OK or false:CANCEL)\""
   ]
 
   let errorFeedbackArr = 
@@ -151,24 +145,37 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       null,
       null,
       null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
       null
     ];
 
-  const sleepInMatches = possibleLongMatches.concat(possibleShortMatches).map(booleanExp => [{token: "let", type: "terminal"}, varNames[2], "="].concat(booleanExp).concat([{token: /^[;]*$/, type: "regexp"}]));
-  sleepInMatches.forEach(patternArr => blockTemplates[2].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
+  const exactlyOneMatches = possibleMatches.map(booleanExp => [{token: "let", type: "terminal"}, varNames[3], "="].concat(booleanExp).concat([{token: /^[;]*$/, type: "regexp"}]));
+  exactlyOneMatches.forEach(patternArr => blockTemplates[3].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
 
-  console.log("SLEEP IN MATCHES", sleepInMatches);
+  console.log(exactlyOneMatches, possibleMatches.length)
+  //exactlyOneMatches.forEach(match => console.log(match));
 
   const patternArrs = [
     [{token: "let", type: "terminal"}, varNames[0], "=", {token: "confirm", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]*"|^'[^']*'/, type: "regexp"}, ")",
-     {token: /^[;]*$/, type: "regexp"}],//"Is it a weekday? (true:OK or false:Cancel)"
+     {token: /^[;]*$/, type: "regexp"}],
     [{token: "let", type: "terminal"}, varNames[1], "=", {token: "confirm", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]*"|^'[^']*'/, type: "regexp"}, ")",
-     {token: /^[;]*$/, type: "regexp"}],// "Is it a vacation? (true:OK or false:Cancel)"
+     {token: /^[;]*$/, type: "regexp"}],
+    [{token: "let", type: "terminal"}, varNames[2], "=", {token: "confirm", type: "terminal"}, "(", {token: /^"[^"]*$|^'[^']*$|^"[^"]*"|^'[^']*'/, type: "regexp"}, ")",
+     {token: /^[;]*$/, type: "regexp"}],
      null,
-    [{token: "display", type: "terminal"}, "(", varNames[2], ")", {token: /^[;]*$/, type: "regexp"}]
+    [{token: "display", type: "terminal"}, "(", varNames[3], ")", {token: /^[;]*$/, type: "regexp"}]
   ];
 
-  patternArrs.forEach((patternArr, index) => index !== 2 && blockTemplates[index].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
+  patternArrs.forEach((patternArr, index) => index !== 3 && blockTemplates[index].addPossibleMatch(patternArr, errorFeedbackArr.slice(0, patternArr.length)));
 
   blockTemplates.forEach(blockTemplate => blockTemplate.addToBlocks());
 
@@ -186,7 +193,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   codeBlocks.slice(0, codeBlocks.length-1)
     .forEach((block, index) => setNextBlock(block, codeBlocks[index+1]));
   const useLanguageObj = (T2C.MSG.currentLanguage === T2C.MSG.PY) ? T2C.MSG.PY : T2C.MSG.JS;
-  codeBlocks.forEach((block, index) => index !== 2 && block.setFieldValue(
+  codeBlocks.forEach((block, index) => index !== 3 && block.setFieldValue(
     patternArrs[index].slice(0, patternArrs[index].length-1)
     .map(patternPart => patternPart.type === "terminal" ? useLanguageObj["TERMINAL_" + patternPart.token.toUpperCase()] : 
       (patternPart.type === "regexp" ? promptStrings[index] : patternPart)).join(""),
@@ -205,7 +212,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         isComplete: () => true,
         animate: () => true,
         finish: () => {
-          alert("In progress: ADAPTED FROM SLEEP IN (http://codingbat.com/prob/p173401): The parameter " + varNames[0] + " is true if it is a weekday, and the parameter " + varNames[1] + " is true if we are on vacation. We can sleep in if it is not a weekday or we're on vacation.  Write a line of code to set " + varNames[2] + " so that the computer displays true exactly when we can sleep in.")
+          alert("In progress: 3 Letters: Exactly One.  Write a line of code to set " + varNames[3] + " so that the computer displays true exactly when one of " + varNames[0] + ", " + varNames[1] + ", " + varNames[2] + " is true.")
         }
       }
     )
@@ -223,7 +230,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         .every((block, index) => block.type === blockNames[index] && blockTemplates[index].hasFullMatch(block.getFieldValue("EXP"), false));
     },
     () => {
-      return "Using the truth table, set " + varNames[2] + " to the appropriate Boolean expression in terms of " + varNames[0] + " and " + varNames[1] + ".";
+      return "Using the truth table, set " + varNames[3] + " to the appropriate Boolean expression in terms of " + varNames[0] + ", " + varNames[1] + ", and " + varNames[2] + ".";
     },
     () => {
       for(let lineNumber = 0; lineNumber < blockNames.length; lineNumber++) {
@@ -242,7 +249,7 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     helpMsgManager, 
     citf, 
     () => {
-      alert("✔✔✔ Congratulations!  You just completed Mission 14!  In the next mission, we continue with another Boolean problem.  (When does our pair of monkeys smile?)  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
+      alert("✔✔✔ Congratulations!  You just completed Mission 18!  In the next mission, we continue with another Boolean problem but this time with some inequalities that evaluate to true or false.  Kyaa aap taiyaar hain? (Are you ready?)  As in the last mission, if you want to save the blocks from this mission, use the XML.  Until next time, phir milenge (See you again)!");
     },
     d
   );
