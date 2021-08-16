@@ -196,16 +196,18 @@ class Match {
    */
   static getSequentialMatchResult_(item, matchBlueprint) {
     let matchResultArr = [];
-    let matchResult = {match: null, remaining: item, hasError: false, 
-        isMatchComplete: true};
+    let matchResult = [{match: null, remaining: item, hasError: false,
+        isMatchComplete: true}];
     let i = -1;
 
-    while (i < matchBlueprint.length-1 && matchResult.remaining && 
-        !matchResult.hasError && matchResult.isMatchComplete) {
+    while (i < matchBlueprint.length-1 &&
+        matchResult[matchResult.length-1].remaining &&
+        !matchResult[matchResult.length-1].hasError &&
+        matchResult[matchResult.length-1].isMatchComplete) {
       ++i;
-      const remaining = matchResult.remaining;
-      matchResult = Match.getMatchResult(remaining, matchBlueprint[i])[0];
-      matchResultArr.push(matchResult);
+      const remaining = matchResult[matchResult.length-1].remaining;
+      matchResult = Match.getMatchResult(remaining, matchBlueprint[i]);
+      matchResultArr.push(...matchResult);
     }
 
     // add matches for regex that match empty strings
@@ -246,7 +248,8 @@ class Match {
         id: matchBlueprint.id,
         match: item,
         length: matchResult.length+1,
-        remaining: null,
+        remaining: matchResult.length > 0 ?
+            matchResult[matchResult.length-1].remaining : null,
         isMatchComplete: false,
         hasError: matchResult.some(match => match.hasError)
       }].concat(matchResult);
@@ -417,6 +420,7 @@ class Match {
       const bestMatchWithIndex = 
           Match.getBestMatchWithIndex_(item, matchBlueprint.value,
           matchBlueprint.comparer);
+      // console.error("BEST MATCH WITH INDEX", bestMatchWithIndex);
       if(bestMatchWithIndex.matchArr.filter(matchObj => matchObj.match != null)
           .length > 0) {
         return [{
@@ -520,8 +524,10 @@ class Match {
   }
 
   static getNonEmptyMatchLength_(matchArr) {
-    return matchArr.filter(matchObj => matchObj.match != null &&
-        matchObj.match != '');
+    const nonemptyMatchArr = matchArr.filter(matchObj =>
+        matchObj.match != null && matchObj.match != '');
+    // console.error("MATCH ARRAY CHOICE", nonemptyMatchArr);
+    return nonemptyMatchArr.length;
   }
 
   /**
@@ -538,12 +544,12 @@ class Match {
       //matchComparer : (a, b) => this.totalLength(a) > this.totalLength(b);
       matchComparer : 
       (a, b) => {
-        return //a.match != null && b.match == null || 
-          Match.getNonEmptyMatchLength_(a) > Match.getNonEmptyMatchLength_(b)
+        //return //a.match != null && b.match == null || 
+        return (Match.getNonEmptyMatchLength_(a) >
+            Match.getNonEmptyMatchLength_(b)) || !a.hasError && b.hasError;
         //Match.recursiveTotalMatches_(a) > Match.recursiveTotalMatches_(b) || 
-        !a.hasError && b.hasError;
-      }
-    
+      };
+
     const result = matchBlueprintArr.reduce(
         (bestMatch, matchBlueprintItem, index) => {
       const currentMatch = Match.getMatchResult(item, matchBlueprintItem);
