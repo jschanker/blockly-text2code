@@ -211,7 +211,8 @@ class Match {
     }
 
     // add matches for regex that match empty strings
-    if (!matchResult.remaining && matchResult.isMatchComplete) {
+    if (!matchResult[matchResult.length-1].remaining &&
+        matchResult[matchResult.length-1].isMatchComplete) {
       while (i < matchBlueprint.length-1 && matchBlueprint[++i] &&
           matchBlueprint[i].type === 'regexp' && 
           matchBlueprint[i].token.test('')) {
@@ -220,7 +221,8 @@ class Match {
       }
     }
 
-    // console.error("Sequential Match Result", matchResultArr);
+     // console.error('Sequential Match Result', matchResultArr, i,
+     //    matchBlueprint);
 
     return [{
       id: matchBlueprint.id,
@@ -228,7 +230,8 @@ class Match {
       type: matchBlueprint.type,
       length: matchResultArr.length+1,
       remaining: null,
-      isMatchComplete: matchBlueprint.length === matchResultArr.length &&
+      //isMatchComplete: matchBlueprint.length === matchResultArr.length &&
+      isMatchComplete: (i === matchBlueprint.length - 1) &&
           matchResultArr.every(match => match.isMatchComplete),
       hasError: matchResultArr.some(match => match.hasError)
     }].concat(matchResultArr);
@@ -250,7 +253,8 @@ class Match {
         length: matchResult.length+1,
         remaining: matchResult.length > 0 ?
             matchResult[matchResult.length-1].remaining : null,
-        isMatchComplete: false,
+        isMatchComplete: matchResult.every(matchItem => matchItem
+            .isMatchComplete),
         hasError: matchResult.some(match => match.hasError)
       }].concat(matchResult);
     } else if (matchBlueprint.type === 'block') {
@@ -275,7 +279,8 @@ class Match {
               match: item,
               length: matchResult.length+1,
               remaining: null,
-              isMatchComplete: true,
+              isMatchComplete: matchResult.every(matchItem => matchItem
+                  .isMatchComplete),
               hasError: false
             }
         ].concat(matchResult);
@@ -462,7 +467,8 @@ class Match {
           type: matchBlueprint.type,
           length: flattenedResultMatchArr.length+1,
           remaining: null,
-          isMatchComplete: resultMatchArr.every(match => match.isMatchComplete),
+          isMatchComplete: flattenedResultMatchArr
+              .every(match => match.isMatchComplete),
           hasError: resultMatchArr.some(match => match.hasError)
         }].concat(flattenedResultMatchArr);
     } else if (matchBlueprint.type === "regexp") {
