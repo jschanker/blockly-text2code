@@ -198,12 +198,49 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
       });
       this.onchange = Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_EXTENSION
           .bind(this);
+      this.setInitialMaxInstances();
     },
     setMatchBlueprint: function(matchBlueprint) {
       this.matchBlueprint = matchBlueprint;
     },
     setTextMatch: function(textMatch) {
       this.textMatch = textMatch;
+    },
+    setInitialMaxInstances: function() {
+      this.initialMaxInstances = {};
+      if (this.workspace.options && this.workspace.options.maxInstances) {
+        const maxInstances = this.workspace.options.maxInstances;
+        Object.keys(maxInstances).forEach(blockType => {
+          this.initialMaxInstances[blockType] = maxInstances[blockType];
+        });
+      }
+    },
+    // block should keep track of max blocks for creating its mutator toolbox
+    setCurrentMaxInstances: function(match) {
+      const currentMaxInstances = {};
+      this.initialMaxInstances = this.initialMaxInstances || {};
+      Object.keys(this.initialMaxInstances).forEach(blockType => {
+        currentMaxInstances[blockType] = this.initialMaxInstances[blockType];
+      });
+
+      if(!match) {
+        this.currentMaxInstances = this.currentMaxInstances || {};
+        Object.keys(this.currentMaxInstances).forEach(blockType => {
+          if(!currentMaxInstances[blockType]) {
+            currentMaxInstances[blockType] = 0;
+          }
+        });
+        this.currentMaxInstances = currentMaxInstances;
+      } else {
+        Match.getRemainingToolboxBlocks(match, this.currentMaxInstances);
+      }
+
+      return this.currentMaxInstances;
+      /*
+      return match ?
+          Match.getRemainingToolboxBlocks(match, this.currentMaxInstances) :
+          this.currentMaxInstances;
+      */
     }
   };
 
@@ -335,12 +372,21 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           //this.setFieldValue('TEXT', 'MODE'); // hack to toggle text match
           //const textMatch = Match.getMatchResult(this, this.matchBlueprint);
           //this.setFieldValue('BLOCK', 'MODE'); // restore
-          const parseTree = getParseTree(
-              Match.getTextToParseFromMatch(textMatch));
-          if (parseTree) {
-            statementBlock = handleParseTreeToBlocks(parseTree
-                , newBlock(this.workspace, 'text_print'), false);
-            this.matchBlueprint.value.value.textMode = false;
+          const textMatchStr = Match.getTextToParseFromMatch(textMatch);
+          const partialTextMatchStr =
+              Match.getTextToParseFromMatch(textMatch, true);
+          // console.error("Text Match", textMatchStr);
+          const paddedTextMatches = [partialTextMatchStr, textMatchStr]
+              .map(s => [s, s + ')', s + '\'', s + '"', s + '\')', s + '")'])
+              .flat();
+          // console.error("Padded Text Matches", paddedTextMatches);
+          const parseTreeTextMatch = paddedTextMatches.find(paddedTextMatch =>
+              getParseTree(paddedTextMatch));
+          const parseTree = getParseTree(parseTreeTextMatch);
+          // console.error("Parse Tree", parseTree);
+          statementBlock = parseTree ? handleParseTreeToBlocks(parseTree,
+              newBlock(this.workspace, 'text_print'), false) : "";
+          this.matchBlueprint.value.value.textMode = false;
             // duplicated in standard_match_managers
             const blockMatch = Match.getMatchResult(
                 statementBlock,
@@ -352,16 +398,30 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                 }
             );
 
+            this.setCurrentMaxInstances(blockMatch);
+
+
+          if (parseTree) {
             const correctBlocks = blockMatch.filter(matchItem => 
                 matchItem.match instanceof Blockly.Block)
                 .map(matchItem => matchItem.match);
 
+            console.error("Match and blocks", blockMatch, correctBlocks);
+/*
+            correctBlocks.forEach(block => {
+              this.currentMaxInstances[block.type] = 
+                ++this.currentMaxInstances[block.type] || 1;
+            });
+*/
             statementBlock.getDescendants().forEach(block => {
               //if(block.type === 'code_expression') {
               //  block.dispose(false);
               //}
-              if(correctBlocks.indexOf(block) === -1) {
+              if (correctBlocks.indexOf(block) === -1) {
                 block.dispose(true);
+              } else {
+                this.currentMaxInstances[block.type] = 
+                    ++this.currentMaxInstances[block.type] || 1;                
               }
             });
             this.workspace.render();
@@ -379,6 +439,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
         }
       } else {
         let s = '';
+        this.setCurrentMaxInstances();
         //this.setFieldValue('BLOCK', 'MODE');
         if (this.getInput('EXP_STATEMENT')) {
           const statementBlock = this.getInputTargetBlock('EXP_STATEMENT');
@@ -412,7 +473,8 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                   }
               );
 
-              s = Match.getTextToParseFromMatch(textMatch);
+              // console.error("Text Match", textMatch);
+              s = Match.getTextToParseFromMatch(textMatch, true);
             }
           }
           this.removeInput("EXP_STATEMENT");

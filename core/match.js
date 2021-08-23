@@ -152,11 +152,14 @@ class Match {
     return maxInstances;
   }
 
-  static getTextToParseFromMatch(textMatchArr) {
+  static getTextToParseFromMatch(textMatchArr, allowPartial=false) {
     return textMatchArr.map(textComponent => {
-      if (typeof textComponent.id !== 'undefined' 
+      /*if (typeof textComponent.id !== 'undefined' 
           && typeof textComponent.match === 'string'
-          && textComponent.isMatchComplete) {
+          && textComponent.isMatchComplete) {*/
+      if ((!textComponent.length || textComponent.length === 1) &&
+          typeof textComponent.match === 'string' &&
+          (textComponent.isMatchComplete || allowPartial)) {
         return textComponent.match;
       } else {
         return '';
