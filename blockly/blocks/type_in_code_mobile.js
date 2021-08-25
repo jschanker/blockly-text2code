@@ -168,7 +168,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
   Blockly.Blocks['code_statement_hybrid'] = {
     init: function() {
       this.jsonInit({
-        "message0": "%1 %2",
+        "message0": "%1 %2 %3",
         "args0": [
           {
             "type": "field_dropdown",
@@ -181,7 +181,11 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           {
             "type": "input_dummy",
             "name": "INPUT_MODE"
-          }
+          },
+          {
+            "type": "field_textinput",
+            "name": "EXP"
+          },
         ]/*,
         "message1": "%1",
         "args1": [{
@@ -199,6 +203,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
       this.onchange = Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_EXTENSION
           .bind(this);
       this.setInitialMaxInstances();
+      this.updateWorkspaceMaxBlocksOnModeChange(true);
     },
     setMatchBlueprint: function(matchBlueprint) {
       this.matchBlueprint = matchBlueprint;
@@ -214,6 +219,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           this.initialMaxInstances[blockType] = maxInstances[blockType];
         });
       }
+      console.error("MY MAX INSTANCES", this.id, this.initialMaxInstances);
     },
     // block should keep track of max blocks for creating its mutator toolbox
     setCurrentMaxInstances: function(match) {
@@ -223,7 +229,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
         currentMaxInstances[blockType] = this.initialMaxInstances[blockType];
       });
 
-      if(!match) {
+      if (!match) {
         this.currentMaxInstances = this.currentMaxInstances || {};
         Object.keys(this.currentMaxInstances).forEach(blockType => {
           if(!currentMaxInstances[blockType]) {
@@ -235,12 +241,41 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
         Match.getRemainingToolboxBlocks(match, this.currentMaxInstances);
       }
 
+      if (this.updateMaxInstances) {
+        this.workspace && 
+            (this.workspace.options || (this.workspace.options = {})) &&
+            (this.workspace.options.maxInstances = this.currentMaxInstances);
+
+        if (this.toolboxManager) {
+          Object.keys(this.currentMaxInstances).forEach(blockType => {
+            if (!this.currentMaxInstances[blockType]) {
+              // console.error("Removing", blockType);
+              this.toolboxManager.removeToolboxBlocksWithType(blockType);
+            } else if (!this.toolboxManager
+                .findToolboxBlockWithType(blockType)) {
+              // console.error("Adding", blockType);
+              this.toolboxManager.createToolboxBlock(blockType, true);
+            }
+          });
+        }
+      }
+
       return this.currentMaxInstances;
       /*
       return match ?
           Match.getRemainingToolboxBlocks(match, this.currentMaxInstances) :
           this.currentMaxInstances;
       */
+    },
+    updateWorkspaceMaxBlocksOnModeChange: function(shouldUpdate) {
+      this.updateMaxInstances = shouldUpdate;
+    },
+    setToolboxManager: function(tbm) {
+      this.toolboxManager = tbm;
+    },
+    isMatchComplete: function() {
+      // temporary hack, should not rely on colour of block for this
+      return this.getColour() === '#008800';
     }
   };
 
@@ -375,14 +410,14 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           const textMatchStr = Match.getTextToParseFromMatch(textMatch);
           const partialTextMatchStr =
               Match.getTextToParseFromMatch(textMatch, true);
-          // console.error("Text Match", textMatchStr);
+          // console.error("Text Match", textMatchStr, typeof textMatchStr);
           const paddedTextMatches = [partialTextMatchStr, textMatchStr]
               .map(s => [s, s + ')', s + '\'', s + '"', s + '\')', s + '")'])
               .flat();
           // console.error("Padded Text Matches", paddedTextMatches);
           const parseTreeTextMatch = paddedTextMatches.find(paddedTextMatch =>
               getParseTree(paddedTextMatch));
-          const parseTree = getParseTree(parseTreeTextMatch);
+          const parseTree = getParseTree(parseTreeTextMatch || '');
           // console.error("Parse Tree", parseTree);
           statementBlock = parseTree ? handleParseTreeToBlocks(parseTree,
               newBlock(this.workspace, 'text_print'), false) : "";
@@ -397,9 +432,6 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                   value: this.matchBlueprint.value.value
                 }
             );
-
-            this.setCurrentMaxInstances(blockMatch);
-
 
           if (parseTree) {
             const correctBlocks = blockMatch.filter(matchItem => 
@@ -426,6 +458,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
             });
             this.workspace.render();
           }
+          this.setCurrentMaxInstances(blockMatch);
           this.getInput('INPUT_MODE').removeField('EXP');
         }
         if (!this.getInput('EXP_STATEMENT')) {
@@ -433,6 +466,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           if (statementBlock && statementBlock.previousConnection) {
             this.getInput('EXP_STATEMENT').connection.connect(
                 statementBlock.previousConnection);
+            // statementBlock.setMovable(false);
           } else if (statementBlock) {
             statementBlock.dispose();
           }
@@ -455,8 +489,9 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
             //    .replace("(?)", "('')");
             if (this.matchBlueprint) {
               // duplicated in standard_match_managers
-              // hack-y to create field here for purpose of matching s
               this.matchBlueprint.value.value.textMode = true;
+              /*
+              // hack-y to create field here for purpose of matching s
               const tempField = new Blockly.Field(s);
               tempField.name = 'TEMP';
               const textMatch = Match.getMatchResult(
@@ -472,9 +507,22 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                     }
                   }
               );
+              */
+              let tryS = s;
+              do {
+                const textMatch = Match.getMatchResult(
+                  s,
+                  {
+                    type: 'component',
+                    name: this.matchBlueprint.value.matchManagerType,
+                    value: this.matchBlueprint.value.value
+                  }
+                );
 
-              // console.error("Text Match", textMatch);
-              s = Match.getTextToParseFromMatch(textMatch, true);
+                console.error("Text Match", textMatch, "S", s, "TRY S", tryS);
+                tryS = Match.getTextToParseFromMatch(textMatch, true);
+                // peel off final characters until match has no errors
+              } while (tryS !== s && (s = s.substring(0, s.length-1)) !== '');
             }
           }
           this.removeInput("EXP_STATEMENT");
@@ -508,6 +556,30 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
     this.getField('MODE').setValidator(function(option) {
       this.getSourceBlock().updateShape_((option === 'BLOCK'));
     });
+
+    if(event.element === 'workspaceClick' || // used version
+        event.targetType === 'workspace') { // current version
+      if (this.isMatchComplete()) {
+        // Convert to statement block, and replace block with this result
+        this.setFieldValue('BLOCK', 'MODE');
+        this.updateShape_(true);
+        const previousBlock = this.getPreviousBlock();
+        const nextBlock = this.getNextBlock();
+        const statementBlock = this.getInputTargetBlock('EXP_STATEMENT');
+        if (statementBlock) {
+          statementBlock.unplug();
+          if (previousBlock && statementBlock.previousConnection) {
+            statementBlock.previousConnection.connect(
+                previousBlock.nextConnection);
+          }
+          if (nextBlock && statementBlock.nextConnection) {
+            statementBlock.nextConnection.connect(
+                nextBlock.previousConnection);
+          }
+        }
+        this.dispose();
+      }
+    }
   }
 
   // Blockly.Extensions.registerMixin('block_text_toggle',

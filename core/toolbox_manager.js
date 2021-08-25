@@ -42,28 +42,28 @@ class ToolboxManager {
 
   createToolboxBlock(blockType, prepend=true) {
     const block = this.createBlockWithType_(blockType);
-    if(prepend) {
-      document.getElementById("toolbox").prepend(block);
+    if (prepend) {
+      document.getElementById('toolbox').prepend(block);
       this.toolboxBlocks_.unshift(block);
     } else {
-      document.getElementById("toolbox").append(block);
+      document.getElementById('toolbox').append(block);
       this.toolboxBlocks_.push(block);
     }
     //if(update)
-    this.workspace_.updateToolbox(document.getElementById("toolbox"));
+    this.workspace_.updateToolbox(document.getElementById('toolbox'));
     return block;
   }
 
   setToolboxBlockFieldValue(block, fieldName, fieldValue) {
-    const field = document.createElement("field");
-    field.setAttribute("name", fieldName);
+    const field = document.createElement('field');
+    field.setAttribute('name', fieldName);
     field.appendChild(document.createTextNode(fieldValue));
     block.appendChild(field);
   }
 
   setToolboxBlockInputValue(block, inputName, inputValueBlock) {
-    const inputVal = document.createElement("value");
-    inputVal.setAttribute("name", inputName)
+    const inputVal = document.createElement('value');
+    inputVal.setAttribute('name', inputName)
     inputVal.appendChild(inputValueBlock);
     block.appendChild(inputVal);
   }
@@ -72,13 +72,29 @@ class ToolboxManager {
     const removeBlockBooleans = this.toolboxBlocks_.map(conditionFunc);
     const blocksToRemove = this.toolboxBlocks_.filter(conditionFunc);
     removeBlockBooleans.forEach((doRemove, index) => {
-      if(doRemove) this.toolboxBlocks_[index].remove();
+      if (doRemove) {
+        this.toolboxBlocks_[index].remove();
+      }
     });
     this.toolboxBlocks_ = 
       this.toolboxBlocks_.filter((_, index) => !removeBlockBooleans[index]);
-    this.workspace_.updateToolbox(document.getElementById("toolbox"));
-    console.log("Removing blocks", blocksToRemove);
+    this.workspace_.updateToolbox(document.getElementById('toolbox'));
+    console.log('Removing blocks', blocksToRemove);
     return blocksToRemove;
+  }
+
+  removeToolboxBlocksWithType(blockType) {
+    return this.removeToolboxBlocks(block =>
+        block.getAttribute('type') === blockType);
+  }
+
+  findToolboxBlock(conditionFunc) {
+    return this.toolboxBlocks_.find(conditionFunc);
+  }
+
+  findToolboxBlockWithType(blockType) {
+    return this.findToolboxBlock(block =>
+        block.getAttribute('type') === blockType);
   }
 }
 

@@ -239,7 +239,10 @@ class FeedbackManager {
 			} else {
 				//block.getCommentIcon() && block.getCommentIcon().setVisible(false);
 				block.setCommentText('');
-				block.setCommentText(null); // hide feedback error
+        // Handle removal of question mark icon after alignment bug is fixed
+        // if (!block.isSelected()) {
+				//  block.setCommentText(null); // hide feedback error
+        // }
 			}
 		})
 	}
