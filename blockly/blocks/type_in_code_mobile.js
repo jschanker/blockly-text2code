@@ -179,13 +179,13 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
             ]
           },
           {
-            "type": "input_dummy",
-            "name": "INPUT_MODE"
+            "type": "field_input",
+            "name": 'EXP'
           },
           {
-            "type": "field_textinput",
-            "name": "EXP"
-          },
+            "type": "input_dummy",
+            "name": "INPUT_MODE"
+          }
         ]/*,
         "message1": "%1",
         "args1": [{
@@ -219,7 +219,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           this.initialMaxInstances[blockType] = maxInstances[blockType];
         });
       }
-      console.error("MY MAX INSTANCES", this.id, this.initialMaxInstances);
+      console.warn("MY MAX INSTANCES", this.id, this.initialMaxInstances);
     },
     // block should keep track of max blocks for creating its mutator toolbox
     setCurrentMaxInstances: function(match) {
@@ -382,7 +382,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
      * @private
      * @this {Blockly.Block}
      */
-    updateShape_: function(blockMode) {    
+    updateShape_: function(blockMode) {
       if(blockMode === 'true' || blockMode === true) {
         //this.setFieldValue("TEXT", "MODE");
         let statementBlock;
@@ -438,7 +438,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                 matchItem.match instanceof Blockly.Block)
                 .map(matchItem => matchItem.match);
 
-            console.error("Match and blocks", blockMatch, correctBlocks);
+            console.warn("Match and blocks", blockMatch, correctBlocks);
 /*
             correctBlocks.forEach(block => {
               this.currentMaxInstances[block.type] = 
@@ -459,6 +459,9 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
             this.workspace.render();
           }
           this.setCurrentMaxInstances(blockMatch);
+        }
+        if(this.getField('EXP')) {
+          // mode switched but, for no match blueprint yet
           this.getInput('INPUT_MODE').removeField('EXP');
         }
         if (!this.getInput('EXP_STATEMENT')) {
@@ -519,20 +522,20 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                   }
                 );
 
-                console.error("Text Match", textMatch, "S", s, "TRY S", tryS);
+                console.warn('Text Match', textMatch, 'S', s, 'TRY S', tryS);
                 tryS = Match.getTextToParseFromMatch(textMatch, true);
                 // peel off final characters until match has no errors
               } while (tryS !== s && (s = s.substring(0, s.length-1)) !== '');
             }
           }
-          this.removeInput("EXP_STATEMENT");
+          this.removeInput('EXP_STATEMENT');
         }
-        if(!this.getField("EXP")) {
-          this.getInput("INPUT_MODE")
+        if(!this.getField('EXP')) {
+          this.getInput('INPUT_MODE')
               .appendField(new Blockly.FieldTextInput(s/*.split("\n")
               .filter(line => !line.startsWith('//')).join('\n')*/, () => {
 
-              }), "EXP");
+              }), 'EXP');
         }
       }
     }
@@ -551,6 +554,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
        event.type === 'bubble_open' && !event.isOpen) { // current version
       this.setFieldValue('TEXT', 'MODE');
       this.updateShape_(false);
+      // console.error('SHOULD NOT REACH THIS NOW!');
       //console.error(this.getInputTargetBlock('EXP_STATEMENT').toString());
     }
     this.getField('MODE').setValidator(function(option) {
@@ -578,6 +582,26 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           }
         }
         this.dispose();
+      } else if (this.getFieldValue('MODE') === 'TEXT' &&
+          this.matchBlueprint && this.getField('EXP')) {
+          let s = this.getFieldValue('EXP') || '';
+          let tryS = s;
+          do {
+            const textMatch = Match.getMatchResult(
+                s,
+                {
+                  type: 'component',
+                  name: this.matchBlueprint.value.matchManagerType,
+                  value: this.matchBlueprint.value.value
+                }
+            );
+
+            console.warn('Text Match', textMatch, 'S', s, 'TRY S', tryS);
+            tryS = Match.getTextToParseFromMatch(textMatch, true);
+            // peel off final characters until match has no errors
+          } while (tryS !== s && (s = s.substring(0, s.length-1)) !== '');
+
+        this.setFieldValue(s, 'EXP');
       }
     }
   }
