@@ -1,3 +1,5 @@
+// import './standard_match_managers.js';
+
 /**
  * Copyright 2021 Text2Code Authors
  * https://github.com/jschanker/blockly-text2code
@@ -429,28 +431,17 @@ class Match {
           Match.getBestMatchWithIndex_(item, matchBlueprint.value,
           matchBlueprint.comparer);
       // console.error("BEST MATCH WITH INDEX", bestMatchWithIndex);
-      if(bestMatchWithIndex.matchArr.filter(matchObj => matchObj.match != null)
-          .length > 0) {
-        return [{
-          id: matchBlueprint.id,
-          match: bestMatchWithIndex.pattern,
-          index: bestMatchWithIndex.index,
-          length: bestMatchWithIndex.matchArr.length + 1,
-          remaining: null,
-          hasError: false,
-          isMatchComplete: true
-        }].concat(bestMatchWithIndex.matchArr)
-      } else {
-        return [{
-          id: matchBlueprint.id,
-          match: null,
-          length: 0,
-          remaining: item,
-          hasError: item != null,
-          isMatchComplete: false
-        }]
-      }
-    } else if(matchBlueprint.type === 'Array') {
+      const bestMatchArr = bestMatchWithIndex.matchArr;
+      return [{
+        id: matchBlueprint.id,
+        match: bestMatchWithIndex.pattern,
+        index: bestMatchWithIndex.index,
+        length: bestMatchWithIndex.matchArr.length + 1,
+        remaining: null,
+        hasError: bestMatchArr.some(matchItem => matchItem.hasError),
+        isMatchComplete: true
+      }].concat(bestMatchWithIndex.matchArr);
+    } else if (matchBlueprint.type === 'Array') {
       if(typeof item === 'string') {
         return Match.getSequentialMatchResult_(item, matchBlueprint.value);
       }
@@ -569,8 +560,7 @@ class Match {
           matchArr: currentMatch,
         } : 
         bestMatch;
-    }, [{index: -1, match: null, pattern: {}, hasError: true,
-        remaining: null}]);
+    }, {index: -1, matchArr: [], pattern: {}});
 
     return result;
   }

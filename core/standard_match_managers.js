@@ -9,11 +9,13 @@ T2C.MatchManagers['string_literal'] = {
         partial: true}; 
     const textTokenSingleQuotes = typeof options.exactText !== 'undefined' ?
         exactTextToken :
-        {id: 20, type: 'regexp', postfix: true, tokenPartial: /^[^']*$/,
+        {id: 'string_literal_include_text_single', type: 'regexp',
+        postfix: true, tokenPartial: /^[^']*$/,
         token: new RegExp("^[^']*" + includeText + "[^']*", 'i')};
     const textTokenDoubleQuotes = typeof options.exactText !== 'undefined' ?
         exactTextToken :
-        {id: 20, type: 'regexp', tokenPartial: /^[^"]*$/,
+        {id: 'string_literal_include_text_double', type: 'regexp',
+        postfix: true, tokenPartial: /^[^"]*$/,
         token: new RegExp('^[^"]*' + includeText + '[^"]*', 'i')};
 
     if (options.textMode) {
@@ -26,17 +28,21 @@ T2C.MatchManagers['string_literal'] = {
               {
                 type: 'Array',
                 value: [
-                  {id: 19, type: 'exact', value: "'", postfix: true},
-                  textTokenSingleQuotes,
-                  {id: 21, type: 'exact', value: "'", postfix: true}
+                  {id: 'string_literal_open_double', type: 'exact', value: '"',
+                      postfix: true},
+                  textTokenDoubleQuotes,
+                  {id: 'string_literal_close_double', type: 'exact',
+                      value: '"', postfix: true},
                 ]
               },
               {
                 type: 'Array',
                 value: [
-                  {id: 19, type: 'exact', value: '"', postfix: true},
-                  textTokenDoubleQuotes,
-                  {id: 21, type: 'exact', value: '"', postfix: true}
+                  {id: 'string_literal_open_single', type: 'exact', value: "'",
+                      postfix: true},
+                  textTokenSingleQuotes,
+                  {id: 'string_literal_close_single', type: 'exact',
+                      value: "'", postfix: true},
                 ]
               }
             ]
@@ -48,6 +54,28 @@ T2C.MatchManagers['string_literal'] = {
       const match = Match.getMatchResult(
           item,
           {
+            id: 'string_literal_block',
+            type: 'block',
+            value: {
+              id: 'string_literal_block_value',
+              type: 'text',
+              inputs: [],
+              fields: [
+                {
+                  id: 'string_literal_field',
+                  type: 'field',
+                  name: 'TEXT',
+                  value: {
+                    id: 'string_literal_block_include_text',
+                    type: 'includes',
+                    value: includeText
+                  }
+                }
+              ]
+            }
+          });
+          /*
+          {
             id: 18,
             type: 'or',
             value: [
@@ -55,12 +83,13 @@ T2C.MatchManagers['string_literal'] = {
               textTokenDoubleQuotes
             ]
           }
-        );
+          
+        );*/
       // console.error("STRING LITERAL MATCH", match);
       return match;
     }
   }
-}
+};
 
 T2C.MatchManagers['prompt_store_input'] = {
   getMatchResult: (item, options) => {
@@ -81,7 +110,6 @@ T2C.MatchManagers['prompt_store_input'] = {
     //    type: "regexp"};
 
     if (options.textMode) {
-      console.error("TM", item);
     	const match = Match.getMatchResult(
     		  item,
     	    {
@@ -132,6 +160,15 @@ T2C.MatchManagers['prompt_store_input'] = {
                         id: 3,
     	  		  			  	type: 'input',
     	  		  			  	name: 'TEXT',
+                        value: {
+                          type: 'component',
+                          name: 'string_literal',
+                          value: {
+                            includeText,
+                            textMode: false
+                          }
+                        }
+                        /*
     	  		  			  	value: {
                           id: 4,
     	  		  			  		type: 'block',
@@ -152,7 +189,7 @@ T2C.MatchManagers['prompt_store_input'] = {
     	  		  			  			  }
     	  		  			  			]
     	  		  			  		}
-    	  		  			  	}
+    	  		  			  	}*/
     	  		  			  }
     	  		  			],
     	  		  			fields: []
@@ -186,7 +223,7 @@ T2C.MatchManagers['code_statement_hybrid'] = {
     const value = options.value;
     // console.error("ITEM", item.type, item.getFieldValue('MODE'));
     //if(item.type === 'text_block_code_hybrid') {
-    if(item.type === 'code_statement_hybrid') {
+    // if(item.type === 'code_statement_hybrid') {
       const textMode = item.getFieldValue('MODE') === 'TEXT';
       value.textMode = textMode;
       //if(item.getFieldValue('MODE') === 'BLOCK') {
@@ -232,6 +269,6 @@ T2C.MatchManagers['code_statement_hybrid'] = {
         )        
       }
     }
-  }
+  // }
 };
 // export default T2C.MatchManagers;

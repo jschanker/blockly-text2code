@@ -23,6 +23,7 @@
 import {parseAndConvertToBlocks, getParseTree, handleParseTreeToBlocks} from
     '../../core/mobile.js';
 import Match from '../../core/match.js';
+import FeedbackManager from '../../core/feedback_manager.js';
 import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
 
 (function() {
@@ -211,6 +212,12 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
     setTextMatch: function(textMatch) {
       this.textMatch = textMatch;
     },
+    setTextFeedbackManager: function(feedbackManager) {
+      this.feedbackManagerText = feedbackManager;
+    },
+    setBlockFeedbackManager: function(feedbackManager) {
+      this.feedbackManagerBlock = feedbackManager;
+    },
     setInitialMaxInstances: function() {
       this.initialMaxInstances = {};
       if (this.workspace.options && this.workspace.options.maxInstances) {
@@ -225,12 +232,14 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
     setCurrentMaxInstances: function(match) {
       const currentMaxInstances = {};
       this.initialMaxInstances = this.initialMaxInstances || {};
+      this.currentMaxInstances = this.currentMaxInstances || {}; // added here
       Object.keys(this.initialMaxInstances).forEach(blockType => {
         currentMaxInstances[blockType] = this.initialMaxInstances[blockType];
       });
 
       if (!match) {
-        this.currentMaxInstances = this.currentMaxInstances || {};
+        // removed here
+        // this.currentMaxInstances = this.currentMaxInstances || {};
         Object.keys(this.currentMaxInstances).forEach(blockType => {
           if(!currentMaxInstances[blockType]) {
             currentMaxInstances[blockType] = 0;
@@ -434,6 +443,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
             );
 
           if (parseTree) {
+            this.setCurrentMaxInstances(blockMatch);
             const correctBlocks = blockMatch.filter(matchItem => 
                 matchItem.match instanceof Blockly.Block)
                 .map(matchItem => matchItem.match);
@@ -458,7 +468,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
             });
             this.workspace.render();
           }
-          this.setCurrentMaxInstances(blockMatch);
+          // this.setCurrentMaxInstances(blockMatch);
         }
         if(this.getField('EXP')) {
           // mode switched but, for no match blueprint yet
@@ -604,7 +614,23 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
         this.setFieldValue(s, 'EXP');
       }
     }
-  }
+
+    // TODO: The below feedback generation, this method in general, AND 
+    //     updateShape_ are in desperate need of refactoring!
+    if (this.matchBlueprint) {
+      const match = Match.getMatchResult(this, this.matchBlueprint);
+      if (this.getFieldValue('MODE') === 'TEXT' && this.feedbackManagerText) {
+        FeedbackManager.displayFeedback(match,
+            T2C.FeedbackManagers['code_statement_hybrid'].feedbackJsonBlock,
+            this.feedbackManagerText);
+      } else if (this.getFieldValue('MODE') === 'BLOCK' &&
+          this.feedbackManagerBlock) {
+        FeedbackManager.displayFeedback(match,
+            this.feedbackManagerBlock.feedbackManager,
+            this.feedbackManagerBlock);
+      }
+    }
+  };
 
   // Blockly.Extensions.registerMixin('block_text_toggle',
   //     Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_MIXIN,

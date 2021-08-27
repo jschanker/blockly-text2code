@@ -278,4 +278,4 @@ class FeedbackManager {
 	}
 }
 
-// export default FeedbackManager;
+export default FeedbackManager;
