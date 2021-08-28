@@ -29,10 +29,10 @@ import FeedbackManager from '../core/feedback_manager.js';
  * Class to handle creation of feedback blocks
  */
 class FeedbackBlockFactory {
-  static createBlock(name, matchBlueprint, feedbackManagerText,
+  static createBlock(blockType, matchBlueprint, feedbackManagerText,
   	  feedbackManagerBlock, options={}) {
     const block = {};
-    const blockTemplate = Blockly.Blocks['code_statement_hybrid'];
+    const blockTemplate = Blockly.Blocks.code_statement_hybrid;
     Object.keys(blockTemplate).forEach(key => {
       block[key] = blockTemplate[key]; 
     });
@@ -65,9 +65,14 @@ class FeedbackBlockFactory {
         }
       }
       */
+      // This should be outside init so it's not initialized every time
+      //     an instance of the block is created, but leaving it here means
+      //     language generators can be imported after.
+      ['Python', 'JavaScript'].forEach(language => Blockly[language][blockType]
+        = Blockly[language].code_statement_hybrid);
     }
 
-  	return (Blockly.Blocks[name] = block);
+  	return (Blockly.Blocks[blockType] = block);
   }
 }
 
