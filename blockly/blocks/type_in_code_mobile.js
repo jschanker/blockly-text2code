@@ -219,8 +219,12 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
       this.feedbackManagerBlock = feedbackManager;
     },
     setInitialMaxInstances: function() {
+      console.assert(!this.initialMaxInstances,
+          'Initial max instances for ' + this.toString() + ' already set.');
       this.initialMaxInstances = {};
       if (this.workspace.options && this.workspace.options.maxInstances) {
+        // Make copy of workspace initialMaxInstances and store in
+        //     this.initialMaxInstances.
         const maxInstances = this.workspace.options.maxInstances;
         Object.keys(maxInstances).forEach(blockType => {
           this.initialMaxInstances[blockType] = maxInstances[blockType];
@@ -228,8 +232,11 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
       }
       console.warn("MY MAX INSTANCES", this.id, this.initialMaxInstances);
     },
-    // block should keep track of max blocks for creating its mutator toolbox
+    // Block should keep track of max blocks for creating its mutator toolbox.
     setCurrentMaxInstances: function(match) {
+      console.assert(this.initialMaxInstances,
+          'Attempting to set current max instances for ' + this.toString() +
+          ' before initializing its max instances.');
       const currentMaxInstances = {};
       this.initialMaxInstances = this.initialMaxInstances || {};
       this.currentMaxInstances = this.currentMaxInstances || {}; // added here
@@ -237,18 +244,32 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
         currentMaxInstances[blockType] = this.initialMaxInstances[blockType];
       });
 
-      if (!match) {
-        // removed here
-        // this.currentMaxInstances = this.currentMaxInstances || {};
-        Object.keys(this.currentMaxInstances).forEach(blockType => {
-          if(!currentMaxInstances[blockType]) {
-            currentMaxInstances[blockType] = 0;
+      if (match) {
+        Match.getMaxInstancesFromMatch(match, currentMaxInstances);
+      }
+
+      Object.keys(this.currentMaxInstances).forEach(blockType => {
+        // Removed from use by switching from block to text modes so set its
+        //     max instances to 0.
+        if (!currentMaxInstances[blockType]) {
+          currentMaxInstances[blockType] = 0;
+        }
+      });
+
+      // Fix the below as this reverts to 0
+      // Update blocks with max instances added later
+      /*
+      if(this.workspace.options && this.workspace.options.maxInstances) {
+        Object.keys(this.workspace.options.maxInstances).forEach(blockType => {
+          if (typeof currentMaxInstances[blockType] === 'undefined') {
+            currentMaxInstances[blockType] =
+                this.workspace.options.maxInstances[blockType];
           }
         });
-        this.currentMaxInstances = currentMaxInstances;
-      } else {
-        Match.getRemainingToolboxBlocks(match, this.currentMaxInstances);
       }
+      */
+
+      this.currentMaxInstances = currentMaxInstances;
 
       if (this.updateMaxInstances) {
         this.workspace && 
@@ -259,11 +280,11 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
           Object.keys(this.currentMaxInstances).forEach(blockType => {
             if (!this.currentMaxInstances[blockType]) {
               // console.error("Removing", blockType);
-              this.toolboxManager.removeToolboxBlocksWithType(blockType);
+              // this.toolboxManager.removeToolboxBlocksWithType(blockType);
             } else if (!this.toolboxManager
                 .findToolboxBlockWithType(blockType)) {
               // console.error("Adding", blockType);
-              this.toolboxManager.createToolboxBlock(blockType, true);
+              this.toolboxManager.createToolboxBlock(blockType, false);
             }
           });
         }
@@ -442,11 +463,10 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                 }
             );
 
+          this.setCurrentMaxInstances(blockMatch);
+
           if (parseTree) {
-            this.setCurrentMaxInstances(blockMatch);
-            const correctBlocks = blockMatch.filter(matchItem => 
-                matchItem.match instanceof Blockly.Block)
-                .map(matchItem => matchItem.match);
+            const correctBlocks = Match.getCorrectBlocksFromMatch(blockMatch);
 
             console.warn("Match and blocks", blockMatch, correctBlocks);
 /*
@@ -456,19 +476,12 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
             });
 */
             statementBlock.getDescendants().forEach(block => {
-              //if(block.type === 'code_expression') {
-              //  block.dispose(false);
-              //}
               if (correctBlocks.indexOf(block) === -1) {
                 block.dispose(true);
-              } else {
-                this.currentMaxInstances[block.type] = 
-                    ++this.currentMaxInstances[block.type] || 1;                
               }
             });
             this.workspace.render();
           }
-          // this.setCurrentMaxInstances(blockMatch);
         }
         if(this.getField('EXP')) {
           // mode switched but, for no match blueprint yet
@@ -558,6 +571,11 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
    * @this {Blockly.Block}
    */
   Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_EXTENSION = function(event) {
+    // None of this should work from flyout.
+    if (this.workspace.isFlyout) {
+      return;
+    }
+
     // Change to text mode when bubble is closed
     // MUTATOR DIALOG NOT CURRENTLY USED
     if (event.element === 'mutatorOpen' && !event.newValue || // used version
@@ -581,6 +599,15 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
         const nextBlock = this.getNextBlock();
         const statementBlock = this.getInputTargetBlock('EXP_STATEMENT');
         if (statementBlock) {
+          const statementDescendants = statementBlock.getDescendants();
+          statementDescendants.forEach(block => {
+            // Restore original block colors
+            if (block.startColour) {
+              block.setColour(block.startColour);
+            }
+            // Hide comment icons
+            block.setCommentText(null);
+          });
           statementBlock.unplug();
           if (previousBlock && statementBlock.previousConnection) {
             statementBlock.previousConnection.connect(
@@ -591,6 +618,7 @@ import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
                 nextBlock.previousConnection);
           }
         }
+
         this.dispose();
       } else if (this.getFieldValue('MODE') === 'TEXT' &&
           this.matchBlueprint && this.getField('EXP')) {

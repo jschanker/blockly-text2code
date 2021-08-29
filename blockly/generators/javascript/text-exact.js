@@ -27,6 +27,7 @@
 
 (function() {
   var realSubstring = String.prototype.substring;
+  String.prototype.substring_ = realSubstring;
   String.prototype.substring = function(indexStart, indexEnd) {
     if(typeof indexStart !== "number") throw new Error("The starting position of one of the substring/getTextFromPositionNUMBER blocks was not a number; it was " + indexStart);
     if(typeof indexEnd !== "number" && typeof indexEnd !== "undefined") throw new Error("The ending position of one of the substring/getTextFromPositionNUMBER blocks was not a number; it was " + indexEnd);
@@ -42,6 +43,7 @@
     throw new Error("You tried to call substring/getTextFromPositionNUMBER on a number " + this.toString());
   }
   var realIndexOf = String.prototype.indexOf;
+  String.prototype.indexOf_ = realIndexOf;
   String.prototype.indexOf = function(searchValue, fromIndex) {
     if(typeof searchValue !== "string") throw new Error("The item you're searching for for one of the indexOf/positionNumberOfTEXT blocks is not text; it's " + searchValue)
     else return realIndexOf.apply(this, arguments);

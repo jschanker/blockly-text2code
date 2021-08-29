@@ -35,8 +35,8 @@ function codeHybridForLanguage(languageName, isStatement) {
     statementBlock = block.getInputTargetBlock('EXP_STATEMENT');
     if (statementBlock) {
       // remove comments from all descendants to avoid polluting code
-      statementBlock.getDescendants()
-         .forEach(block => block.setCommentText(''));
+      //statementBlock.getDescendants()
+      //   .forEach(block => block.setCommentText(''));
       // temporary fix until problem of issue with variable code is fixed;
       //    this probably has something to do with hack-y removal of vars
       //    from code but unclear why comments are part of code after removed

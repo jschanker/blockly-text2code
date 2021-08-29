@@ -138,6 +138,11 @@ class Match {
           .getBlocksInMatch === 'function') {
         T2C.MatchManagers[blueprint.name].getBlocksInBlueprint(blueprint.value,
             maxInstances);
+      } else {
+        // get entire blueprint from component by using null for item
+        const matchArr = Match.getMatchResult(null, blueprint);
+        console.warn('Component Match', 
+            Match.getRemainingToolboxBlocks(matchArr, maxInstances));
       }
     }
 
@@ -152,6 +157,33 @@ class Match {
     remainingBlueprints.forEach(blueprint => 
         Match.getBlocksInBlueprint(blueprint, maxInstances));
     return maxInstances;
+  }
+
+  static getMaxInstancesFromMatch(matchArr, maxInstances={}) {
+    const correctBlocks = Match.getCorrectBlocksFromMatch(matchArr);
+    Match.getRemainingToolboxBlocks(matchArr, maxInstances);
+    correctBlocks.forEach(block => maxInstances[block.type] = 
+        ++maxInstances[block.type] || 1);
+    /*
+    matchArr.forEach(matchItem => {
+      if (matchItem.match instanceof Blockly.Block && 
+          matchItem.type === 'block') {
+        const blockType = matchItem.match.type;
+        maxInstances[blockType] = ++maxInstances[blockType] || 1;
+      }
+    });
+    */
+  }
+
+  static getCorrectBlockMatchItems(matchArr) {
+    return matchArr.filter(matchItem => 
+        matchItem.match instanceof Blockly.Block &&
+        matchItem.type === 'block');
+  }
+
+  static getCorrectBlocksFromMatch(matchArr) {
+    return Match.getCorrectBlockMatchItems(matchArr)
+        .map(matchItem => matchItem.match);
   }
 
   static getTextToParseFromMatch(textMatchArr, allowPartial=false) {
@@ -284,6 +316,9 @@ class Match {
               match: item,
               length: matchResult.length+1,
               remaining: null,
+              // for identifying single block match items for
+              //     Match.getInstancesFromMatch
+              type: 'block',
               isMatchComplete: matchResult.every(matchItem => matchItem
                   .isMatchComplete),
               hasError: false

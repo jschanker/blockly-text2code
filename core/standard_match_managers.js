@@ -3,6 +3,12 @@ import Match from "./match.js";
 T2C.MatchManagers = {};
 
 T2C.MatchManagers['string_literal'] = {
+  // NOT NEEDED
+  /*
+  getBlocksInBluePrint: (_, maxInstances) => {
+    maxInstances['text'] = ++maxInstances['text'] || 1;
+  },
+  */
   getMatchResult: (item, options) => {
     const includeText = options.includeText || '';
     const exactTextToken = {id: 20, type: 'exact', value: options.exactText,
