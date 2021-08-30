@@ -121,10 +121,10 @@ function convertImportsAndExports(cb) {
 
 function minifyJS(filePath, outputPath, cb) {  
     src(filePath, {base: './'})
-    /*.pipe(babel({
-      //"presets": ["es2015"]
-      "presets": ["@babel/env"]
-    }))*/
+    .pipe(babel({
+      "presets": ["es2015"]
+      //"presets": ["@babel/env"]
+    }))
     .pipe(terser())
     .pipe(dest(outputPath || "./"));
   console.log("JS Files Babelified and compressed");

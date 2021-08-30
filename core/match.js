@@ -515,7 +515,7 @@ class Match {
       let result;
       while (!(result = (usedStartPadding + itemStr)
           .match(matchBlueprint.token)) && usedStartPadding !== startPadding) {
-        startPadding += ' ';
+        usedStartPadding += ' ';
       }
 
       if (!result) {
@@ -525,7 +525,7 @@ class Match {
           while (!(result = (usedStartPadding + itemStr)
               .match(matchBlueprint.tokenPartial)) &&
               usedStartPadding !== startPadding) {
-            startPadding += ' ';
+            usedStartPadding += ' ';
           }
         }
       } else {
