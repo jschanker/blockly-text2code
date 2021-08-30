@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: BlockEvaluator</title>
+	<title>Documentation Class: MatchTemplate</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -33,7 +33,7 @@
 			<li class="dropdown">
 				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="BlinkAnimation.html">BlinkAnimation</a></li><li><a href="BlockBlueprint.html">BlockBlueprint</a></li><li><a href="BlockEvaluator.html">BlockEvaluator</a></li><li><a href="BlockFeedbackManager.html">BlockFeedbackManager</a></li><li><a href="FeedbackBlockFactory.html">FeedbackBlockFactory</a></li><li><a href="FeedbackManager.html">FeedbackManager</a></li><li><a href="FieldFeedbackManager.html">FieldFeedbackManager</a></li><li><a href="GlideAnimation.html">GlideAnimation</a></li><li><a href="HelpMessageDirection.html">HelpMessageDirection</a></li><li><a href="InputFeedbackManager.html">InputFeedbackManager</a></li><li><a href="LevelGenerator.html">LevelGenerator</a></li><li><a href="Match.html">Match</a></li><li><a href="Memoizer.html">Memoizer</a></li><li><a href="MessageConsoleManager.html">MessageConsoleManager</a></li><li><a href="ParallelAnimation.html">ParallelAnimation</a></li><li><a href="ParseForest.html">ParseForest</a></li><li><a href="Parser.html">Parser</a></li><li><a href="ParseTreeBlockConnector.html">ParseTreeBlockConnector</a></li><li><a href="ParseTreeBlockNode.html">ParseTreeBlockNode</a></li><li><a href="ParseTreeRHSidesNode.html">ParseTreeRHSidesNode</a></li><li><a href="SeriesAnimation.html">SeriesAnimation</a></li><li><a href="Tokenizer.html">Tokenizer</a></li>
+					<li><a href="BlinkAnimation.html">BlinkAnimation</a></li><li><a href="BlockBlueprint.html">BlockBlueprint</a></li><li><a href="BlockEvaluator.html">BlockEvaluator</a></li><li><a href="BlockFeedbackManager.html">BlockFeedbackManager</a></li><li><a href="FieldFeedbackManager.html">FieldFeedbackManager</a></li><li><a href="GlideAnimation.html">GlideAnimation</a></li><li><a href="HelpMessageDirection.html">HelpMessageDirection</a></li><li><a href="InputFeedbackManager.html">InputFeedbackManager</a></li><li><a href="LevelGenerator.html">LevelGenerator</a></li><li><a href="MatchTemplate.html">MatchTemplate</a></li><li><a href="Memoizer.html">Memoizer</a></li><li><a href="MessageConsoleManager.html">MessageConsoleManager</a></li><li><a href="ParallelAnimation.html">ParallelAnimation</a></li><li><a href="ParseForest.html">ParseForest</a></li><li><a href="Parser.html">Parser</a></li><li><a href="ParseTreeBlockConnector.html">ParseTreeBlockConnector</a></li><li><a href="ParseTreeBlockNode.html">ParseTreeBlockNode</a></li><li><a href="ParseTreeRHSidesNode.html">ParseTreeRHSidesNode</a></li><li><a href="SeriesAnimation.html">SeriesAnimation</a></li><li><a href="Tokenizer.html">Tokenizer</a></li>
 				</ul>
 			</li>
 			
@@ -72,16 +72,16 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: BlockEvaluator</h1>
+	<h1 class="page-title">Class: MatchTemplate</h1>
 <section>
 
 <header>
     
         <h2>
-        BlockEvaluator
+        MatchTemplate
         </h2>
         
-            <div class="class-description"><p>DESCRIPTION</p></div>
+            <div class="class-description"><p>Class to compare/maintain match results</p></div>
         
     
 </header>
@@ -93,7 +93,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="BlockEvaluator"><span class="type-signature"></span>new BlockEvaluator(blockInterpretations)</h4>
+    <h4 class="name" id="MatchTemplate"><span class="type-signature"></span>new MatchTemplate()</h4>
     
     
 </dt>
@@ -101,8 +101,160 @@
 
     
     <div class="description">
-        <p>constructor</p>
+        <p>Constructs a new template to match Blockly objects with</p>
     </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+            
+<hr>
+<dt class="name" id="block">
+    <h4 id="block"><span class="type-signature"></span>block<span class="type-signature"></span></h4>
+
+    
+</dt>
+<dd>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="addPossibleFeedbackManager"><span class="type-signature"></span>addPossibleFeedbackManager(feedbackManagerArr)</h4>
+    
+    
+</dt>
+<dd>
+
     
 
     
@@ -136,13 +288,13 @@
 
         <tr>
             
-                <td class="name"><code>blockInterpretations</code></td>
+                <td class="name"><code>feedbackManagerArr</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">Array.&lt;(<a href="FieldFeedbackManager.html">FieldFeedbackManager</a>|<a href="InputFeedbackManager.html">InputFeedbackManager</a>)></span>
 
 
 
@@ -217,29 +369,11 @@
     
 </dd>
 
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        <dl>
+        
             
 <hr>
 <dt>
-    <h4 class="name" id="evaluate"><span class="type-signature"></span>evaluate(root)</h4>
+    <h4 class="name" id="getBestMatchWithIndex_"><span class="type-signature"></span>getBestMatchWithIndex_(matchComparer)</h4>
     
     
 </dt>
@@ -247,7 +381,7 @@
 
     
     <div class="description">
-        <p>Creates blueprint for blocks from block parse tree</p>
+        <p>Get best match with index in form {match, index}</p>
     </div>
     
 
@@ -270,6 +404,8 @@
         <th>Type</th>
 
         
+        <th>Argument</th>
+        
 
         
 
@@ -282,13 +418,13 @@
 
         <tr>
             
-                <td class="name"><code>root</code></td>
+                <td class="name"><code>matchComparer</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="ParseTreeBlockNode.html">ParseTreeBlockNode</a></span>
+<span class="param-type">function</span>
 
 
 
@@ -296,10 +432,21 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+                    &lt;nullable><br>
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>the root of the tree to convert to blueprint</p></td>
+            <td class="description last"><p>should return true exactly when the first argument
+is a strictly better match than the second</p></td>
         </tr>
 
     
@@ -363,9 +510,7 @@
     
             
 <div class="param-desc">
-    <p>blueprint object from parse tree: matches form from
-block-interpretation JSON files;
-blueprint formed by replacing each %d with blueprint for corresponding block</p>
+    <p>the best match according to matchComparer with the associated index</p>
 </div>
 
 
@@ -376,10 +521,339 @@ blueprint formed by replacing each %d with blueprint for corresponding block</p>
     </dt>
     <dd>
         
-<span class="param-type"><a href="BlockBlueprint.html">BlockBlueprint</a></span>
+<span class="param-type">Object</span>
 |
 
+<span class="param-type">null</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getErrorFeedback"><span class="type-signature"></span>getErrorFeedback(matchComparer)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Returns error feedback for given block</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>matchComparer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>comparer(a,b)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>the error feedback</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
 <span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="getMatch"><span class="type-signature"></span>getMatch()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id="hasFullMatch"><span class="type-signature"></span>hasFullMatch()</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>returns true if there is at least one match</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>true exactly when all inputs and field values correct according to
+at least one feedbackManager Array</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
 
 
 
@@ -442,7 +916,7 @@ blueprint formed by replacing each %d with blueprint for corresponding block</p>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.5</a>
 	
-		on August 30th 2021, 2:17:09 am
+		on May 16th 2021, 3:55:54 pm
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

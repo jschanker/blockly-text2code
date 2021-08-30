@@ -8,7 +8,12 @@ import ParallelAnimation from "../core/parallel_animation.js";
 import CourseInstructionTaskFlow from "../core/course_instruction_task_flow.js";
 import MessageConsoleManager from "../core/message_console_manager.js";
 import TypeInCodeBlock from "../core/type_in_code_block.js";
+import Match from '../core/match.js';
 import LevelGenerator from "../core/level_generator.js";
+import ToolboxManager from '../core/toolbox_manager.js';
+import FeedbackBlockFactory from '../core/feedback_block_factory.js';
+import '../core/standard_match_managers.js';
+import '../core/standard_feedback_managers.js';
 
 /*
 const helpMsgManager = new MessageConsoleManager();
@@ -188,20 +193,54 @@ function addMoveAndFlashTask(courseInstructionTaskFlow, div) {
 }
 
 export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
+  const missingPhraseFunction = (matchItem, matchArr) => {
+    console.error("MATCH ARR ON MISSING PHRASE", matchArr);
+    // "Include some message in between the quotation marks so that the user sees some text!"
+    const isTextMode = !matchArr.find(item => item.match &&
+        item.match.type === 'text');
+    const actualIncludeText = matchItem.remaining;
+    // matchItem.expected.value;
+    const expectedIncludeText = Match.getExpected(matchItem);
+    if (['\'', '"'].indexOf(actualIncludeText) !== -1) {
+      return 'Include some message in between the quotation marks so that ' +
+          'the user sees some text!';
+    } else if (!actualIncludeText.includes(' ')) {
+      return 'Try writing a message with a space in it.  Remember that ' +
+          'unlike variable names in JavaScript, which can\'t have spaces, ' +
+          'this is a message that will be displayed as is to be read by ' + 
+          'humans.';
+    }
+  };
+
+  const missingQuotationMarks = () => {
+    return 'Make sure the text you want to display is between \" and \" so ' + 
+        'the computer just displays it without trying to figure out what ' + 
+        'you mean!';
+  };
+
   const levelGenerator = new LevelGenerator();
   const helpMsgManager = levelGenerator.createStandardHelpMessageManager();
   const citf = courseInstructionTaskFlow || new CourseInstructionTaskFlow();
-  const workspace = ws || Blockly.getMainWorkspace(); 
+  const workspace = ws || Blockly.getMainWorkspace();
+  const toolboxManager = new ToolboxManager(workspace);
+  toolboxManager.clearToolbox();
+  const initialBlocks = ['text_print', 'text'];
   workspace.clear();
+
+  initialBlocks.forEach(blockType => {
+    toolboxManager.createToolboxBlock(blockType, false);
+    workspace.options.maxInstances[blockType] = 1;
+  });
+  
   //workspace.options.horizontalLayout = true;
-  workspace.options.maxInstances = {text_print: 1, text: 1, type_in_display_string_literal: 1};
+  // workspace.options.maxInstances = {text_print: 1, text: 1, type_in_display_string_literal: 1};
   //workspace.options.maxBlocks = 2;
   //workspace.updateToolbox(document.getElementById("toolbox"));
   workspace.setScale(1);
   refreshWorkspace(workspace);
 
   const toolboxBlocks = Array.from(document.querySelectorAll("rect"))
-    .filter(x => x.getAttribute("fill-opacity"))  
+    .filter(x => x.getAttribute("fill-opacity"))
   const displayBlock = toolboxBlocks[0];
   const textBlock = toolboxBlocks[1];
   console.warn("TEXT", textBlock);
@@ -281,19 +320,49 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     alert("✔ Congratulations! You just created and ran your first program!");
     // restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
     // hideOutputAndCodeContainers();
+    FeedbackBlockFactory.createBlock('level0_display_string_literal_block',
+      {type: 'component', name: 'code_statement_hybrid',
+      value: {matchManagerType: 'display_string_literal', 
+      value: {displayText: ' '}}},
+      {textModeFeedbackManager: T2C.FeedbackManagers[
+      'code_statement_hybrid'].DEFAULT_TEXT_MODE_FEEDBACK_MANAGER,
+      feedbackManager: T2C.FeedbackManagers['display_string_literal'],
+      options: {stringLiteralMissingIncludeTextDouble: missingPhraseFunction,
+      stringLiteralMissingIncludeTextSingle: missingPhraseFunction,
+      stringLiteralMissingOpenDouble: missingQuotationMarks}},
+      
+      {feedbackManager: T2C.FeedbackManagers['display_string_literal']
+      .feedbackJsonBlock, missing_phrase_error_msg:
+      T2C.FeedbackManagers['display_string_literal']
+      .DEFAULT_MISSING_PHRASE_ERROR_MSG,
+      stringLiteralWrongBlock: () => T2C.FeedbackManagers['string_literal']
+      .DEFAULT_WRONG_BLOCK_MSG, stringLiteralMissingIncludeTextBlock:
+      missingPhraseFunction},
+      null
+    );
+    const typeBlock = toolboxManager.createToolboxBlock(
+        'level0_display_string_literal_block', true);
+    workspace.options.maxInstances['level0_display_string_literal_block'] = 1;
+    /*
     const typeBlock = document.createElement("block");
     typeBlock.setAttribute("type", "type_in_display_string_literal");
     document.getElementById("toolbox").prepend(typeBlock);
-    workspace.options.maxInstances["type_in_display_string_literal"] = 1;
-    workspace.updateToolbox(document.getElementById("toolbox"));    
+    workspace.options.maxInstances['level0_display_string_literal_block'] = 1;
+    workspace.updateToolbox(document.getElementById("toolbox"));
+    */
+    workspace.getFlyout().getWorkspace().getAllBlocks().find(block =>
+        block.type === 'level0_display_string_literal_block')
+        .setDeletable(false);
   }, d);
   //addMoveAndFlashTask(citf, document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
 
   citf.addTask(
     new CourseInstructionTask(
-      () => workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print") && 
-        x.getNextBlock() && x.getNextBlock().type === "type_in_display_string_literal" && 
-        !workspace.isDragging()),
+      () => workspace.getAllBlocks().find(x => 
+          (x.type === 'text_print' || x.type === 'js_text_print') &&
+          x.getNextBlock() &&
+          x.getNextBlock().type === 'level0_display_string_literal_block' &&
+          !workspace.isDragging()),
       new ParallelAnimation([
         levelGenerator.createHelpMessageDirections(helpMsgManager,() => "Drag in the type-in-code block so its top groove connects to the point of the bottom of the " + T2C.MSG.currentLanguage.TERMINAL_DISPLAY + " block.", ""),
         new GlideAnimation(d, {
@@ -309,9 +378,13 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
             }
           },
           endPosition: () => {
-            const textBlockWs = workspace.getAllBlocks().find(x => (x.type === "text_print" || x.type === "js_text_print"));
+            const textBlockWs = workspace.getAllBlocks().find(x => 
+                (x.type === 'text_print' || x.type === 'js_text_print'));
             //const coords = textBlockWs.getBoundingRectangle();
-            return getAbsolutePosition(workspace, textBlockWs, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, d.offsetWidth/4,  document.getElementById("top-header").offsetHeight);
+            return getAbsolutePosition(workspace, textBlockWs,
+                {blockOffsetScaleX: 0, blockOffsetScaleY: 1.25},
+                d.offsetWidth/4, document.getElementById('top-header')
+                .offsetHeight);
             /*
             return {       
               x: coords.left + d.offsetWidth/4,
@@ -333,21 +406,22 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       new ParallelAnimation([
         levelGenerator.createHelpMessageDirections(helpMsgManager,
           () => "Type in code matching above block but with different text to display.  I.e., Type\n" + 
-            T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "\"your new message\"") + "\nreplacing your new message with whatever you want to display.  Be exact with parentheses, quotation marks, etc.  Tap off the block when you're done.", 
+            T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "\"your new message\"") + "\nreplacing your new message with whatever you want to display, but be sure to include a space in it!  Be exact with parentheses, quotation marks, etc.  Tap off the block when you're done.", 
           () => {
-            const typeInBlock = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");
+            return 'Click the ? on the blocks to see if there\'s any feedback.';
+            /*const typeInBlock = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");
             if(typeInBlock) {
               return typeInCodeDisplayStringLiteralBlock.getErrorFeedback();
             } else {
               return "";
-            }
+            }*/
           }
         ),
       new BlinkAnimation(d, {
         totalSteps: 200,
         toggleSteps: 50,
         startPosition: () => {
-          const typeInBlock1 = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");
+          const typeInBlock1 = workspace.getAllBlocks().find(x => x.type === "level0_display_string_literal_block");
           // const coords = typeInBlock1.getBoundingRectangle();
           return getAbsolutePosition(workspace, typeInBlock1, {blockOffsetScaleX: 0, blockOffsetScaleY: 1}, 0,  document.getElementById("top-header").offsetHeight);
           /*
@@ -369,7 +443,9 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
       alert("✔ Awesome! You just typed code for and ran your first program!");
       // restoreAfterMoveAndFlashText(document.getElementById("output-container").querySelectorAll(".table-cell")[0]);
       // hideOutputAndCodeContainers();
-      workspace.options.maxInstances["type_in_display_string_literal"] = 0;
+      workspace.options.maxInstances['level0_display_string_literal_block'] = 0;
+      toolboxManager
+          .removeToolboxBlocksWithType('level0_display_string_literal_block');     
       // workspace.updateToolbox(document.getElementById("toolbox"));
       ["variables_get", "variables_set"].forEach(blockType => {
         const typeBlock = document.createElement("block");

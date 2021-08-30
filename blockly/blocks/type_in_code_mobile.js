@@ -20,7 +20,11 @@
  * @author Jason Schanker
  */
 
-import {parseAndConvertToBlocks} from "../../core/mobile.js";
+import {parseAndConvertToBlocks, getParseTree, handleParseTreeToBlocks} from
+    '../../core/mobile.js';
+import Match from '../../core/match.js';
+import FeedbackManager from '../../core/feedback_manager.js';
+import {newBlock, copyBlock} from '../../core/block_utility_functions.js';
 
 (function() {
   function updateAutocomplete(val, optionsArr, fieldArr, filterFunc) {
@@ -161,4 +165,507 @@ import {parseAndConvertToBlocks} from "../../core/mobile.js";
       this.onchange = parseAndConvertToBlocks.bind(this, props);
     }
   };
+
+  Blockly.Blocks['code_statement_hybrid'] = {
+    init: function() {
+      this.jsonInit({
+        "message0": "%1 %2 %3",
+        "args0": [
+          {
+            "type": "field_dropdown",
+            "name": "MODE",
+            "options": [
+              ["Text Mode", 'TEXT'],
+              ["Block Mode", 'BLOCK']
+            ]
+          },
+          {
+            "type": "field_input",
+            "name": 'EXP'
+          },
+          {
+            "type": "input_dummy",
+            "name": "INPUT_MODE"
+          }
+        ]/*,
+        "message1": "%1",
+        "args1": [{
+          "type": "input_statement",
+          "name": "EXP_STATEMENT"
+        }]*/,
+        "inputsInline": true,
+        "tooltip": T2C.MSG.currentLanguage.TYPEIN_EXPRESSION_TOOLTIP,
+        "nextStatement": true,
+        "previousStatement": true,
+        "colour": 60,
+        "mutator": "block_text_toggle",
+        "helpUrl": Blockly.Msg.MATH_ARITHMETIC_HELPURL
+      });
+      this.onchange = Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_EXTENSION
+          .bind(this);
+      this.setInitialMaxInstances();
+      this.updateWorkspaceMaxBlocksOnModeChange(true);
+    },
+    setMatchBlueprint: function(matchBlueprint) {
+      this.matchBlueprint = matchBlueprint;
+    },
+    setTextMatch: function(textMatch) {
+      this.textMatch = textMatch;
+    },
+    setTextFeedbackManager: function(feedbackManager) {
+      this.feedbackManagerText = feedbackManager;
+    },
+    setBlockFeedbackManager: function(feedbackManager) {
+      this.feedbackManagerBlock = feedbackManager;
+    },
+    setInitialMaxInstances: function() {
+      console.assert(!this.initialMaxInstances,
+          'Initial max instances for ' + this.toString() + ' already set.');
+      this.initialMaxInstances = {};
+      if (this.workspace.options && this.workspace.options.maxInstances) {
+        // Make copy of workspace initialMaxInstances and store in
+        //     this.initialMaxInstances.
+        const maxInstances = this.workspace.options.maxInstances;
+        Object.keys(maxInstances).forEach(blockType => {
+          this.initialMaxInstances[blockType] = maxInstances[blockType];
+        });
+      }
+      console.warn("MY MAX INSTANCES", this.id, this.initialMaxInstances);
+    },
+    // Block should keep track of max blocks for creating its mutator toolbox.
+    setCurrentMaxInstances: function(match) {
+      console.assert(this.initialMaxInstances,
+          'Attempting to set current max instances for ' + this.toString() +
+          ' before initializing its max instances.');
+      const currentMaxInstances = {};
+      this.initialMaxInstances = this.initialMaxInstances || {};
+      this.currentMaxInstances = this.currentMaxInstances || {}; // added here
+      Object.keys(this.initialMaxInstances).forEach(blockType => {
+        currentMaxInstances[blockType] = this.initialMaxInstances[blockType];
+      });
+
+      if (match) {
+        Match.getMaxInstancesFromMatch(match, currentMaxInstances);
+      }
+
+      Object.keys(this.currentMaxInstances).forEach(blockType => {
+        // Removed from use by switching from block to text modes so set its
+        //     max instances to 0.
+        if (!currentMaxInstances[blockType]) {
+          currentMaxInstances[blockType] = 0;
+        }
+      });
+
+      // Fix the below as this reverts to 0
+      // Update blocks with max instances added later
+      /*
+      if(this.workspace.options && this.workspace.options.maxInstances) {
+        Object.keys(this.workspace.options.maxInstances).forEach(blockType => {
+          if (typeof currentMaxInstances[blockType] === 'undefined') {
+            currentMaxInstances[blockType] =
+                this.workspace.options.maxInstances[blockType];
+          }
+        });
+      }
+      */
+
+      this.currentMaxInstances = currentMaxInstances;
+
+      if (this.updateMaxInstances) {
+        this.workspace && 
+            (this.workspace.options || (this.workspace.options = {})) &&
+            (this.workspace.options.maxInstances = this.currentMaxInstances);
+
+        if (this.toolboxManager) {
+          Object.keys(this.currentMaxInstances).forEach(blockType => {
+            if (!this.currentMaxInstances[blockType]) {
+              // console.error("Removing", blockType);
+              // this.toolboxManager.removeToolboxBlocksWithType(blockType);
+            } else if (!this.toolboxManager
+                .findToolboxBlockWithType(blockType)) {
+              // console.error("Adding", blockType);
+              this.toolboxManager.createToolboxBlock(blockType, false);
+            }
+          });
+        }
+      }
+
+      return this.currentMaxInstances;
+      /*
+      return match ?
+          Match.getRemainingToolboxBlocks(match, this.currentMaxInstances) :
+          this.currentMaxInstances;
+      */
+    },
+    updateWorkspaceMaxBlocksOnModeChange: function(shouldUpdate) {
+      this.updateMaxInstances = shouldUpdate;
+    },
+    setToolboxManager: function(tbm) {
+      this.toolboxManager = tbm;
+    },
+    isMatchComplete: function() {
+      // temporary hack, should not rely on colour of block for this
+      return this.getColour() === '#008800';
+    }
+  };
+
+  Blockly.Constants.TypeIn = {};
+  Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_MIXIN = {
+    /**
+     * Create XML to represent whether the element is in text or block mode.
+     * @return {!Element} XML storage element.
+     * @this {Blockly.Block}
+     */
+    mutationToDom: function() {
+      const container = Blockly.utils.xml.createElement('mutation');
+      const isBlockMode = (this.getFieldValue('MODE') === 'BLOCK');
+      container.setAttribute('is_block_mode', isBlockMode);
+      return container;
+    },
+    /**
+     * Parse XML to append statement input if in block mode
+     * @param {!Element} xmlElement XML storage element.
+     * @this {Blockly.Block}
+     */
+    domToMutation: function(xmlElement) {
+      this.updateShape_(xmlElement.getAttribute('is_block_mode'));
+    },
+
+    /**
+     * Populate the mutator's dialog with this block's components.
+     * @param {!Blockly.Workspace} workspace Mutator's workspace.
+     * @return {!Blockly.Block} Root block in mutator.
+     * @this {Blockly.Block}
+     */
+  /*
+    decompose: function(workspace) {
+      // placeholder container block here
+      let containerBlock = newBlock(workspace, 'variables_set');
+      // convert text to correct blocks if in text mode & switch to block mode
+      this.updateShape_(true);
+
+      const statementBlock = this.getInputTargetBlock('EXP_STATEMENT');
+      if (statementBlock) {
+        containerBlock.dispose();
+        // containerBlock = copyBlock(statementBlock, true, workspace);
+        containerBlock = Blockly.Xml
+            .domToBlock(Blockly.Xml.blockToDom(statementBlock), workspace);
+      }
+    
+      //const containerBlock = newBlock(workspace, 'code_statement_hybrid');
+      this.updateShape_(true);
+
+      containerBlock.setPreviousStatement(false);
+      containerBlock.setNextStatement(false);
+      if (!workspace.options) {
+        workspace.options = {};
+      }
+      if (!workspace.options.maxInstances) {
+        workspace.options.maxInstances = {};
+      }
+      // change to blocks from match
+      workspace.options.maxInstances["text_print"] = 2;
+      workspace.options.maxInstances["variables_get"] = 1;
+      return containerBlock;
+    },
+  */
+  /**
+   * Store pointers to any connected child blocks.
+   * @param {!Blockly.Block} containerBlock Root block in mutator.
+   * @this {Blockly.Block}
+   */
+  // saveConnections: function(containerBlock) {
+    // console.warn("COPY", copyBlock(containerBlock, true))
+    // return copyBlock(containerBlock, true);
+  // },
+
+  /*
+    compose: function(containerBlock) {
+      if(this.getFieldValue('MODE') !== 'BLOCK') {
+        this.setFieldValue('BLOCK', 'MODE');
+      }
+      this.updateShape_(true);
+      //const workspace = this.workspace; // main workspace
+      this.getInputTargetBlock('EXP_STATEMENT')
+          && this.getInputTargetBlock('EXP_STATEMENT').dispose();
+
+      const workspaceContainerBlock = Blockly.Xml
+          .domToBlock(Blockly.Xml.blockToDom(containerBlock), this.workspace);
+      // workspaceContainerBlock.setMovable(true);
+      // console.error(this.getInput('EXP_STATEMENT') === Blockly
+          .getMainWorkspace().getAllBlocks()[0].getInput('EXP_STATEMENT'));
+      console.error(workspaceContainerBlock);
+      this.getInput('EXP_STATEMENT').connection.connect(workspaceContainerBlock
+          .previousConnection);
+    },
+  */
+
+    /**
+     * Modify this block to add a statement input and remove the text field if
+     *     switching to block mode or to remove a statement input and add the
+     *     text field if switching to text mode. When switching from text to
+     *     block mode, additionally, get the text match, parse the correct
+     *     text and attach appropriate blocks to the statement input, 
+     *     accordingly.  When switching to text mode, additionally convert
+     *     blocks to textual code and use it for the text field.
+     * @param {boolean} divisorInput True if this block has a divisor input.
+     * @private
+     * @this {Blockly.Block}
+     */
+    updateShape_: function(blockMode) {
+      if(blockMode === 'true' || blockMode === true) {
+        //this.setFieldValue("TEXT", "MODE");
+        let statementBlock;
+        if (this.getField('EXP') && this.matchBlueprint) {
+          // duplicated in standard_match_managers
+          const textMatch = Match.getMatchResult(
+              this.getField('EXP'),
+              {
+                id: 10000,
+                type: 'field',
+                name: 'EXP',
+                value: {
+                  type: 'component',
+                  name: this.matchBlueprint.value.matchManagerType,
+                  value: this.matchBlueprint.value.value
+                }
+              }
+          );
+        // if (this.getField('EXP') && this.textMatch) {
+          //const parseTree = getParseTree(this.getFieldValue('EXP'));
+          //console.error(this.getField)
+          //this.setFieldValue('TEXT', 'MODE'); // hack to toggle text match
+          //const textMatch = Match.getMatchResult(this, this.matchBlueprint);
+          //this.setFieldValue('BLOCK', 'MODE'); // restore
+          const textMatchStr = Match.getTextToParseFromMatch(textMatch);
+          const partialTextMatchStr =
+              Match.getTextToParseFromMatch(textMatch, true);
+          // console.error("Text Match", textMatchStr, typeof textMatchStr);
+          const paddedTextMatches = [partialTextMatchStr, textMatchStr]
+              .map(s => [s, s + ')', s + '\'', s + '"', s + '\')', s + '")'])
+              .flat();
+          // console.error("Padded Text Matches", paddedTextMatches);
+          const parseTreeTextMatch = paddedTextMatches.find(paddedTextMatch =>
+              getParseTree(paddedTextMatch));
+          const parseTree = getParseTree(parseTreeTextMatch || '');
+          // console.error("Parse Tree", parseTree);
+          statementBlock = parseTree ? handleParseTreeToBlocks(parseTree,
+              newBlock(this.workspace, 'text_print'), false) : "";
+          this.matchBlueprint.value.value.textMode = false;
+            // duplicated in standard_match_managers
+            const blockMatch = Match.getMatchResult(
+                statementBlock,
+                {
+                  id: -1,
+                  type: 'component',
+                  name: this.matchBlueprint.value.matchManagerType,
+                  value: this.matchBlueprint.value.value
+                }
+            );
+
+          this.setCurrentMaxInstances(blockMatch);
+
+          if (parseTree) {
+            const correctBlocks = Match.getCorrectBlocksFromMatch(blockMatch);
+
+            console.warn("Match and blocks", blockMatch, correctBlocks);
+/*
+            correctBlocks.forEach(block => {
+              this.currentMaxInstances[block.type] = 
+                ++this.currentMaxInstances[block.type] || 1;
+            });
+*/
+            statementBlock.getDescendants().forEach(block => {
+              if (correctBlocks.indexOf(block) === -1) {
+                block.dispose(true);
+              }
+            });
+            this.workspace.render();
+          }
+        }
+        if(this.getField('EXP')) {
+          // mode switched but, for no match blueprint yet
+          this.getInput('INPUT_MODE').removeField('EXP');
+        }
+        if (!this.getInput('EXP_STATEMENT')) {
+          this.appendStatementInput('EXP_STATEMENT');
+          if (statementBlock && statementBlock.previousConnection) {
+            this.getInput('EXP_STATEMENT').connection.connect(
+                statementBlock.previousConnection);
+            // statementBlock.setMovable(false);
+          } else if (statementBlock) {
+            statementBlock.dispose();
+          }
+        }
+      } else {
+        let s = '';
+        this.setCurrentMaxInstances();
+        //this.setFieldValue('BLOCK', 'MODE');
+        if (this.getInput('EXP_STATEMENT')) {
+          const statementBlock = this.getInputTargetBlock('EXP_STATEMENT');
+          if (statementBlock) {
+            // remove comments so they don't pollute textual code
+            statementBlock.getDescendants().forEach(block => {
+              block.setCommentText('');
+              block.setCommentText(null);
+            });
+            s = Blockly.JavaScript.blockToCode(statementBlock);
+            statementBlock.dispose(); // remove block after conversion
+            //s = statementBlock.toString().replace(/“|”/g, '"')
+            //    .replace("(?)", "('')");
+            if (this.matchBlueprint) {
+              // duplicated in standard_match_managers
+              this.matchBlueprint.value.value.textMode = true;
+              /*
+              // hack-y to create field here for purpose of matching s
+              const tempField = new Blockly.Field(s);
+              tempField.name = 'TEMP';
+              const textMatch = Match.getMatchResult(
+                  tempField,
+                  {
+                    id: 10000,
+                    type: 'field',
+                    name: 'TEMP',
+                    value: {
+                      type: 'component',
+                      name: this.matchBlueprint.value.matchManagerType,
+                      value: this.matchBlueprint.value.value
+                    }
+                  }
+              );
+              */
+              let tryS = s;
+              do {
+                const textMatch = Match.getMatchResult(
+                  s,
+                  {
+                    type: 'component',
+                    name: this.matchBlueprint.value.matchManagerType,
+                    value: this.matchBlueprint.value.value
+                  }
+                );
+
+                console.warn('Text Match', textMatch, 'S', s, 'TRY S', tryS);
+                tryS = Match.getTextToParseFromMatch(textMatch, true);
+                // peel off final characters until match has no errors
+              } while (tryS !== s && (s = s.substring(0, s.length-1)) !== '');
+            }
+          }
+          this.removeInput('EXP_STATEMENT');
+        }
+        if(!this.getField('EXP')) {
+          this.getInput('INPUT_MODE')
+              .appendField(new Blockly.FieldTextInput(s/*.split("\n")
+              .filter(line => !line.startsWith('//')).join('\n')*/, () => {
+
+              }), 'EXP');
+        }
+      }
+    }
+  };
+
+  /**
+   * 'code_statement_hybrid_mutator' extension to the 'code_statement_hybrid'
+   *     block that can update the block shape/set appropriate attached statement
+   *     blocks/field text value based on whether mode is "BLOCK" or "TEXT".
+   * @this {Blockly.Block}
+   */
+  Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_EXTENSION = function(event) {
+    // None of this should work from flyout.
+    if (this.workspace.isFlyout) {
+      return;
+    }
+
+    // Change to text mode when bubble is closed
+    // MUTATOR DIALOG NOT CURRENTLY USED
+    if (event.element === 'mutatorOpen' && !event.newValue || // used version
+       event.type === 'bubble_open' && !event.isOpen) { // current version
+      this.setFieldValue('TEXT', 'MODE');
+      this.updateShape_(false);
+      // console.error('SHOULD NOT REACH THIS NOW!');
+      //console.error(this.getInputTargetBlock('EXP_STATEMENT').toString());
+    }
+    this.getField('MODE').setValidator(function(option) {
+      this.getSourceBlock().updateShape_((option === 'BLOCK'));
+    });
+
+    if(event.element === 'workspaceClick' || // used version
+        event.targetType === 'workspace') { // current version
+      if (this.isMatchComplete()) {
+        // Convert to statement block, and replace block with this result
+        this.setFieldValue('BLOCK', 'MODE');
+        this.updateShape_(true);
+        const previousBlock = this.getPreviousBlock();
+        const nextBlock = this.getNextBlock();
+        const statementBlock = this.getInputTargetBlock('EXP_STATEMENT');
+        if (statementBlock) {
+          const statementDescendants = statementBlock.getDescendants();
+          statementDescendants.forEach(block => {
+            // Restore original block colors
+            if (block.startColour) {
+              block.setColour(block.startColour);
+            }
+            // Hide comment icons
+            block.setCommentText(null);
+          });
+          statementBlock.unplug();
+          if (previousBlock && statementBlock.previousConnection) {
+            statementBlock.previousConnection.connect(
+                previousBlock.nextConnection);
+          }
+          if (nextBlock && statementBlock.nextConnection) {
+            statementBlock.nextConnection.connect(
+                nextBlock.previousConnection);
+          }
+        }
+
+        this.dispose();
+      } else if (this.getFieldValue('MODE') === 'TEXT' &&
+          this.matchBlueprint && this.getField('EXP')) {
+          let s = this.getFieldValue('EXP') || '';
+          let tryS = s;
+          do {
+            const textMatch = Match.getMatchResult(
+                s,
+                {
+                  type: 'component',
+                  name: this.matchBlueprint.value.matchManagerType,
+                  value: this.matchBlueprint.value.value
+                }
+            );
+
+            console.warn('Text Match', textMatch, 'S', s, 'TRY S', tryS);
+            tryS = Match.getTextToParseFromMatch(textMatch, true);
+            // peel off final characters until match has no errors
+          } while (tryS !== s && (s = s.substring(0, s.length-1)) !== '');
+
+        this.setFieldValue(s, 'EXP');
+      }
+    }
+
+    // TODO: The below feedback generation, this method in general, AND 
+    //     updateShape_ are in desperate need of refactoring!
+    if (this.matchBlueprint) {
+      const match = Match.getMatchResult(this, this.matchBlueprint);
+      if (this.getFieldValue('MODE') === 'TEXT' && this.feedbackManagerText) {
+        FeedbackManager.displayFeedback(match,
+            T2C.FeedbackManagers['code_statement_hybrid'].feedbackJsonBlock,
+            this.feedbackManagerText);
+      } else if (this.getFieldValue('MODE') === 'BLOCK' &&
+          this.feedbackManagerBlock) {
+        FeedbackManager.displayFeedback(match,
+            this.feedbackManagerBlock.feedbackManager,
+            this.feedbackManagerBlock);
+      }
+    }
+  };
+
+  // Blockly.Extensions.registerMixin('block_text_toggle',
+  //     Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_MIXIN,
+  //     Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_EXTENSION);
+
+  Blockly.Extensions.registerMutator('block_text_toggle',
+      Blockly.Constants.TypeIn.BLOCK_TEXT_TOGGLE_MIXIN, null,
+      ['variables_set', 'text_print', 'text_input', 'text', 'math_number',
+      't2c_text_join']);
 })();

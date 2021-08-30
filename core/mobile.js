@@ -55,10 +55,11 @@ export const getParseTree = function(text) {
   return parseTree;
 };
 
-export const handleParseTreeToBlocks = function(parseTree, blockToReplace, refreshWorkspace=true) {
+export const handleParseTreeToBlocks = function(parseTree, blockToReplace, refreshWorkspace=true, workspace=null) {
+  workspace = workspace || shared.workspace;
   const evaluation = shared.evaluator.evaluate(parseTree);
   console.log("Evaluation: ", evaluation, blockToReplace);
-  blockToReplace = blockToReplace || newBlock(shared.workspace); // pass e.g., "math_number" if not replaced
+  blockToReplace = blockToReplace || newBlock(workspace); // pass e.g., "math_number" if not replaced
   const replacingBlock = createBlocks(evaluation, blockToReplace, refreshWorkspace);
   console.log(replacingBlock);
   return replacingBlock;
@@ -145,12 +146,15 @@ export const parseAndConvertToBlocks = function(props, e) {
 /**** factor into new module languages.js? ****/
 
 function varsToLets(code) {
-  var variableDeclarationStart = code.indexOf("var")+4;
+  // var variableDeclarationStart = code.indexOf("var")+4;
+  // starting location is used to make sure that you're not inside a comment
+  var start = code.search(/^\s*var|[\r\n]\s*var/);
+  var variableDeclarationStart = code.indexOf('var', start) + 4;
   var variableDeclarationEnd   = code.indexOf(";", variableDeclarationStart);
   var variableNames = [];
   var newCode = code;
   
-  if(variableDeclarationStart > 3) { // has variable declaration
+  if (start !== -1) { // has variable declaration
     var firstLine = code.substring(variableDeclarationStart, variableDeclarationEnd);
     variableNames = firstLine.split(", ");
     newCode = code.substring(0, variableDeclarationStart-4) + code.substring(variableDeclarationEnd+1);
@@ -175,8 +179,18 @@ export const workspaceToLanguageCode = function(workspace, language) {
   // temporary fix to remove Python variable declarations
   Blockly.Python.tempFinish = Blockly.Python.finish;
   Blockly.Python.finish = code => code;
+
+  // remove comments before generating code
+  const blocks = workspace.getAllBlocks()
+  const comments = blocks.map(block => block.getCommentText());
+  blocks.forEach(block => block.setCommentText(null));
+
   const code = Blockly[codeGen].workspaceToCode(workspace || Blockly.getMainWorkspace()); 
   Blockly.Python.finish = Blockly.Python.tempFinish;
+
+  // restore comments
+  blocks.forEach((block, index) => block.setCommentText(comments[index]));
+
   return codeGen === "Python" ?
     code : varsToLets(code);
 };
