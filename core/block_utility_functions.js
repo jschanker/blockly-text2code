@@ -148,16 +148,20 @@ export function fitBlocksInWorkspace(workspace) {
  * recursively does this for all descendants if deep is true
  * @param {!Blockly.Block} block the block to copy
  * @param {boolean} deep true exactly when making a deep copy
+ * @param {Blockly.Workspace?} targetWorkspace the target workspace to copy the block to;
+ * uses the same workspace as the block to copy if not provided
  * @return {Blockly.Block} the copy of the block
  */
-export function copyBlock(block, deep) {
+export function copyBlock(block, deep, targetWorkspace) {
   if(!block) return null;
   const workspace = block.workspace;
   
-  const blockCp = newBlock(workspace, block.type);
+  const blockCp = newBlock(targetWorkspace || workspace, block.type);
   block.inputList.forEach(function(input) {
     input.fieldRow.forEach(function(field) {
+      if(field.name) {
         setFieldValue(blockCp, field.getValue(), field.name);
+      }
     });
   });
   
@@ -165,7 +169,7 @@ export function copyBlock(block, deep) {
     block.getChildren().slice().forEach(function(childBlock) {
       if(block.getNextBlock() !== childBlock) {
         const blockInput = block.getInputWithBlock(childBlock);
-        setValueInput(blockCp, blockInput.name, copyBlock(childBlock, true));
+        setValueInput(blockCp, blockInput.name, copyBlock(childBlock, true, targetWorkspace));
       }
     });
   }
@@ -203,6 +207,11 @@ export function createNewTempVariable(workspace, prefix) {
  * @param {string} fieldName the name of the field to set
  */
 export function setFieldValue(block, value, fieldName) {
+  if(!fieldName) {
+    // bail because this was probably unintentional
+    console.warn("Ignoring request to set field value to", value, " of ", block, "because no field name was given");
+    return;
+  }
   const workspace = block.workspace;
   let setValue = value;
   if(block.type.toLowerCase().startsWith("variables_")

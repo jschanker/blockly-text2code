@@ -102,7 +102,7 @@ T2C.FeedbackManagers['string_literal'] = {
       ' as is.',
   DEFAULT_MISSING_OPEN_DOUBLE_QUOTE_MSG: 'The message to supply to the user ' +
       'should be surrounded by " and " because you want it to be displayed ' + 
-      'as is!',
+      'as is.',
   DEFAULT_WRONG_BLOCK_MSG: 'This is not the correct block to ' +
       'place here.',
   DEFAULT_MISSING_PHRASE_ERROR_MSG: 'The message to the user should contain ' +
@@ -154,6 +154,17 @@ T2C.FeedbackManagers['string_literal'] = {
   ]
 }
 
+T2C.FeedbackManagers['display_string_literal'] = {
+    feedbackJsonBlock: [/*{
+    	selectType: 'id',
+    	id: 'display_string_literal_terminal',
+    	outputType: 'function',
+    	showType: 'error',
+    	msg: 'missingPhraseFunction'
+    }*/].concat(T2C.FeedbackManagers['default'].errorFunctions)
+   .concat(T2C.FeedbackManagers['string_literal'].errorFunctions)
+}
+
 T2C.FeedbackManagers['prompt_store_input'] = {
 	/*
 	init: function(options) {
@@ -173,8 +184,13 @@ T2C.FeedbackManagers['prompt_store_input'] = {
        
   ],
   feedbackJsonBlock: [
-    {selectType: "id", id: 0, showType: "error", outputType: "string", msg: "You'll want to store the result in a variable, which means you should use a {T2C.MSG.currentLanguage.TERMINAL_LET} variable block."},
-    {selectType: "id", id: 2, showType: "error", outputType: "string", msg: "The variable should store what the user enters, which means you'll need to attach it to a {T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING} block."},
+    {selectType: 'id', id: 0, showType: 'error', outputType: 'string', msg:
+        'You\'ll want to store the result in a variable, which means you ' +
+        'should use a {T2C.MSG.currentLanguage.TERMINAL_LET} variable block.'},
+    {selectType: 'id', id: 2, showType: 'error', outputType: 'string', msg: 
+        'The variable should store what the user enters, which means you\'ll' + 
+        'need to attach it to a ' +
+        '{T2C.MSG.currentLanguage.TERMINAL_GETINPUTBYASKING} block.'},
     //{selectType: "id", id: 4, showType: "error", outputType: "string", msg: 'This is not the correct block to place here.'},
     //{selectType: "id", id: 6, showType: "error", outputType: "string", msg: "{options.missing_phrase_error_msg}"},
     //{selectType: "id", id: 8, showType: "error", outputType: "string", msg: "{options.var_name_error_message}"}

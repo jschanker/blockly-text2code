@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Documentation Class: SeriesAnimation</title>
+	<title>Documentation Class: InputFeedbackManager</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -72,16 +72,17 @@
 		<div id="main">
 			
 
-	<h1 class="page-title">Class: SeriesAnimation</h1>
+	<h1 class="page-title">Class: InputFeedbackManager</h1>
 <section>
 
 <header>
     
         <h2>
-        SeriesAnimation
+        InputFeedbackManager
         </h2>
         
-            <div class="class-description"><p>Class to handle sequence of animations</p></div>
+            <div class="class-description"><p>Class to maintain and call appropriate feedback handlers for
+input of block</p></div>
         
     
 </header>
@@ -93,19 +94,73 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="SeriesAnimation"><span class="type-signature"></span>new SeriesAnimation()</h4>
+    <h4 class="name" id="InputFeedbackManager"><span class="type-signature"></span>new InputFeedbackManager(input)</h4>
     
     
 </dt>
 <dd>
 
     
-
+    <div class="description">
+        <p>Constructs a new input feedback manager for the supplied input</p>
+    </div>
     
 
     
 
     
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>input</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Blockly.Input</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>the input for which to manage the feedback</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -178,6 +233,162 @@
 
     
 
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id="getErrorFeedback"><span class="type-signature"></span>getErrorFeedback(matchComparer)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Returns error feedback for given block</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>matchComparer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>comparer(a,b)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>the error feedback</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        </dl>
     
 
     

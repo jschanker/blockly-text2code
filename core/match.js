@@ -258,8 +258,8 @@ class Match {
       }
     }
 
-     // console.error('Sequential Match Result', matchResultArr, i,
-     //    matchBlueprint);
+    // console.error('Sequential Match Result', matchResultArr, i,
+    //     matchBlueprint);
 
     return [{
       id: matchBlueprint.id,
@@ -500,7 +500,7 @@ class Match {
               .every(match => match.isMatchComplete),
           hasError: resultMatchArr.some(match => match.hasError)
         }].concat(flattenedResultMatchArr);
-    } else if (matchBlueprint.type === "regexp") {
+    } else if (matchBlueprint.type === 'regexp') {
       // this logic doesn't have automatic way for determining partial matches
       //     of regexp from full match, currently caller needs to explicitly
       //     tell it what partial match means in tokenPartial, needed when 
@@ -510,26 +510,37 @@ class Match {
       const itemStr = item.toString();
       const startPadding = itemStr.match(/^\s*/)[0];
       let isMatchComplete = false;
-      // const endPadding = item.match(/$\s*/)[0];
-      // should fix this in case regex requires match start with fixed amount of
-      //    whitespace; currently matches all or none
-      let result = itemStr.match(matchBlueprint.token) || itemStr.trim().match(
-          matchBlueprint.token);
-      const partialResult = matchBlueprint.tokenPartial && 
-          (itemStr.match(matchBlueprint.tokenPartial) || itemStr.trim().match(
-          matchBlueprint.token));
-      if (result || partialResult) {
-        if(result) {
-          isMatchComplete = true;
-        } else {
-          result = partialResult;
+      let i = 0;
+      let usedStartPadding = '';
+      let result;
+      while (!(result = (usedStartPadding + itemStr)
+          .match(matchBlueprint.token)) && usedStartPadding !== startPadding) {
+        startPadding += ' ';
+      }
+
+      if (!result) {
+        if (typeof matchBlueprint.tokenPartial !== 'undefined') {
+          // No full match, check for partial match.
+          usedStartPadding = '';
+          while (!(result = (usedStartPadding + itemStr)
+              .match(matchBlueprint.tokenPartial)) &&
+              usedStartPadding !== startPadding) {
+            startPadding += ' ';
+          }
         }
+      } else {
+        isMatchComplete = true;
+      }
+
+      if (result) {
+        // console.warn('REGEX MATCH:', result);
         return [{
           id: matchBlueprint.id,
           expected: matchBlueprint.token,
-          match: startPadding + result[0],
+          match: result[0],
           length: 1,
-          remaining: itemStr.substring(startPadding.length + result[0].length),
+          remaining: itemStr.substring(startPadding.length +
+              result[0].trim().length),
           isMatchComplete,
           hasError: false
         }]

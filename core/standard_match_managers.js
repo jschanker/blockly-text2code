@@ -1,4 +1,4 @@
-import Match from "./match.js";
+import Match from './match.js';
 
 T2C.MatchManagers = {};
 
@@ -96,6 +96,68 @@ T2C.MatchManagers['string_literal'] = {
     }
   }
 };
+
+T2C.MatchManagers['display_string_literal'] = {
+  getMatchResult: (item, options) => {
+    const includeText = options.displayText || '';
+    const displayTerminal = options.displayLanguage 
+      ? {id: 'display_string_literal_terminal', type: 'exact', value:
+      T2C.MSG[options.displayLanguage].TERMINAL_DISPLAY, partial: true,
+      postfix: true}
+      : {id: 'display_string_literal_terminal', type: 'terminal', 
+      token: 'display'};
+    if (options.textMode) {
+      const match = Match.getMatchResult(
+          item,
+          {
+            type: 'Array',
+            value: [
+              displayTerminal,
+              {id: 'display_string_literal_open_paren', type: 'exact', 
+              value: '(', postfix: true},
+              //promptTokenText,
+              {id: 'display_string_literal_text', type: 'component',
+              name: 'string_literal', value: {includeText, textMode: true},
+              postfix: true},
+              {id: 'display_string_literal_close_paren', type: 'exact', 
+              value: ')', postfix: true},
+              {id: 'display_string_literal_semicolon', token: /^[;]*$/,
+              type: 'regexp'}
+            ]
+          }
+      );
+      return match;
+    } else {
+      // block mode
+      return Match.getMatchResult(
+        item,
+        {
+          id: 'display_string_literal_display_block',
+          type: 'block',
+          value: {
+            types: ['text_print', 'js_text_print'],
+            inputs: [
+              {
+                id: 'display_string_literal_text_block',
+                type: 'input',
+                name: 'TEXT',
+                value: {
+                  type: 'component',
+                  name: 'string_literal',
+                  value: {
+                    includeText,
+                    textMode: false
+                  }
+                }
+              }
+            ],
+            fields: []
+          }
+        }
+      )
+    }
+  }
+}
 
 T2C.MatchManagers['prompt_store_input'] = {
   getMatchResult: (item, options) => {
@@ -247,13 +309,13 @@ T2C.MatchManagers['code_statement_hybrid'] = {
           }
       )
       */
-      if(textMode) {
+      if (textMode) {
         return Match.getMatchResult(
             item.getField('EXP'),
             {
               id: 10000,
-              type: "field",
-              name: "EXP",
+              type: 'field',
+              name: 'EXP',
               value: {
                 type: 'component',
                 name: matchManagerType,
