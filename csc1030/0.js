@@ -194,22 +194,23 @@ function addMoveAndFlashTask(courseInstructionTaskFlow, div) {
 
 export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
   const missingPhraseFunction = (matchItem, matchArr) => {
-    console.error("MATCH ARR ON MISSING PHRASE", matchArr);
+    console.warn("MATCH ARR ON MISSING PHRASE", matchArr);
     // "Include some message in between the quotation marks so that the user sees some text!"
     const isTextMode = !matchArr.find(item => item.match &&
         item.match.type === 'text');
     const actualIncludeText = matchItem.remaining;
     // matchItem.expected.value;
     const expectedIncludeText = Match.getExpected(matchItem);
-    if (['\'', '"'].indexOf(actualIncludeText) !== -1) {
+    // if (['\'', '"'].indexOf(actualIncludeText) !== -1) {
+    // if (/^['"]/.test(actualIncludeText)) {
       return 'Include some message in between the quotation marks so that ' +
           'the user sees some text!';
-    } else if (!actualIncludeText.includes(' ')) {
+    /*} else if (!actualIncludeText.includes(' ')) {
       return 'Try writing a message with a space in it.  Remember that ' +
           'unlike variable names in JavaScript, which can\'t have spaces, ' +
           'this is a message that will be displayed as is to be read by ' + 
           'humans.';
-    }
+    }*/
   };
 
   const missingQuotationMarks = () => {
@@ -323,7 +324,8 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
     FeedbackBlockFactory.createBlock('level0_display_string_literal_block',
       {type: 'component', name: 'code_statement_hybrid',
       value: {matchManagerType: 'display_string_literal', 
-      value: {displayText: ' '}}},
+      // value: {displayText: ' '}}},
+      value: {nonEmptyText: true}}},
       {textModeFeedbackManager: T2C.FeedbackManagers[
       'code_statement_hybrid'].DEFAULT_TEXT_MODE_FEEDBACK_MANAGER,
       feedbackManager: T2C.FeedbackManagers['display_string_literal'],
@@ -405,8 +407,14 @@ export const loadLevelTasks = (courseInstructionTaskFlow, ws) => {
         && x.getNextBlock().getInputTargetBlock("TEXT").type === "text"),
       new ParallelAnimation([
         levelGenerator.createHelpMessageDirections(helpMsgManager,
-          () => "Type in code matching above block but with different text to display.  I.e., Type\n" + 
-            T2C.MSG.currentLanguage["TEXT_PRINT_TITLE"].replace("%1", "\"your new message\"") + "\nreplacing your new message with whatever you want to display, but be sure to include a space in it!  Be exact with parentheses, quotation marks, etc.  Tap off the block when you're done.", 
+          () => 'Type in code matching above block but with different text ' +
+              'to display.  I.e., Type\n' +
+              T2C.MSG.currentLanguage['TEXT_PRINT_TITLE'].replace('%1',
+              '"your new message"') + '\nreplacing your new message with ' +
+              'whatever you want to display' +
+              //', but be sure to include a space in it!' +
+              '.  Be exact with parentheses, quotation marks, etc.  Tap off ' +
+              'the block when you\'re done.',
           () => {
             return 'Click the ? on the blocks to see if there\'s any feedback.';
             /*const typeInBlock = workspace.getAllBlocks().find(x => x.type === "type_in_display_string_literal");

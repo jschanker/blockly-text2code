@@ -10,9 +10,64 @@ T2C.MatchManagers['string_literal'] = {
   },
   */
   getMatchResult: (item, options) => {
-    const includeText = options.includeText || '';
-    const exactTextToken = {id: 20, type: 'exact', value: options.exactText,
-        partial: true}; 
+    const typeId = 'string_literal';
+    const idSuffix = options.suffix || '';
+
+    //const exactTextToken = {id: 20, type: 'exact', value: options.exactText,
+    //    partial: true};
+    const quotesTokens = ['\'', '"'].map(quoteType => {
+      const idQuoteType = (quoteType === '\'') ? 'single' : 'double';
+      if (options.exactText) {
+        const id = typeId + '_' + idQuoteType + '_text_' + idSuffix;
+        return {id, type: 'exact', value: options.exactText, partial: true};
+      } else if (options.nonEmptyText) {
+        const id = typeId + '_' + idQuoteType + '_text_' + idSuffix;
+        return {id, type: 'regexp', postfix: true, tokenPartial:
+            new RegExp('^[^' + quoteType + ']*$'), token:
+            new RegExp('^[^' + quoteType + ']+')};
+      } else if (options.endsWithText) {
+        const id = typeId + '_' + idQuoteType + '_text_' + idSuffix;
+        return {id, type: 'regexp', postfix: true, tokenPartial:
+            new RegExp('^[^' + quoteType + ']*$'), token:
+            new RegExp('^[^' + quoteType + ']*' +
+            (options.endsWithText.source || options.endsWithText) + '$', 'i')};
+      } else {
+        // default option is include text, which may be regex
+        const includeText = options.includeText ? 
+            (options.includeText.source || options.includeText) : '';
+        const id = typeId + '_' + idQuoteType + '_text_' + idSuffix;
+        return {id, type: 'regexp', postfix: true, tokenPartial:
+            new RegExp('^[^' + quoteType + ']*$'), token:
+            new RegExp('^[^' + quoteType + ']*' +
+            includeText + '^[^' + quoteType + ']*', 'i')};
+      }
+    });
+
+    const textTokenSingleQuotes = quotesTokens[0];
+    const textTokenDoubleQuotes = quotesTokens[1];
+    let blockTextToken;
+
+    if (options.exactText) {
+        const id = typeId + '_block_text_' + idSuffix;
+        blockTextToken = 
+            {id, type: 'exact', value: options.exactText, partial: true};
+    } else if (options.nonEmptyText) {
+      const id = typeId + '_block_text_' + idSuffix;
+      blockTextToken = {id, type: 'regexp', postfix: true, token: /[\s\S]+/};
+    } else if (options.endsWithText) {
+      const id = typeId + '_block_text_' + idSuffix;
+      blockTextToken = {id, type: 'regexp', postfix: true, token:
+          new RegExp((options.endsWithText.source || options.endsWithText) + 
+          '$', 'i')};
+    } else {
+      // default option is include text, which may be regex
+      const includeText = options.includeText ?
+          (options.includeText.source || options.includeText) : '';
+      const id = typeId + '_block_text_' + idSuffix;
+      blockTextToken = {id, type: 'regexp', postfix: true, token:
+          new RegExp(includeText, 'i')};
+    }
+/* 
     const textTokenSingleQuotes = typeof options.exactText !== 'undefined' ?
         exactTextToken :
         {id: 'string_literal_include_text_single', type: 'regexp',
@@ -23,7 +78,7 @@ T2C.MatchManagers['string_literal'] = {
         {id: 'string_literal_include_text_double', type: 'regexp',
         postfix: true, tokenPartial: /^[^"]*$/,
         token: new RegExp('^[^"]*' + includeText + '[^"]*', 'i')};
-
+*/
     if (options.textMode) {
       const match = Match.getMatchResult(
           item,
@@ -71,11 +126,14 @@ T2C.MatchManagers['string_literal'] = {
                   id: 'string_literal_field',
                   type: 'field',
                   name: 'TEXT',
-                  value: {
-                    id: 'string_literal_block_include_text',
-                    type: 'includes',
-                    value: includeText
-                  }
+                  value: blockTextToken/*{
+                    //id: 'string_literal_block_include_text',
+                    id: 'string_literal_block_text_',
+                    //type: 'includes',
+                    //value: includeText
+                    type: 'regexp',
+                    token: blockTextToken
+                  }*/
                 }
               ]
             }
@@ -91,11 +149,18 @@ T2C.MatchManagers['string_literal'] = {
           }
           
         );*/
-      // console.error("STRING LITERAL MATCH", match);
+      // console.error("STRING LITERAL MATCH", blockTextToken, match);
       return match;
     }
   }
 };
+
+function joinObjects(obj1, obj2) {
+  const obj = {};
+  Object.keys(obj1).forEach(key => obj[key] = obj1[key]);
+  Object.keys(obj2).forEach(key => obj[key] = obj2[key]);
+  return obj;
+}
 
 T2C.MatchManagers['display_string_literal'] = {
   getMatchResult: (item, options) => {
@@ -115,9 +180,11 @@ T2C.MatchManagers['display_string_literal'] = {
               displayTerminal,
               {id: 'display_string_literal_open_paren', type: 'exact', 
               value: '(', postfix: true},
-              //promptTokenText,
+              // promptTokenText,
               {id: 'display_string_literal_text', type: 'component',
-              name: 'string_literal', value: {includeText, textMode: true},
+              // name: 'string_literal', value: {includeText, textMode: true},
+              name: 'string_literal', value: joinObjects(options,
+                  {textMode: true}),
               postfix: true},
               {id: 'display_string_literal_close_paren', type: 'exact', 
               value: ')', postfix: true},
@@ -144,10 +211,11 @@ T2C.MatchManagers['display_string_literal'] = {
                 value: {
                   type: 'component',
                   name: 'string_literal',
-                  value: {
+                  value: joinObjects(options, {textMode: false}),
+                  /*value: {
                     includeText,
                     textMode: false
-                  }
+                  }*/
                 }
               }
             ],

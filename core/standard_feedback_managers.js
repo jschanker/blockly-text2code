@@ -124,21 +124,22 @@ T2C.FeedbackManagers['string_literal'] = {
     },
     {
     	selectType: 'id',
-    	id: 'string_literal_include_text_single',
+    	//id: 'string_literal_include_text_single',
+    	id: 'string_literal_single_text_',
     	outputType: 'function',
     	showType: 'error',
     	msg: 'stringLiteralMissingIncludeTextSingle'
     },
     {
     	selectType: 'id',
-    	id: 'string_literal_include_text_double',
+    	id: 'string_literal_double_text_',
     	outputType: 'function',
     	showType: 'error',
     	msg: 'stringLiteralMissingIncludeTextDouble'
     },
     {
     	selectType: 'id',
-    	id: 'string_literal_block',
+    	id: 'string_literal_block_text_',
     	outputType: 'function',
     	showType: 'error',
     	msg: 'stringLiteralWrongBlock'
