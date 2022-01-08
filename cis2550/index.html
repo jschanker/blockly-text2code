@@ -1,0 +1,128 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset = "utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Text 2 Code</title>
+    <base href = "../">
+    <link rel = "stylesheet" href = "styles.css">
+    <link rel = "stylesheet" href = "mobile.css">
+    <script src="blockly/blockly_compressed.js"></script>
+    <script src="blockly/blocks_compressed.js"></script>
+    <script src="blockly/javascript_compressed.js"></script>
+    <script src="blockly/python_compressed.js"></script>
+    <script src="blockly/msg/js/en.js"></script>
+    <script src = "core/msg/en.js"></script>
+    <script src = "core/msg/hi.js"></script>
+    <script src = "core/msg/js.js"></script>
+    <script src = "core/msg/py.js"></script>
+    <script src="dist/text2code_blocks_mobile.js"></script>
+    <script src = "cis2550/blocks/request.js"></script>
+    <script src = "cis2550/generators/javascript/request.js"></script>
+  </head>
+  <body>
+    <header id = "top-header">
+      <div class = "table-row">
+        <div id = "run-code-button" style = "color: green;" class = "header-button table-cell">▶</div>
+        <div id = "save-code-button" style = "color: green;" class = "header-button table-cell">💾</div>
+        <div id = "load-code-button" style = "color: green;" class = "header-button table-cell">📁</div>
+        <form style = "font-size: x-large;" class = "table-cell">
+          <select id = "language" style = "font-size: normal; width:95px;">
+            <option value = "en">English Pseudocode</option>
+            <option value = "js">JavaScript</option>
+            <option value = "py">Python</option>
+            <option value = "hi">हिंदी स्यूडोकोड</option>
+            <option value = "hi">Hindee Syoodokod</option>
+          </select>
+        </form>
+        <h1><span id = "textHeader">T</span><span id = "twoHeader">2</span><span id = "codeTextHeader">C</span></h1>
+      </div>
+      <!--<h1><span id = "textHeader">Text</span> <span id = "twoHeader">2</span> <span id = "codeTextHeader">Code</span></h1>-->
+    </header>
+    <div id = "all-content">
+      <!--<form style = "text-align:right; font-size: x-large;">
+        Language:
+        <select id = "language" style = "text-align:right; font-size: x-large;">
+          <option value = "en">English</option>
+          <option value = "hi">हिंदी</option>
+        </select>
+      </form>-->
+        <div id = "blockly-div">
+          <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
+            <block type="text_print"></block>
+            <block type="text"></block>
+            <block type="t2c_text_join"></block>
+            <block type="logic_negate"></block>
+            <block type="variables_get"></block>
+            <block type="variables_set"></block>
+            <block type="cis_2550_1_get_request">
+              <value name = "URL">
+                <shadow type = "text">
+                  <field name = "TEXT">https://</field>
+                </shadow>
+              </value>
+            </block>
+            <block type="cis_2550_1_post_request">
+              <value name = "URL">
+                <shadow type = "text">
+                  <field name = "TEXT">https://</field>
+                </shadow>
+              </value>
+            </block>
+            <block type = "cis_2550_1_forEach_line"></block>
+            <block type = "cis_2550_1_includes"></block>
+            <block type = "controls_if"></block>
+            <!--<block type = "cis_2550_1_break"></block>-->
+          </xml>
+        </div>
+        <div id = "output-container" class = "hide-container">
+          <div class = "table-container">
+            <div class = "table-row">
+              <div class = "table-cell">
+                <h3 id = "outputAppearsBelow" name = "HEADING_OUTPUT_APPEARS_BELOW">Output will appear below</h3>
+                <pre>
+                  <div id = "consoleDisplay">
+                  </div>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id = "text-code-container" class = "hide-container">
+          <div class = "table-container">
+            <div class = "table-row">
+              <div class = "table-cell">
+                <!--<form>-->
+                  <h3>Textual Code</h3>
+                  <textarea id = "textCodeBox" name = "TEXTAREA_CODE_APPEARS_BELOW" placeholder = "Code to appear here."></textarea>
+                  <button id = "load-save-text-code">Load/Save Text Code</button>
+                  <h3>XML</h3>
+                  <div id = "xml-data-container">
+                    <!--<span id = "xml-close" onclick="javascript:alert();">❌</span>-->
+                    <textarea id = "xmlData" name = "TEXTAREA_COPY_TEXT_HERE" placeholder="Copy text here to save/load blocks."></textarea>
+                  </div>
+                  <button id = "load-save-xml">Load/Save XML</button>
+                <!--</form>-->
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <!--<div>
+      <iframe height="400px" width="100%" src="https://repl.it/@jschanker/Text2Code-Strings-Exact?lite=true" scrolling="no" frameborder="no" allowtransparency="true" allowfullscreen="true" sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts allow-modals"></iframe>
+    </div>-->
+    <!--
+    <footer>
+        <h3 id = "bottomText" name = "HEADING_BOTTOM_TEXT"><em>If you can describe the solution, you can code it. (At least that's the goal.)</em></h3>
+    </footer>
+    -->
+    <script src = "dist/text2code_generators.js"></script>
+    <script src = "dist/text2code_core_mobile.js"></script>
+    <!--<script src = "dist/csc1030_problems.js"></script>-->
+    <!--<script type = "module" src = "csc1030/0.js"></script>-->
+    <!--<script type = "module" src = "csc1030/problems.js"></script>-->
+    <!--<script src = "dist/csc1030_problems.js"></script>-->
+  </body>
+</html>
