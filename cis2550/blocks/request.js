@@ -22,8 +22,8 @@ Blockly.Blocks["cis_2550_1_get_request"] = {
         }
       ],
       previousStatement: null,
-      colour: 160,
-      tooltip: "Makes request for data from URL and processes response",
+      colour: 290,
+      tooltip: "Makes get request for data from URL and processes response",
       helpUrl: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch"
     });
   }
@@ -58,8 +58,8 @@ Blockly.Blocks["cis_2550_1_post_request"] = {
         }
       ],
       previousStatement: null,
-      colour: 160,
-      tooltip: "Makes request for data from URL and processes response",
+      colour: 290,
+      tooltip: "Makes POST request for data from URL and processes response",
       helpUrl: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch"
     });
   }
@@ -70,7 +70,7 @@ Blockly.Blocks['cis_2550_1_forEach_line'] = {
     this.jsonInit({
       type: 'cis_2550_1_forEach_line',
       //message0: "get data from URL: %1 %2 then on response with data %3 %4",
-      message0: 'for each line %1 in %2 from %3 to %4 %5 do %6',
+      message0: 'for each line %1 in %2 from %3 to %4 with delay %5 ms %6 do %7',
       args0: [
         {
           type: 'field_variable',
@@ -95,6 +95,12 @@ Blockly.Blocks['cis_2550_1_forEach_line'] = {
           value: 1000
         },
         {
+          type: 'field_number',
+          name: 'DELAY',
+          min: 1,
+          value: 50
+        },
+        {
           type: 'input_dummy',
         },
         {
@@ -104,10 +110,10 @@ Blockly.Blocks['cis_2550_1_forEach_line'] = {
       ],
       previousStatement: null,
       nextStatement: null,
-      colour: 260,
+      colour: 120,
       inputsInline: true,
       tooltip: 'For each line in a string, set the variable to the line and ' + 
-          ' then do some statements',
+          ' then do some statements with a delay between each line processing',
       helpUrl: ''
     });
   }
@@ -132,7 +138,7 @@ Blockly.Blocks['cis_2550_1_includes'] = {
       ],
       output: 'Boolean',
       inputsInline: true,
-      colour: 260,
+      colour: 160,
       tooltip: 'True if the first value contains the text in the second.' +
           'This is case-sensitive so CARS contains CAR but not car.',
       helpUrl: ''

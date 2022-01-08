@@ -50,12 +50,12 @@
       </form>-->
         <div id = "blockly-div">
           <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
+            <block type="variables_get"></block>
+            <block type="variables_set"></block>
             <block type="text_print"></block>
             <block type="text"></block>
             <block type="t2c_text_join"></block>
-            <block type="logic_negate"></block>
-            <block type="variables_get"></block>
-            <block type="variables_set"></block>
+            <block type = "cis_2550_1_includes"></block>
             <block type="cis_2550_1_get_request">
               <value name = "URL">
                 <shadow type = "text">
@@ -71,7 +71,7 @@
               </value>
             </block>
             <block type = "cis_2550_1_forEach_line"></block>
-            <block type = "cis_2550_1_includes"></block>
+            <block type="logic_negate"></block>
             <block type = "controls_if"></block>
             <!--<block type = "cis_2550_1_break"></block>-->
           </xml>
@@ -120,6 +120,9 @@
     -->
     <script src = "dist/text2code_generators.js"></script>
     <script src = "dist/text2code_core_mobile.js"></script>
+    <script>
+      setTimeout(() => Blockly.getMainWorkspace().clear(), 0);
+    </script>
     <!--<script src = "dist/csc1030_problems.js"></script>-->
     <!--<script type = "module" src = "csc1030/0.js"></script>-->
     <!--<script type = "module" src = "csc1030/problems.js"></script>-->

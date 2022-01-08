@@ -53,14 +53,17 @@ Blockly.JavaScript['cis_2550_1_forEach_line'] = (block) => {
       .replace(/\s/g, '_').replace(/$\d+/g, '');
   const s = Blockly.JavaScript.valueToCode(block, 'STR',
       Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-  const cb = Blockly.JavaScript.statementToCode(block, 'DO');
+  const cb = Blockly.JavaScript.prefixLines(
+      Blockly.JavaScript.statementToCode(block, 'DO'), 
+      Blockly.JavaScript.INDENT);
   const start = block.getFieldValue('START') - 1;
   const end = block.getFieldValue('END');
+  const delay = block.getFieldValue('DELAY');
 
   //return requestFunc + '(\'' + url + '\')\n    .then((response) => ' +
   return s + '.slice(' + start + ', ' + end + ')' +
-  '.split(/\\r?\\n/).forEach((' + iteratorVariable + ') => {\n' + cb +
-      '});\n';
+  '.split(/\\r?\\n/).forEach((' + iteratorVariable + ', index) => {\n' +
+  '  setTimeout(() => {\n' + cb + '  }, ' + delay + '*index);\n});\n';
 };
 
 Blockly.JavaScript['cis_2550_1_includes'] = (block) => {
