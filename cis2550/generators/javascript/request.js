@@ -78,8 +78,8 @@ Blockly.JavaScript['cis_2550_1_forEach_line'] = (block) => {
   const delay = block.getFieldValue('DELAY');
 
   //return requestFunc + '(\'' + url + '\')\n    .then((response) => ' +
-  return s + '.slice(' + start + ', ' + end + ')' +
-  '.split(/\\r?\\n/).forEach((' + iteratorVariable + ', index) => {\n' +
+  return s + '.split(/\\r?\\n/).slice(' + start + ', ' + end + ')' +
+  '.forEach((' + iteratorVariable + ', index) => {\n' +
   '  setTimeout(() => {\n' + cb + '  }, ' + delay + '*index);\n});\n';
 };
 
