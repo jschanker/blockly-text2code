@@ -61,8 +61,8 @@ Blockly.JavaScript['cis_2550_1_forEach_number'] = (block) => {
   //return requestFunc + '(\'' + url + '\')\n    .then((response) => ' +
   return 'for(let ' + iteratorVariable + ' = ' + start + '; ' +
       iteratorVariable + ' <= ' + end + '; ' + iteratorVariable + '++) {\n' +
-      '  setTimeout(() => {\n' + cb + '  }, ' + delay + '*' +
-      iteratorVariable + ');\n}\n';
+      '  setTimeout(() => {\n' + cb + '  }, ' + delay + ' * (' +
+      iteratorVariable + ' - ' + start + '));\n}\n';
 };
 
 Blockly.JavaScript['cis_2550_1_forEach_line'] = (block) => {
@@ -79,8 +79,8 @@ Blockly.JavaScript['cis_2550_1_forEach_line'] = (block) => {
 
   //return requestFunc + '(\'' + url + '\')\n    .then((response) => ' +
   return s + '.split(/\\r?\\n/).slice(' + start + ', ' + end + ')' +
-  '.forEach((' + iteratorVariable + ', index) => {\n' +
-  '  setTimeout(() => {\n' + cb + '  }, ' + delay + '*index);\n});\n';
+      '.forEach((' + iteratorVariable + ', index) => {\n' +
+      '  setTimeout(() => {\n' + cb + '  }, ' + delay + ' * index);\n});\n';
 };
 
 Blockly.JavaScript['cis_2550_1_includes'] = (block) => {
