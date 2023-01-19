@@ -5,7 +5,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, save-task-localstorage ]
   pull_request:
     branches: [ master ]
 
@@ -16,10 +16,10 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 15.x, 16.x]
+        node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
@@ -27,3 +27,18 @@ jobs:
     #- run: npm ci
     - run: npm run build
     #- run: npm test
+    - name: Commit generated build files
+      run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          # git add $SCRIPT_OUTPUT_FILE_PATH
+          git add *
+          # https://stackoverflow.com/a/25149786 for git status --porcelain
+          # https://git-scm.com/docs/git-status#Documentation/git-status.txt--ultmodegt to ignore untracked files
+          if [[ `git status -uno --porcelain` ]]; then
+            git commit -m "Update production distribution on $(date)"
+            git push
+            echo "Successfully updated production distribution"
+          else
+            echo "Error updating production distribution"
+          fi
