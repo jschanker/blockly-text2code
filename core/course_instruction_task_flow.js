@@ -31,10 +31,15 @@ class CourseInstructionTaskFlow {
   	this.tasks_.push(task);
   }
 
-  runTasks() {
+  runTasks(id, levelIndex) {
   	const FRAME_RATE = 5;
   	const stages = this.tasks_.length;
   	let currentStage = 0;//{taskNum: 0, directionsComplete: false};
+        const storedStageKey = id != null ? id + "," + levelIndex : null;
+        const storedStage = storedStageKey ? localStorage.getItem(storedStageKey) : 0;
+        if (storedStage && confirm('Would you like to resume from the task you last completed?')) {
+          currentStage = Math.max(parseInt(storedStage), 0);
+        }
   	let lastTime = 0;
   	this.tasks_[currentStage].startDirections();
   	const runTasksHelper = (ms) => {
@@ -47,7 +52,8 @@ class CourseInstructionTaskFlow {
   		  	this.tasks_[currentStage].finish();
   		  	++currentStage;
   		  	if(currentStage < this.tasks_.length) {
-  		  		this.tasks_[currentStage].startDirections();
+                          if(storedStageKey) localStorage.setItem(storedStageKey, currentStage);
+  		          this.tasks_[currentStage].startDirections();
   		  	}
   		  	lastTime = ms;
   		  }
