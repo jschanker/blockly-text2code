@@ -35,6 +35,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	console.log("Loading level", levelIndex);
 	if(0 <= levelIndex && levelIndex < loadLevelTasksArr.length) {
 	  const citf = loadLevelTasksArr[levelIndex]();
-	  citf.runTasks();
+	  citf.runTasks("csc1030", levelIndex);
 	}
 });
