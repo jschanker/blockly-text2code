@@ -530,7 +530,7 @@ Blockly.Blocks['type_in_set_to_position_of_second_middle_char'] = {
       if(this.getFieldValue("EXP").endsWith("\r") || 
         this.getFieldValue("EXP").endsWith("\n") || (this.getFieldValue("EXP").length > 0 && e.element === "workspaceClick")) {
         if(!this.validate(this.getFieldValue("EXP")) || 
-          (!this.getFieldValue("EXP").endsWith(")") && 
+          (!this.getFieldValue("EXP").endsWith("2") && 
             !this.getFieldValue("EXP").endsWith(";"))) return;
         else {
           const parseTree = getParseTree(this.getFieldValue("EXP"));
@@ -617,7 +617,7 @@ Blockly.Blocks['type_in_set_to_position_of_first_middle_char'] = {
       if(this.getFieldValue("EXP").endsWith("\r") || 
         this.getFieldValue("EXP").endsWith("\n") || (this.getFieldValue("EXP").length > 0 && e.element === "workspaceClick")) {
         if(!this.validate(this.getFieldValue("EXP")) || 
-          (!this.getFieldValue("EXP").endsWith(")") && 
+          (!this.getFieldValue("EXP").endsWith("1") && 
             !this.getFieldValue("EXP").endsWith(";"))) return;
         else {
           const parseTree = getParseTree(this.getFieldValue("EXP"));
