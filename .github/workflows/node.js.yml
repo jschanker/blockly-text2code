@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build_and_push:
 
     runs-on: ubuntu-latest
 
@@ -27,3 +27,15 @@ jobs:
     #- run: npm ci
     - run: npm run build
     #- run: npm test
+    - name: Commit and push files from build
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add .
+        # https://stackoverflow.com/a/25149786 for git status --porcelain
+        if [[ `git status --porcelain` ]]; then
+          git commit -m "Update build data on $(date)"
+          git push
+        else
+          echo "No new changes"
+        fi
