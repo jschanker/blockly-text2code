@@ -43,19 +43,20 @@ class CourseInstructionTaskFlow {
           console.log("Starting from task", storedStage);
           try {
             const workspace = Blockly.getMainWorkspace();
-            workspace.updateToolbox();
             workspace.render();
             if (storedOptions) {
               workspace.options = new Blockly.Options(JSON.stringify(storedOptions));
+              workspace.updateToolbox();
             }
           } catch (e) {
             console.error("Error while constructing options during load:", e);
           }
           try {
             const workspace = Blockly?.getMainWorkspace();
-            if (storedBlocks) {
+            if (storedBlocksText) {
+              const xmlDom = Blockly.Xml.textToDom(storedBlocksText);
               workspace.clear();
-              xmlDom && Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(storedBlockText), workspace);
+              xmlDom && Blockly.Xml.domToWorkspace(xmlDom, workspace);
               workspace.render();
             }
           } catch (e) {
