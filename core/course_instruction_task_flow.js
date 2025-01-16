@@ -40,6 +40,7 @@ class CourseInstructionTaskFlow {
         if (storedStage && confirm('Would you like to resume from the task you last completed?')) {
           const storedOptions = localStorage.getItem(storedStageKey + ",options");
           const storedBlocksText = localStorage.getItem(storedStageKey + ",blocks");
+          console.log("Starting from task", storedStage);
           try {
             const workspace = Blockly.getMainWorkspace();
             workspace.updateToolbox();
