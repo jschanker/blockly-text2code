@@ -38,6 +38,28 @@ class CourseInstructionTaskFlow {
         const storedStageKey = id != null ? id + "," + levelIndex : null;
         const storedStage = storedStageKey ? localStorage.getItem(storedStageKey) : 0;
         if (storedStage && confirm('Would you like to resume from the task you last completed?')) {
+          const storedOptions = localStorage.getItem(storedStageKey + ",options");
+          const storedBlocksText = localStorage.getItem(storedStageKey + ",blocks");
+          try {
+            const workspace = Blockly.getMainWorkspace();
+            workspace.updateToolbox();
+            workspace.render();
+            if (storedOptions) {
+              workspace.options = new Blockly.Options(JSON.stringify(storedOptions));
+            }
+          } catch (e) {
+            console.error("Error while constructing options during load:", e);
+          }
+          try {
+            const workspace = Blockly?.getMainWorkspace();
+            if (storedBlocks) {
+              workspace.clear();
+              xmlDom && Blockly.Xml.domToWorkspace(Blockly.Xml.textToDom(storedBlockText), workspace);
+              workspace.render();
+            }
+          } catch (e) {
+            console.error("Error while loading workspace blocks:", e);
+          }
           currentStage = Math.max(parseInt(storedStage), 0);
         }
   	let lastTime = 0;
@@ -52,7 +74,15 @@ class CourseInstructionTaskFlow {
   		  	this.tasks_[currentStage].finish();
   		  	++currentStage;
   		  	if(currentStage < this.tasks_.length) {
-                          if(storedStageKey) localStorage.setItem(storedStageKey, currentStage);
+                if(storedStageKey) {
+                  localStorage.setItem(storedStageKey, currentStage);
+                  try {
+                    localStorage.setItem(storedStageKey + ",options", JSON.stringify(Blockly.getMainWorkspace().options));
+                    localStorage.setItem(storedStageKey + ",blocks", Blockly.Xml.domToPrettyText(Blockly.Xml.workspaceToDom(Blockly.getMainWorkspace())));
+                  } catch (e) {
+                    console.error("Error saving current state", e);
+                  }
+                }
   		          this.tasks_[currentStage].startDirections();
   		  	}
   		  	lastTime = ms;
