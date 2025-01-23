@@ -41,6 +41,7 @@ class CourseInstructionTaskFlow {
           const storedOptions = localStorage.getItem(storedStageKey + ",options");
           const storedBlocksText = localStorage.getItem(storedStageKey + ",blocks");
           console.log("Starting from task", storedStage);
+          /*
           try {
             const workspace = Blockly.getMainWorkspace();
             workspace.render();
@@ -50,7 +51,7 @@ class CourseInstructionTaskFlow {
             }
           } catch (e) {
             console.error("Error while constructing options during load:", e);
-          }
+          }*/
           try {
             const workspace = Blockly?.getMainWorkspace();
             if (storedBlocksText) {
