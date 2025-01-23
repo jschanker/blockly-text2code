@@ -1506,7 +1506,7 @@ citf.addTask(
         const text3 = workspace.getAllBlocks().filter(block => block.type === "text" && block.getFieldValue("TEXT") == "@");
         const t2cTextIndexof5 = workspace.getAllBlocks().filter(block => (block.type === "t2c_text_indexof" || block.type === "js_text_indexof") && variablesGet0.indexOf(block.getInputTargetBlock("VALUE")) !== -1 && text3.indexOf(block.getInputTargetBlock("FIND")) !== -1);
         const mathArithmeticBasic6 = workspace.getAllBlocks().filter(block => block.type === "math_arithmetic_basic" && (t2cTextIndexof5.indexOf(block.getInputTargetBlock("A")) !== -1 && mathNumber2.indexOf(block.getInputTargetBlock("B")) !== -1 || 
-           t2cTextIndexof5.indexOf(block.getInputTargetBlock("B")) !== -1 && block.getInputTargetBlock("A") === mathNumber2) && block.getFieldValue("OP") == "ADD");
+           t2cTextIndexof5.indexOf(block.getInputTargetBlock("B")) !== -1 && mathNumber2.indexOf(block.getInputTargetBlock("A")) !== -1) && block.getFieldValue("OP") == "ADD");
         const t2cTextGetsubstring8 = workspace.getAllBlocks().find(block => (block.type === "t2c_text_getsubstring" || block.type === "js_text_getsubstring") && variablesGet0.indexOf(block.getInputTargetBlock("STRING")) !== -1 && mathArithmeticBasic6.indexOf(block.getInputTargetBlock("AT1")) !== -1 && block.getInputTargetBlock("AT2") === t2cTextLength1);
         const textPrint9 = workspace.getAllBlocks().find(block => (block.type === "text_print" || block.type === "js_text_print") && block.getPreviousBlock() !== null && block.getInputTargetBlock("TEXT") === t2cTextGetsubstring8);
         const text10 = workspace.getAllBlocks().find(block => block.type === "text" && 
